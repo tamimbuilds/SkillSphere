@@ -2,7 +2,7 @@ First Everyone need to craete their own branch
 
 branch1 - tamimlikhon
 
-Shirin,,,,,,,
+Shirin,,
 
 ## How to create branch?
 
