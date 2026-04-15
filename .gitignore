@@ -1,0 +1,29 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django-specific
+db.sqlite3
+db.sqlite3-journal
+media/
+static/
+# If you decide to collect static files for production later
+staticfiles/
+
+# Environments
+.venv/
+venv/
+ENV/
+env/
+*.env
+
+# VS Code settings
+.vscode/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
