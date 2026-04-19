@@ -1,0 +1,19 @@
+<nav style="padding:1rem;border-bottom:1px solid #ddd;">
+  <a href="{% url 'home' %}">Home</a>
+  {% if user.is_authenticated %}
+    {% if user.role == 'candidate' %}
+      <a href="{% url 'candidate_profile' %}">My Profile</a>
+    {% elif user.role == 'recruiter' %}
+      <a href="{% url 'recruiter_profile' %}">My Profile</a>
+    {% endif %}
+    <a href="{% url 'notifications' %}">Notifications</a>
+    <form method="post" action="{% url 'logout' %}" style="display:inline">
+      {% csrf_token %}
+      <button type="submit">Logout</button>
+    </form>
+    <span>({{ user.username }})</span>
+  {% else %}
+    <a href="{% url 'login' %}">Login</a>
+    <a href="{% url 'register' %}">Register</a>
+  {% endif %}
+</nav>

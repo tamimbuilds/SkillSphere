@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Notifications</h2>
+{% if notifications %}
+  <ul>
+    {% for n in notifications %}
+      <li>
+        <strong>{{ n.title }}</strong> — {{ n.message }}
+        <small>{{ n.created_at|date:"M d, Y H:i" }}</small>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No notifications.</p>
+{% endif %}
+{% endblock %}

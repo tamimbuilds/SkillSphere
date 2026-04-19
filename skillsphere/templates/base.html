@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}SkillSphere{% endblock %}</title>
+</head>
+<body>
+  {% include "navbar.html" %}
+  <main style="max-width:800px;margin:2rem auto;padding:0 1rem;">
+    {% if messages %}
+      {% for m in messages %}<p>{{ m }}</p>{% endfor %}
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

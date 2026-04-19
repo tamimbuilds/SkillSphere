@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python manage.py makemigrations accounts)",
+      "Bash(pip install *)",
+      "Bash(python manage.py migrate)",
+      "Bash(python manage.py check)"
+    ],
+    "additionalDirectories": [
+      "d:\\DjangoProject-skillsphere\\skillsphere\\templates\\accounts"
+    ]
+  }
+}
