@@ -23,4 +23,4 @@ def add_shortlist(request):
     return redirect('shortlist_list')
 
 def interviewer_list(request):
-    return render(request, 'interviews/interviewer_list.html')
+    return render(request, "interview_list.html")
