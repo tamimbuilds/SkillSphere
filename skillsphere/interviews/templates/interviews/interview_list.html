@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Interview List</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 20px;
+            color: #333;
+        }
+
+        table {
+            width: 80%;
+            margin: 30px auto;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background: #007bff;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: #f2f2f2;
+        }
+
+        tr:hover {
+            background: #e6f2ff;
+        }
+
+        a {
+            text-decoration: none;
+            background: #007bff;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 5px;
+        }
+
+        a:hover {
+            background: #0056b3;
+        }
+    </style>
+
+</head>
+
+<body>
+
+<h2>Interview List</h2>
+
+<table>
+    <tr>
+        <th>Candidate</th>
+        <th>Job</th>
+        <th>Type</th>
+        <th>Date</th>
+        <th>Status</th>
+        <th>Action</th>
+    </tr>
+
+    {% for interview in interviews %}
+    <tr>
+        <td>{{ interview.candidate }}</td>
+        <td>{{ interview.job }}</td>
+        <td>{{ interview.interview_type }}</td>
+        <td>{{ interview.scheduled_date }}</td>
+        <td>{{ interview.status }}</td>
+        <td>
+            <a href="{% url 'interview_detail' interview.id %}">View</a>
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="6">No interviews found</td>
+    </tr>
+    {% endfor %}
+</table>
+
+</body>
+</html>
