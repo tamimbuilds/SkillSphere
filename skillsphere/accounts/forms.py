@@ -17,10 +17,16 @@ class LoginForm(AuthenticationForm):
     pass
 
 
+class UserUpdateForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['email', 'phone', 'profile_image']
+
+
 class CandidateProfileForm(forms.ModelForm):
     class Meta:
         model = CandidateProfile
-        exclude = ('user',)
+        fields = ['full_name', 'specialized_sector', 'university', 'department', 'cgpa', 'graduation_year', 'bio', 'linkedin_url', 'github_url', 'portfolio_url']
 
 
 class RecruiterProfileForm(forms.ModelForm):

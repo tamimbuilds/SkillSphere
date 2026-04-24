@@ -7,12 +7,12 @@ from django.contrib.auth.decorators import login_required
 
 def job_list(request):
     jobs = JobPost.objects.filter(status='open')
-    return render(request, 'jobs/job_list.html', {'jobs': jobs})
+    return render(request, 'job_list.html', {'jobs': jobs})
 
 
 def job_detail(request, pk):
     job = get_object_or_404(JobPost, pk=pk)
-    return render(request, 'jobs/job_detail.html', {'job': job})
+    return render(request, 'job_detail.html', {'job': job})
 
 
 @login_required
@@ -30,7 +30,7 @@ def job_create(request):
     else:
         form = JobPostForm()
 
-    return render(request, 'jobs/job_form.html', {'form': form})
+    return render(request, 'job_form.html', {'form': form})
 
 
 @login_required
@@ -51,4 +51,4 @@ def apply_job(request, pk):
     else:
         form = ApplicationForm()
 
-    return render(request, 'jobs/apply.html', {'form': form, 'job': job})
+    return render(request, 'apply.html', {'form': form, 'job': job})

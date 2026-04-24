@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}{{ job.title }} | SkillSphere{% endblock %}
+
+{% block content %}
+<div class="job-detail-container" style="display: grid; grid-template-columns: 2fr 1fr; gap: 3rem;">
+    <div class="animate-fade-in">
+        <div style="margin-bottom: 2rem;">
+            <a href="{% url 'job_list' %}" style="color: var(--primary); text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem;">
+                ← Back to Jobs
+            </a>
+            <h1 style="font-size: 3rem; margin-bottom: 1rem;">{{ job.title }}</h1>
+            <div style="display: flex; gap: 2rem; color: var(--text-muted);">
+                <span>📍 {{ job.location }}</span>
+                <span>💼 Full-time</span>
+                <span>📅 Deadline: {{ job.deadline }}</span>
+            </div>
+        </div>
+
+        <div class="card glass" style="margin-bottom: 2rem;">
+            <h3 style="margin-bottom: 1.5rem;">Description</h3>
+            <div style="color: var(--text-muted); line-height: 1.8;">
+                {{ job.description|linebreaks }}
+            </div>
+        </div>
+
+        <div class="card glass">
+            <h3 style="margin-bottom: 1.5rem;">Requirements</h3>
+            <ul style="list-style: none; display: grid; gap: 1rem; color: var(--text-muted);">
+                <li style="display: flex; align-items: center; gap: 1rem;">
+                    <span style="color: var(--primary);">•</span>
+                    <strong>Minimum CGPA:</strong> {{ job.required_cgpa }}
+                </li>
+                <li style="display: flex; align-items: center; gap: 1rem;">
+                    <span style="color: var(--primary);">•</span>
+                    <strong>Required Experience:</strong> {{ job.required_experience }} years
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="animate-fade-in" style="animation-delay: 0.2s;">
+        <div class="card glass" style="position: sticky; top: 100px;">
+            <h3 style="margin-bottom: 1rem;">Interested?</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                Apply now to start your journey with {{ job.recruiter.user.get_full_name|default:job.recruiter.user.username }}.
+            </p>
+            <div style="margin-bottom: 2rem;">
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">Salary Range</div>
+                <div style="font-size: 1.5rem; font-weight: 700; color: var(--secondary);">{{ job.salary_range }}</div>
+            </div>
+            
+            {% if user.role == 'candidate' %}
+                <a href="{% url 'apply_job' job.pk %}" class="btn btn-primary" style="width: 100%; text-align: center; padding: 1rem;">Apply for this Job</a>
+            {% elif not user.is_authenticated %}
+                <a href="{% url 'login' %}" class="btn btn-primary" style="width: 100%; text-align: center; padding: 1rem;">Login to Apply</a>
+            {% else %}
+                <button class="btn btn-primary" style="width: 100%; opacity: 0.5; cursor: not-allowed;" disabled>Only candidates can apply</button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

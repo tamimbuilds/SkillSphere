@@ -16,8 +16,3 @@ class ShortlistAdmin(admin.ModelAdmin):
 @admin.register(Interview)
 class InterviewAdmin(admin.ModelAdmin):
     list_display = ['candidate', 'job', 'interview_type', 'status', 'score']
-
-
-admin.site.register(Interviewer)
-admin.site.register(Shortlist)
-admin.site.register(Interview)

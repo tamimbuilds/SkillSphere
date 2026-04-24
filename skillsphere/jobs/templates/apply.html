@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Apply for {{ job.title }} | SkillSphere{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <div style="margin-bottom: 2rem;">
+        <h1 style="margin-bottom: 0.5rem;">Job Application</h1>
+        <p style="color: var(--text-muted);">You are applying for <strong>{{ job.title }}</strong></p>
+    </div>
+
+    <div class="card glass animate-fade-in">
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                <small style="color: var(--text-muted);">{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                <div style="color: #ef4444; font-size: 0.85rem; margin-top: 0.25rem;">{{ error }}</div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+            
+            <div style="padding: 1.5rem; background: rgba(99, 102, 241, 0.1); border-radius: 8px; margin: 2rem 0;">
+                <p style="font-size: 0.9rem; color: var(--text-muted);">
+                    <span style="color: var(--primary); font-weight: 700;">Note:</span> Your profile details (experience, CGPA, and skills) will be automatically attached to this application.
+                </p>
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-primary" style="padding: 1rem 2rem;">Submit Application</button>
+                <a href="{% url 'job_detail' job.pk %}" class="btn btn-outline" style="padding: 1rem 2rem;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

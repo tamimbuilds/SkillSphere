@@ -16,8 +16,19 @@ class User(AbstractUser):
 
 
 class CandidateProfile(models.Model):
+    SECTOR_CHOICES = [
+        ('android', 'Android App Development'),
+        ('ios', 'iOS Development'),
+        ('web_app', 'Web App'),
+        ('frontend', 'Frontend'),
+        ('backend', 'Backend'),
+        ('devops', 'DevOps'),
+        ('fullstack', 'Fullstack'),
+        ('ui_ux', 'UI/UX Design'),
+    ]
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='candidate_profile')
     full_name = models.CharField(max_length=100)
+    specialized_sector = models.CharField(max_length=50, choices=SECTOR_CHOICES, default='fullstack')
     university = models.CharField(max_length=200)
     department = models.CharField(max_length=100)
     cgpa = models.FloatField()
