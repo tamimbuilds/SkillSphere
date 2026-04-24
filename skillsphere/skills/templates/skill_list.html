@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Skills Library | SkillSphere{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem;">
+    <div>
+        <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Skills Library</h1>
+        <p style="color: var(--text-muted);">Discover and master the skills required for your dream job.</p>
+    </div>
+    {% if user.is_staff %}
+    <a href="{% url 'add_skill' %}" class="btn btn-primary">+ Add New Skill</a>
+    {% endif %}
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem;">
+    {% for skill in skills %}
+    <div class="card glass animate-fade-in">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+            <h3 style="font-size: 1.25rem;">{{ skill.skill_name }}</h3>
+            <span style="background: var(--surface); color: var(--text-muted); padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                {{ skill.category }}
+            </span>
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; line-height: 1.6;">
+            {{ skill.description|truncatewords:20 }}
+        </p>
+        <div style="display: flex; gap: 0.5rem; margin-top: auto;">
+            <a href="{% url 'add_assessment' skill.pk %}" class="btn btn-outline" style="flex: 1; text-align: center; font-size: 0.85rem;">Take Assessment</a>
+            <a href="{% url 'add_candidate_skill' %}" class="btn btn-primary" style="flex: 1; text-align: center; font-size: 0.85rem;">Add to My Skills</a>
+        </div>
+    </div>
+    {% empty %}
+    <div class="card glass" style="grid-column: 1 / -1; text-align: center; padding: 4rem;">
+        <p style="color: var(--text-muted);">No skills available yet.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

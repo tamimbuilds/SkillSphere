@@ -2,15 +2,13 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # Skill
-    path('', views.skill_list, name='skill_list'),
-    path('add/', views.add_skill, name='add_skill'),
-    path('<int:pk>/edit/', views.edit_skill, name='edit_skill'),
-    path('<int:pk>/delete/', views.delete_skill, name='delete_skill'),
+    # Candidate Skills (Main Interface)
+    path('', views.candidate_skill_list, name='my_skills'),
+    path('delete/<int:pk>/', views.delete_candidate_skill, name='delete_candidate_skill'),
 
-    # Candidate Skills
-    path('my-skills/', views.candidate_skill_list, name='my_skills'),
-    path('my-skills/add/', views.add_candidate_skill, name='add_candidate_skill'),
+    # Admin/General Skill List (moved to a different path if needed, or kept)
+    path('all/', views.skill_list, name='skill_list'),
+    path('all/add/', views.add_skill, name='add_skill'),
 
     # Certificate
     path('certificate/', views.certificate_list, name='certificate_list'),

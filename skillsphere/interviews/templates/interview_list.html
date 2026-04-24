@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Interviews | SkillSphere{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem;">
+    <div>
+        <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Interview Pipeline</h1>
+        <p style="color: var(--text-muted);">Manage and track upcoming interviews.</p>
+    </div>
+    {% if user.role == 'recruiter' %}
+    <a href="{% url 'schedule_interview' %}" class="btn btn-primary">Schedule New Interview</a>
+    {% endif %}
+</div>
+
+<div class="card glass animate-fade-in" style="padding: 0; overflow: hidden;">
+    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead>
+            <tr style="background: rgba(255,255,255,0.05); border-bottom: 1px solid var(--border);">
+                <th style="padding: 1.25rem 1.5rem; font-weight: 600; color: var(--text-muted);">Candidate</th>
+                <th style="padding: 1.25rem 1.5rem; font-weight: 600; color: var(--text-muted);">Job Position</th>
+                <th style="padding: 1.25rem 1.5rem; font-weight: 600; color: var(--text-muted);">Type</th>
+                <th style="padding: 1.25rem 1.5rem; font-weight: 600; color: var(--text-muted);">Date & Time</th>
+                <th style="padding: 1.25rem 1.5rem; font-weight: 600; color: var(--text-muted);">Status</th>
+                <th style="padding: 1.25rem 1.5rem; font-weight: 600; color: var(--text-muted);">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for interview in interviews %}
+            <tr style="border-bottom: 1px solid var(--border); transition: background 0.3s ease;">
+                <td style="padding: 1.25rem 1.5rem;">
+                    <div style="font-weight: 600;">{{ interview.candidate }}</div>
+                </td>
+                <td style="padding: 1.25rem 1.5rem;">{{ interview.job.title }}</td>
+                <td style="padding: 1.25rem 1.5rem;">
+                    <span style="background: var(--surface); padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem;">
+                        {{ interview.interview_type }}
+                    </span>
+                </td>
+                <td style="padding: 1.25rem 1.5rem;">{{ interview.scheduled_date|date:"M d, Y H:i" }}</td>
+                <td style="padding: 1.25rem 1.5rem;">
+                    {% if interview.status == 'scheduled' %}
+                        <span style="color: #60a5fa;">● Scheduled</span>
+                    {% elif interview.status == 'completed' %}
+                        <span style="color: #34d399;">● Completed</span>
+                    {% else %}
+                        <span style="color: #f87171;">● {{ interview.status|title }}</span>
+                    {% endif %}
+                </td>
+                <td style="padding: 1.25rem 1.5rem;">
+                    <a href="{% url 'interview_detail' interview.pk %}" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Details</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="padding: 4rem; text-align: center; color: var(--text-muted);">
+                    No interviews found in the pipeline.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

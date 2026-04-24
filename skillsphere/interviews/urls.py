@@ -9,4 +9,6 @@ urlpatterns = [
     path('shortlist/', views.shortlist_list, name='shortlist_list'),
     path('shortlist/add/', views.add_shortlist, name='add_shortlist'),
     path('interviewers/', views.interviewer_list, name='interviewer_list'),
+    path('interviewers/add/', views.add_interviewer, name='add_interviewer'),
+    path('<int:pk>/delete/', views.delete_interview, name='delete_interview'),
 ]

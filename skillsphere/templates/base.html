@@ -1,16 +1,50 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>{% block title %}SkillSphere{% endblock %}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SkillSphere | Elevate Your Career{% endblock %}</title>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    
+    <!-- Icons: Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    {% block extra_head %}{% endblock %}
 </head>
 <body>
-  {% include "navbar.html" %}
-  <main style="max-width:800px;margin:2rem auto;padding:0 1rem;">
-    {% if messages %}
-      {% for m in messages %}<p>{{ m }}</p>{% endfor %}
-    {% endif %}
-    {% block content %}{% endblock %}
-  </main>
+    {% include "navbar.html" %}
+
+    <main>
+        <div class="container animate-fade-in">
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="card glass" style="margin-bottom: 1rem; padding: 1rem; border-left: 4px solid var(--primary);">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer style="padding: 4rem 5%; border-top: 1px solid var(--border); margin-top: 4rem; text-align: center; color: var(--text-muted);">
+        <p>&copy; 2024 SkillSphere. All rights reserved.</p>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+    <script>
+      lucide.createIcons();
+    </script>
 </body>
 </html>

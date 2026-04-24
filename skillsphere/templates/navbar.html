@@ -1,19 +1,18 @@
-<nav style="padding:1rem;border-bottom:1px solid #ddd;">
-  <a href="{% url 'home' %}">Home</a>
-  {% if user.is_authenticated %}
-    {% if user.role == 'candidate' %}
-      <a href="{% url 'candidate_profile' %}">My Profile</a>
-    {% elif user.role == 'recruiter' %}
-      <a href="{% url 'recruiter_profile' %}">My Profile</a>
-    {% endif %}
-    <a href="{% url 'notifications' %}">Notifications</a>
-    <form method="post" action="{% url 'logout' %}" style="display:inline">
-      {% csrf_token %}
-      <button type="submit">Logout</button>
-    </form>
-    <span>({{ user.username }})</span>
-  {% else %}
-    <a href="{% url 'login' %}">Login</a>
-    <a href="{% url 'register' %}">Register</a>
-  {% endif %}
+<nav class="glass">
+    <a href="{% url 'home' %}" class="logo">SkillSphere</a>
+    
+    <ul class="nav-links">
+        <li><a href="{% url 'home' %}">Home</a></li>
+        <li><a href="{% url 'job_list' %}">Jobs</a></li>
+        <li><a href="{% url 'interview_list' %}">Interviews</a></li>
+        {% if user.is_authenticated %}
+            {% if user.role == 'candidate' %}
+                <li><a href="{% url 'my_skills' %}">My Skills</a></li>
+            {% endif %}
+            <li><a href="{% url 'profile' %}">Profile</a></li>
+            <li><a href="{% url 'logout' %}" class="btn btn-outline" style="padding: 0.5rem 1rem;">Logout</a></li>
+        {% else %}
+            <li><a href="{% url 'login' %}" class="btn btn-primary" style="padding: 0.5rem 1rem;">Login</a></li>
+        {% endif %}
+    </ul>
 </nav>
