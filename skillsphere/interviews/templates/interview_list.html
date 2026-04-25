@@ -3,62 +3,88 @@
 {% block title %}Interviews | SkillSphere{% endblock %}
 
 {% block content %}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem;">
+
+<!-- Page header -->
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3rem; flex-wrap: wrap; gap: 1rem;">
     <div>
-        <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Interview Pipeline</h1>
-        <p style="color: var(--text-muted);">Manage and track upcoming interviews.</p>
+        <span style="font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted);">Pipeline</span>
+        <h1 style="font-family: var(--font-mono); font-size: 2.2rem; font-weight: 700; letter-spacing: -0.03em; margin-top: 0.4rem;">
+            Interview Pipeline
+        </h1>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 0.3rem; font-family: var(--font-sans);">
+            Manage and track all scheduled interviews.
+        </p>
     </div>
     {% if user.role == 'recruiter' %}
-    <a href="{% url 'schedule_interview' %}" class="btn btn-primary">Schedule New Interview</a>
+    <a href="{% url 'schedule_interview' %}" class="btn btn-primary" style="font-size: 0.82rem; padding: 0.7rem 1.5rem;">
+        <i data-lucide="calendar-plus" style="width:14px;height:14px;"></i> Schedule Interview
+    </a>
     {% endif %}
 </div>
 
+<!-- Table card -->
 <div class="card glass animate-fade-in" style="padding: 0; overflow: hidden;">
-    <table style="width: 100%; border-collapse: collapse; text-align: left;">
-        <thead>
-            <tr style="background: rgba(255,255,255,0.05); border-bottom: 1px solid var(--border);">
-                <th style="padding: 1.25rem 1.5rem; font-weight: 600; color: var(--text-muted);">Candidate</th>
-                <th style="padding: 1.25rem 1.5rem; font-weight: 600; color: var(--text-muted);">Job Position</th>
-                <th style="padding: 1.25rem 1.5rem; font-weight: 600; color: var(--text-muted);">Type</th>
-                <th style="padding: 1.25rem 1.5rem; font-weight: 600; color: var(--text-muted);">Date & Time</th>
-                <th style="padding: 1.25rem 1.5rem; font-weight: 600; color: var(--text-muted);">Status</th>
-                <th style="padding: 1.25rem 1.5rem; font-weight: 600; color: var(--text-muted);">Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for interview in interviews %}
-            <tr style="border-bottom: 1px solid var(--border); transition: background 0.3s ease;">
-                <td style="padding: 1.25rem 1.5rem;">
-                    <div style="font-weight: 600;">{{ interview.candidate }}</div>
-                </td>
-                <td style="padding: 1.25rem 1.5rem;">{{ interview.job.title }}</td>
-                <td style="padding: 1.25rem 1.5rem;">
-                    <span style="background: var(--surface); padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem;">
-                        {{ interview.interview_type }}
-                    </span>
-                </td>
-                <td style="padding: 1.25rem 1.5rem;">{{ interview.scheduled_date|date:"M d, Y H:i" }}</td>
-                <td style="padding: 1.25rem 1.5rem;">
-                    {% if interview.status == 'scheduled' %}
-                        <span style="color: #60a5fa;">● Scheduled</span>
-                    {% elif interview.status == 'completed' %}
-                        <span style="color: #34d399;">● Completed</span>
-                    {% else %}
-                        <span style="color: #f87171;">● {{ interview.status|title }}</span>
-                    {% endif %}
-                </td>
-                <td style="padding: 1.25rem 1.5rem;">
-                    <a href="{% url 'interview_detail' interview.pk %}" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Details</a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="6" style="padding: 4rem; text-align: center; color: var(--text-muted);">
-                    No interviews found in the pipeline.
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    {% if interviews %}
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr style="border-bottom: 1px solid var(--border);">
+                    <th style="padding: 1rem 1.5rem; font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700;">Candidate</th>
+                    <th style="padding: 1rem 1.5rem; font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700;">Position</th>
+                    <th style="padding: 1rem 1.5rem; font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700;">Type</th>
+                    <th style="padding: 1rem 1.5rem; font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700;">Date &amp; Time</th>
+                    <th style="padding: 1rem 1.5rem; font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700;">Status</th>
+                    <th style="padding: 1rem 1.5rem; font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for interview in interviews %}
+                <tr style="border-bottom: 1px solid var(--border); transition: background var(--transition);"
+                    onmouseover="this.style.background='var(--surface-3)'"
+                    onmouseout="this.style.background='transparent'">
+                    <td style="padding: 1.1rem 1.5rem;">
+                        <span style="font-family: var(--font-mono); font-size: 0.88rem; font-weight: 700;">{{ interview.candidate }}</span>
+                    </td>
+                    <td style="padding: 1.1rem 1.5rem;">
+                        <span style="font-family: var(--font-sans); font-size: 0.88rem; color: var(--text-muted);">{{ interview.job.title }}</span>
+                    </td>
+                    <td style="padding: 1.1rem 1.5rem;">
+                        <span class="badge badge-neutral">{{ interview.interview_type }}</span>
+                    </td>
+                    <td style="padding: 1.1rem 1.5rem;">
+                        <span style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--text-muted);">{{ interview.scheduled_date|date:"M d, Y" }}</span>
+                        <span style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-subtle); display: block;">{{ interview.scheduled_date|date:"H:i" }}</span>
+                    </td>
+                    <td style="padding: 1.1rem 1.5rem;">
+                        {% if interview.status == 'scheduled' %}
+                            <span class="badge badge-primary">Scheduled</span>
+                        {% elif interview.status == 'completed' %}
+                            <span class="badge badge-success">Completed</span>
+                        {% elif interview.status == 'cancelled' %}
+                            <span class="badge badge-danger">Cancelled</span>
+                        {% else %}
+                            <span class="badge badge-neutral">{{ interview.status|title }}</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 1.1rem 1.5rem;">
+                        <a href="{% url 'interview_detail' interview.pk %}" class="btn btn-outline" style="padding: 0.38rem 0.9rem; font-size: 0.72rem;">
+                            View →
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 5rem 2rem;">
+        <div style="width:52px;height:52px;background:var(--surface-3);border:1px solid var(--border);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;color:var(--text-subtle);">
+            <i data-lucide="calendar-x" style="width:22px;height:22px;"></i>
+        </div>
+        <p style="color: var(--text-muted); font-family: var(--font-mono); font-size: 0.9rem; margin-bottom: 0.4rem;">No interviews in the pipeline.</p>
+        <p style="color: var(--text-subtle); font-family: var(--font-sans); font-size: 0.82rem;">Interviews will appear here once scheduled.</p>
+    </div>
+    {% endif %}
 </div>
+
 {% endblock %}

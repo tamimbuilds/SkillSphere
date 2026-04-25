@@ -66,17 +66,30 @@ def profile_view(request):
 
     # Fetch skills if candidate
     skills = []
+    total_jobs = 0
+    total_interviews = 0
+    
+    from jobs.models import Application, JobPost
+    from interviews.models import Interview
+
     if user.role == 'candidate':
         from skills.models import CandidateSkill, Assessment
         skills = CandidateSkill.objects.filter(candidate=profile)
         for s in skills:
             s.has_assessment = Assessment.objects.filter(candidate_skill=s).exists()
+        total_jobs = Application.objects.filter(candidate=profile).count()
+        total_interviews = Interview.objects.filter(candidate=profile).count()
+    elif user.role == 'recruiter':
+        total_jobs = JobPost.objects.filter(recruiter=profile).count()
+        total_interviews = Interview.objects.filter(job__recruiter=profile).count()
 
     context = {
         'user_form': user_form,
         'profile_form': profile_form,
         'role': user.role,
         'skills': skills,
+        'total_jobs': total_jobs,
+        'total_interviews': total_interviews,
     }
     return render(request, 'profile.html', context)
 

@@ -3,412 +3,227 @@
 {% block title %}My Skills | SkillSphere{% endblock %}
 
 {% block content %}
-<div class="skills-page-container" style="max-width: 1000px; margin: 3rem auto;">
-    <div class="skills-header glass animate-fade-in" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem; padding: 2rem;">
+<div style="max-width: 1000px; margin: 0 auto;">
+
+    <!-- Page header -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3rem; flex-wrap: wrap; gap: 1.5rem;">
         <div>
-            <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem; background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">My Specialized Skills</h1>
-            <p style="color: var(--text-muted);">Your specialized sector is: <strong class="badge-sector">{{ request.user.candidate_profile.get_specialized_sector_display }}</strong></p>
+            <span style="font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted);">Skill Management</span>
+            <h1 style="font-family: var(--font-mono); font-size: 2.2rem; font-weight: 700; letter-spacing: -0.03em; margin-top: 0.4rem;">My Specialized Skills</h1>
+            <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 0.3rem; font-family: var(--font-sans);">
+                Sector:
+                <strong style="color: var(--text); font-weight: 700;">{{ request.user.candidate_profile.get_specialized_sector_display }}</strong>
+            </p>
         </div>
-        <div style="text-align: right;">
-            {% with skill_count=data.count %}
-            <div class="skill-limit-tracker">
-                <span style="font-size: 0.9rem; color: var(--text-muted);">Slots Used:</span>
-                <span class="count-badge {% if skill_count >= 3 %}limit-reached{% endif %}">{{ skill_count }}/3</span>
+        <!-- Slot tracker -->
+        {% with skill_count=data.count %}
+        <div style="
+            background: var(--surface-2); border: 1px solid var(--border);
+            border-radius: var(--radius-md); padding: 1rem 1.5rem; text-align: center;
+        ">
+            <div style="font-family: var(--font-mono); font-size: 1.8rem; font-weight: 700; color: {% if skill_count >= 3 %}var(--danger){% else %}var(--text){% endif %};">
+                {{ skill_count }}<span style="color: var(--text-muted); font-size: 1rem; font-weight: 400;">/3</span>
             </div>
-            {% endwith %}
+            <div style="font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-top: 0.2rem;">Slots Used</div>
         </div>
+        {% endwith %}
     </div>
 
     {% if messages %}
         {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} animate-slide-up" style="margin-bottom: 2rem;">
-                <i data-lucide="info"></i> {{ message }}
+            <div style="
+                display: flex; align-items: center; gap: 0.75rem;
+                padding: 0.9rem 1.25rem; border-radius: var(--radius-sm);
+                background: rgba(110,231,183,0.06); border: 1px solid rgba(110,231,183,0.2);
+                color: var(--success); font-family: var(--font-mono); font-size: 0.82rem;
+                margin-bottom: 1.5rem;
+            ">
+                <i data-lucide="check-circle" style="width:14px;height:14px;flex-shrink:0;"></i> {{ message }}
             </div>
         {% endfor %}
     {% endif %}
 
-    <!-- Current Skills Display -->
-    <div class="section-label">Your Active Skills</div>
-    <div class="skills-grid-display">
+    <!-- ── Active Skills ──────────────────────────────── -->
+    <div style="font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 1.25rem; padding-left: 0.25rem;">
+        Active Skills
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
         {% for s in data %}
-            <div class="skill-display-card glass animate-fade-in" style="animation-delay: 0.1s;">
-                <div class="card-header">
-                    <div class="skill-info">
-                        <h3>{{ s.skill.skill_name }}</h3>
-                        <span class="sector-tag">{{ s.skill.get_category_display }}</span>
-                    </div>
-                    <div class="proficiency-badge {{ s.proficiency_level|lower }}">
-                        {{ s.proficiency_level }}
-                    </div>
-                </div>
+        <div class="card animate-fade-in" style="display: flex; flex-direction: column; gap: 0;">
 
-                <div class="card-body">
-                    <div class="experience-stat">
-                        <span class="label">Experience:</span>
-                        <span class="value">{{ s.get_years_of_experience_display }}</span>
-                    </div>
-                    <div class="assessment-status">
-                        {% if s.has_assessment %}
-                            <span class="status-tag verified"><i data-lucide="check-circle"></i> Verified by Assessment</span>
-                        {% else %}
-                            <span class="status-tag pending"><i data-lucide="alert-circle"></i> No Assessment Taken</span>
-                        {% endif %}
-                    </div>
-                </div>
+            <!-- Accent stripe -->
+            <div style="height: 2px; background: linear-gradient(90deg, var(--accent), transparent); margin: -2rem -2rem 1.75rem; border-radius: var(--radius-lg) var(--radius-lg) 0 0;"></div>
 
-                <div class="card-footer" style="display: flex; gap: 1rem; margin-top: auto;">
-                    {% if not s.has_assessment %}
-                        <a href="{% url 'add_assessment' s.pk %}" class="btn btn-primary" style="flex: 2; font-size: 0.8rem; padding: 0.5rem;">Take Assessment</a>
-                    {% endif %}
-                    <form action="{% url 'delete_candidate_skill' s.pk %}" method="POST" style="flex: 1;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-outline-danger" style="width: 100%; font-size: 0.8rem; padding: 0.5rem; color: #ef4444; border-color: rgba(239, 68, 68, 0.3);">Remove</button>
-                    </form>
+            <!-- Header -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; margin-bottom: 1.25rem;">
+                <div>
+                    <h3 style="font-family: var(--font-mono); font-size: 1rem; font-weight: 700; margin-bottom: 0.3rem;">{{ s.skill.skill_name }}</h3>
+                    <span class="badge badge-primary">{{ s.skill.get_category_display }}</span>
                 </div>
+                <span class="badge {% if s.proficiency_level == 'Expert' %}badge-warning{% elif s.proficiency_level == 'Intermediate' %}badge-primary{% else %}badge-success{% endif %}">
+                    {{ s.proficiency_level }}
+                </span>
             </div>
+
+            <!-- Experience row -->
+            <div style="
+                display: flex; justify-content: space-between; align-items: center;
+                background: var(--surface-3); border-radius: var(--radius-sm);
+                padding: 0.65rem 0.9rem; margin-bottom: 1rem;
+            ">
+                <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em;">Experience</span>
+                <span style="font-family: var(--font-mono); font-size: 0.82rem; font-weight: 700;">{{ s.get_years_of_experience_display }}</span>
+            </div>
+
+            <!-- Assessment status -->
+            <div style="margin-bottom: 1.5rem;">
+                {% if s.has_assessment %}
+                    <span style="display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);font-size:0.75rem;color:var(--success);">
+                        <i data-lucide="check-circle" style="width:12px;height:12px;"></i> Verified by Assessment
+                    </span>
+                {% else %}
+                    <span style="display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);font-size:0.75rem;color:var(--warning);">
+                        <i data-lucide="alert-circle" style="width:12px;height:12px;"></i> No Assessment Taken
+                    </span>
+                {% endif %}
+            </div>
+
+            <!-- Actions -->
+            <div style="display: flex; gap: 0.75rem; margin-top: auto; padding-top: 1.25rem; border-top: 1px solid var(--border);">
+                {% if not s.has_assessment %}
+                    <a href="{% url 'add_assessment' s.pk %}" class="btn btn-primary" style="flex: 2; font-size: 0.75rem; padding: 0.5rem 0.75rem;">
+                        Take Assessment
+                    </a>
+                {% endif %}
+                <form action="{% url 'delete_candidate_skill' s.pk %}" method="POST" style="flex: 1;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger" style="width: 100%; font-size: 0.75rem; padding: 0.5rem 0.75rem;">
+                        Remove
+                    </button>
+                </form>
+            </div>
+        </div>
         {% empty %}
-            <div class="empty-state glass" style="grid-column: 1 / -1; text-align: center; padding: 4rem; border-radius: 24px;">
-                <div class="empty-icon"><i data-lucide="award"></i></div>
-                <h2>No skills added yet.</h2>
-                <p>Add up to 3 specialized skills within your sector to stand out to recruiters.</p>
+        <div class="card glass" style="grid-column: 1 / -1; text-align: center; padding: 4rem 2rem;">
+            <div style="width:52px;height:52px;background:var(--surface-3);border:1px solid var(--border);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;color:var(--text-subtle);">
+                <i data-lucide="award" style="width:22px;height:22px;"></i>
             </div>
+            <h3 style="font-family:var(--font-mono);font-size:0.95rem;font-weight:700;margin-bottom:0.4rem;">No skills added yet</h3>
+            <p style="color:var(--text-muted);font-size:0.85rem;font-family:var(--font-sans);">Add up to 3 specialized skills within your sector to stand out to recruiters.</p>
+        </div>
         {% endfor %}
     </div>
 
-    <!-- Add New Skill Section (Only if < 3) -->
+    <!-- ── Add Skill Section ─────────────────────────── -->
     {% if data.count < 3 %}
-    <div class="add-skill-section animate-fade-in" style="margin-top: 4rem; animation-delay: 0.2s;">
-        <div class="section-label">Add a New Skill in {{ user_sector|title }}</div>
+    <div class="animate-fade-in delay-2">
+        <div style="font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 1.25rem; padding-left: 0.25rem;">
+            Add Skill — {{ user_sector|title }}
+        </div>
+
         <div class="card glass" style="padding: 2.5rem;">
             {% if not user_sector %}
-                <div class="empty-state" style="text-align: center; padding: 1rem;">
-                    <i data-lucide="alert-triangle" style="color: var(--secondary); font-size: 3rem; margin-bottom: 1rem;"></i>
-                    <h3 style="color: var(--text-bright);">No Specialized Sector Selected</h3>
-                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">You must select a specialized sector (e.g., Web App, Android) in your profile before you can add skills.</p>
-                    <a href="{% url 'profile' %}" class="btn btn-outline-primary">Go to Profile</a>
+                <div style="text-align: center; padding: 2rem;">
+                    <div style="width:52px;height:52px;background:var(--surface-3);border:1px solid var(--border);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;color:var(--warning);">
+                        <i data-lucide="alert-triangle" style="width:22px;height:22px;"></i>
+                    </div>
+                    <h3 style="font-family:var(--font-mono);font-size:0.95rem;font-weight:700;margin-bottom:0.5rem;">No Sector Selected</h3>
+                    <p style="color:var(--text-muted);font-size:0.85rem;font-family:var(--font-sans);margin-bottom:1.5rem;">
+                        Select a specialized sector in your profile before adding skills.
+                    </p>
+                    <a href="{% url 'profile' %}" class="btn btn-outline" style="font-size:0.82rem;padding:0.7rem 1.5rem;">
+                        Go to Profile →
+                    </a>
                 </div>
             {% else %}
                 <form method="POST" id="skillForm">
                     {% csrf_token %}
-                    
+
+                    <!-- Step 1: Skill selection grid -->
                     <div class="form-group">
-                        <label style="margin-bottom: 1.5rem; display: block;">1. Select Skill from your Sector ({{ request.user.candidate_profile.get_specialized_sector_display }})</label>
-                        <div class="skills-selection-grid">
+                        <label>01 — Select Skill ({{ request.user.candidate_profile.get_specialized_sector_display }})</label>
+                        <div style="
+                            display: grid;
+                            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                            gap: 0.75rem; max-height: 380px; overflow-y: auto;
+                            padding: 1.25rem; background: var(--surface-3);
+                            border-radius: var(--radius-sm); border: 1px solid var(--border);
+                            margin-top: 0.75rem;
+                        ">
                             {% for skill in all_skills %}
-                                <div class="skill-option-card {% if skill.category == user_sector %}selectable{% else %}unclickable{% endif %}" 
-                                     data-skill-id="{{ skill.id }}"
-                                     {% if skill.category == user_sector %}onclick="selectSkill('{{ skill.id }}', this)"{% endif %}>
-                                    <div class="option-icon">
-                                        {% if skill.category == user_sector %}
-                                            <i data-lucide="plus-circle"></i>
-                                        {% else %}
-                                            <i data-lucide="lock"></i>
-                                        {% endif %}
-                                    </div>
-                                    <span class="option-name">{{ skill.skill_name }}</span>
-                                    <span class="option-sector">{{ skill.get_category_display }}</span>
-                                    {% if skill.category != user_sector %}
-                                        <div class="lock-tooltip">Select {{ skill.get_category_display }} in profile to unlock</div>
-                                    {% endif %}
+                            <div class="skill-opt {% if skill.category == user_sector %}skill-selectable{% else %}skill-locked{% endif %}"
+                                 data-skill-id="{{ skill.id }}"
+                                 {% if skill.category == user_sector %}onclick="selectSkill('{{ skill.id }}', this)"{% endif %}
+                                 style="
+                                    padding: 0.9rem 0.75rem;
+                                    background: var(--surface-2); border: 1px solid var(--border);
+                                    border-radius: var(--radius-sm);
+                                    display: flex; flex-direction: column; align-items: center;
+                                    gap: 0.5rem; text-align: center;
+                                    transition: all var(--transition);
+                                    cursor: {% if skill.category == user_sector %}pointer{% else %}not-allowed{% endif %};
+                                    opacity: {% if skill.category == user_sector %}1{% else %}0.3{% endif %};
+                                    position: relative;
+                                 ">
+                                <div style="color: {% if skill.category == user_sector %}var(--accent){% else %}var(--text-muted){% endif %};">
+                                    <i data-lucide="{% if skill.category == user_sector %}plus-circle{% else %}lock{% endif %}" style="width:16px;height:16px;"></i>
                                 </div>
+                                <span style="font-family:var(--font-mono);font-size:0.78rem;font-weight:700;color:var(--text);">{{ skill.skill_name }}</span>
+                                <span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">{{ skill.get_category_display }}</span>
+                            </div>
                             {% endfor %}
                         </div>
-                        <div style="display: none;">
-                            {{ form.skill }}
-                        </div>
+                        <div style="display: none;">{{ form.skill }}</div>
                         {% if form.skill.errors %}
-                            <div class="error-msg">{{ form.skill.errors }}</div>
+                            <div style="color:var(--danger);font-size:0.78rem;margin-top:0.4rem;font-family:var(--font-mono);">↳ {{ form.skill.errors }}</div>
                         {% endif %}
                     </div>
-    
-                    <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2.5rem;">
+
+                    <!-- Step 2 & 3 -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
                         <div class="form-group">
-                            <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
-                                <i data-lucide="bar-chart" style="width: 18px; height: 18px; color: var(--primary);"></i>
-                                2. Proficiency Level
-                            </label>
+                            <label>02 — Proficiency Level</label>
                             {{ form.proficiency_level }}
                         </div>
                         <div class="form-group">
-                            <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
-                                <i data-lucide="calendar" style="width: 18px; height: 18px; color: var(--primary);"></i>
-                                3. Years of Experience
-                            </label>
+                            <label>03 — Years of Experience</label>
                             {{ form.years_of_experience }}
                         </div>
                     </div>
-    
-                    <div class="form-actions" style="margin-top: 3rem;">
-                        <button type="submit" class="btn btn-primary btn-large" style="width: 100%;">Save and Add Skill</button>
-                    </div>
+
+                    <div style="height: 1px; background: var(--border); margin: 1.5rem 0;"></div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem; font-size: 0.82rem;">
+                        Save Skill →
+                    </button>
                 </form>
             {% endif %}
         </div>
     </div>
     {% endif %}
+
 </div>
 
 <style>
-    .badge-sector {
-        background: var(--primary);
-        color: white;
-        padding: 0.2rem 0.8rem;
-        border-radius: 20px;
-        font-size: 0.9rem;
+    .skill-opt.skill-selected {
+        background: rgba(165, 243, 252, 0.08) !important;
+        border-color: var(--accent) !important;
     }
+    .skill-opt.skill-selected i { color: var(--accent) !important; }
 
-    .count-badge {
-        font-size: 1.5rem;
-        font-weight: 800;
-        color: var(--primary);
-        margin-left: 0.5rem;
-    }
-
-    .count-badge.limit-reached {
-        color: #ef4444;
-    }
-
-    .section-label {
-        font-size: 1.1rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        color: var(--text-muted);
-        margin-bottom: 1.5rem;
-        padding-left: 0.5rem;
-        border-left: 4px solid var(--primary);
-    }
-
-    .skills-grid-display {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 2rem;
-        margin-bottom: 2rem;
-    }
-
-    .skill-display-card {
-        padding: 2rem;
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        transition: transform 0.3s ease;
-    }
-
-    .skill-display-card:hover {
-        transform: translateY(-8px);
-    }
-
-    .card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 1.5rem;
-    }
-
-    .skill-info h3 {
-        font-size: 1.4rem;
-        color: var(--text-bright);
-        margin-bottom: 0.25rem;
-    }
-
-    .sector-tag {
-        font-size: 0.7rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        color: var(--primary);
-        background: rgba(99, 102, 241, 0.1);
-        padding: 0.2rem 0.6rem;
-        border-radius: 4px;
-    }
-
-    .proficiency-badge {
-        padding: 0.3rem 0.7rem;
-        border-radius: 6px;
-        font-size: 0.7rem;
-        font-weight: 800;
-        text-transform: uppercase;
-    }
-
-    .proficiency-badge.expert { background: rgba(168, 85, 247, 0.2); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.3); }
-    .proficiency-badge.intermediate { background: rgba(99, 102, 241, 0.2); color: #6366f1; border: 1px solid rgba(99, 102, 241, 0.3); }
-    .proficiency-badge.beginner { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
-
-    .experience-stat {
-        display: flex;
-        justify-content: space-between;
-        background: rgba(255, 255, 255, 0.03);
-        padding: 0.75rem 1rem;
-        border-radius: 10px;
-        margin-bottom: 1rem;
-    }
-
-    .status-tag {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.85rem;
-        font-weight: 600;
-    }
-
-    .status-tag.verified { color: #10b981; }
-    .status-tag.pending { color: #f59e0b; }
-
-    /* Selection Grid */
-    .skills-selection-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-        gap: 1rem;
-        max-height: 400px;
-        overflow-y: auto;
-        padding: 1.5rem;
-        background: rgba(0, 0, 0, 0.2);
-        border-radius: 16px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .skill-option-card {
-        padding: 1rem;
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.03);
-        border: 2px solid transparent;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        transition: all 0.3s ease;
-        cursor: pointer;
-    }
-
-    .skill-option-card.selectable:hover {
-        background: rgba(99, 102, 241, 0.1);
-        border-color: var(--primary);
-        transform: translateY(-3px);
-    }
-
-    .skill-option-card.selected {
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2));
-        border-color: var(--primary);
-    }
-
-    .skill-option-card.unclickable {
-        opacity: 0.4;
-        cursor: not-allowed;
-        position: relative;
-        filter: grayscale(1);
-    }
-
-    .skill-option-card.unclickable:hover .lock-tooltip {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    .lock-tooltip {
-        position: absolute;
-        bottom: 110%;
-        left: 50%;
-        transform: translateX(-50%) translateY(10px);
-        background: var(--surface);
-        color: var(--secondary);
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
-        font-size: 0.7rem;
-        width: 150px;
-        pointer-events: none;
-        opacity: 0;
-        transition: all 0.3s ease;
-        z-index: 10;
-        box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-        border: 1px solid rgba(239, 68, 68, 0.2);
-    }
-
-    .lock-tooltip::after {
-        content: '';
-        position: absolute;
-        top: 100%;
-        left: 50%;
-        transform: translateX(-50%);
-        border: 6px solid transparent;
-        border-top-color: var(--surface);
-    }
-
-    .option-icon {
-        font-size: 1.5rem;
-        color: var(--text-muted);
-        margin-bottom: 0.5rem;
-    }
-
-    .option-name {
-        font-weight: 700;
-        font-size: 0.9rem;
-        color: var(--text-bright);
-    }
-
-    .option-sector {
-        font-size: 0.6rem;
-        text-transform: uppercase;
-        color: var(--text-muted);
-        margin-top: 0.25rem;
-    }
-
-    .empty-icon {
-        font-size: 4rem;
-        color: var(--text-muted);
-        margin-bottom: 1.5rem;
-    }
-
-    /* Premium Select Styling */
-    .form-select {
-        width: 100%;
-        padding: 0.8rem 1.2rem;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
-        color: var(--text-bright);
-        font-size: 1rem;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 1rem center;
-        background-size: 1.2rem;
-        cursor: pointer;
-    }
-
-    .form-select:hover {
-        background-color: rgba(255, 255, 255, 0.08);
-        border-color: var(--primary);
-    }
-
-    .form-select:focus {
-        outline: none;
-        border-color: var(--primary);
-        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
-        background-color: rgba(255, 255, 255, 0.1);
-    }
-
-    .form-select option {
-        background: #0f172a; /* Dark background for options */
-        color: white;
-        padding: 1rem;
-    }
+    /* Scrollbar for skill grid */
+    div[style*="overflow-y: auto"]::-webkit-scrollbar { width: 4px; }
+    div[style*="overflow-y: auto"]::-webkit-scrollbar-track { background: var(--surface-3); }
+    div[style*="overflow-y: auto"]::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 2px; }
 </style>
 
 <script>
     function selectSkill(skillId, element) {
-        // Remove selection from others
-        document.querySelectorAll('.skill-option-card').forEach(card => {
-            card.classList.remove('selected');
-        });
-
-        // Add to current
-        element.classList.add('selected');
-
-        // Update hidden select
+        document.querySelectorAll('.skill-opt').forEach(c => c.classList.remove('skill-selected'));
+        element.classList.add('skill-selected');
         const select = document.querySelector('select[name="skill"]');
-        if (select) {
-            select.value = skillId;
-        }
+        if (select) select.value = skillId;
     }
 </script>
-{% endblock %}
+{% endblock %}

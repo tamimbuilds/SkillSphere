@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
 from .models import Interview, Interviewer, Shortlist
 from .forms import InterviewForm, InterviewerForm, ShortlistForm
 
@@ -26,8 +27,14 @@ def add_shortlist(request):
         return redirect('shortlist_list')
     return render(request, 'shortlist_form.html', {'form': form})
 
+@login_required
 def interview_list(request):
-    interviews = Interview.objects.all()
+    if request.user.role == 'candidate':
+        interviews = Interview.objects.filter(candidate=request.user.candidate_profile)
+    elif request.user.role == 'recruiter':
+        interviews = Interview.objects.filter(job__recruiter=request.user.recruiter_profile)
+    else:
+        interviews = Interview.objects.none()
     return render(request, 'interview_list.html', {'interviews': interviews})
 
 

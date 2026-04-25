@@ -1,94 +1,64 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Schedule Interview</title>
+{% extends "base.html" %}
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(to right, #eef2f3, #dfe9f3);
-            margin: 0;
-            padding: 0;
-        }
+{% block title %}Schedule Interview | SkillSphere{% endblock %}
 
-        .container {
-            width: 420px;
-            margin: 70px auto;
-            background: #ffffff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-        }
+{% block content %}
+<div style="max-width: 640px; margin: 0 auto;">
 
-        h2 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 25px;
-        }
+    <!-- Back -->
+    <a href="{% url 'interview_list' %}" style="
+        display: inline-flex; align-items: center; gap: 0.5rem;
+        font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-muted);
+        text-decoration: none; margin-bottom: 2rem; transition: color var(--transition);
+    " onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-muted)'">
+        <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> Interview Pipeline
+    </a>
 
-        form p {
-            margin-bottom: 15px;
-        }
+    <!-- Header -->
+    <div style="margin-bottom: 2.5rem;">
+        <span style="
+            font-family: var(--font-mono); font-size: 0.72rem;
+            letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted);
+        ">Recruiter Action</span>
+        <h1 style="
+            font-family: var(--font-mono); font-size: 2rem;
+            font-weight: 700; letter-spacing: -0.03em; margin-top: 0.4rem;
+        ">Schedule Interview</h1>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 0.3rem; font-family: var(--font-sans);">
+            Fill in the details below to schedule a new interview.
+        </p>
+    </div>
 
-        label {
-            font-weight: bold;
-            color: #444;
-        }
+    <!-- Form card -->
+    <div class="card glass animate-fade-in" style="padding: 2.5rem;">
+        <form method="post" novalidate>
+            {% csrf_token %}
 
-        input, select, textarea {
-            width: 100%;
-            padding: 10px;
-            margin-top: 6px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            transition: 0.3s;
-        }
+            {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                    <small style="color: var(--text-subtle); display: block; margin-top: 0.3rem; font-size: 0.75rem; font-family: var(--font-mono);">{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                    <div style="color: var(--danger); font-size: 0.78rem; margin-top: 0.4rem; font-family: var(--font-mono);">↳ {{ error }}</div>
+                {% endfor %}
+            </div>
+            {% endfor %}
 
-        input:focus, select:focus, textarea:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 5px rgba(0,123,255,0.3);
-            outline: none;
-        }
+            <div style="height: 1px; background: var(--border); margin: 1.5rem 0;"></div>
 
-        button {
-            width: 100%;
-            background: #007bff;
-            color: white;
-            padding: 12px;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        button:hover {
-            background: #0056b3;
-        }
-
-        /* Django form errors */
-        .errorlist {
-            color: red;
-            margin: 5px 0;
-            list-style: none;
-            padding: 0;
-            font-size: 13px;
-        }
-    </style>
-
-</head>
-
-<body>
-
-<div class="container">
-    <h2>Schedule Interview</h2>
-
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Schedule</button>
-    </form>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <button type="submit" class="btn btn-primary" style="padding: 0.85rem 2rem; font-size: 0.82rem;">
+                    <i data-lucide="calendar-plus" style="width:14px;height:14px;"></i>
+                    Schedule Interview
+                </button>
+                <a href="{% url 'interview_list' %}" class="btn btn-outline" style="padding: 0.85rem 2rem; font-size: 0.82rem;">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
 </div>
-
-</body>
-</html>
+{% endblock %}

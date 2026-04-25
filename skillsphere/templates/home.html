@@ -1,70 +1,152 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}SkillSphere | Empowering Your Professional Journey{% endblock %}
 
 {% block content %}
-<div class="hero" style="padding: 6rem 0; text-align: center;">
-    <h1 style="font-size: 4rem; font-weight: 800; margin-bottom: 1.5rem; background: linear-gradient(to right, #6366f1, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-        Elevate Your Career with SkillSphere
+
+<!-- ── Hero ─────────────────────────────────────────────────── -->
+<section style="padding: 6rem 0 5rem; text-align: center; position: relative;">
+
+    <div aria-hidden="true" style="
+        position: absolute; inset: 0;
+        background-image: radial-gradient(circle, rgba(26,26,46,0.07) 1px, transparent 1px);
+        background-size: 32px 32px;
+        mask-image: radial-gradient(ellipse 80% 70% at 50% 0%, black 30%, transparent 85%);
+        pointer-events: none;
+    "></div>
+
+    <span style="
+        display: inline-flex; align-items: center; gap: 0.5rem;
+        font-family: var(--font-mono); font-size: 0.68rem;
+        letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-2);
+        background: rgba(201,169,110,0.08); border: 1px solid rgba(201,169,110,0.25);
+        padding: 0.3rem 1rem; border-radius: var(--radius-full); margin-bottom: 2.5rem;
+    ">
+        <span style="width:5px;height:5px;border-radius:50%;background:var(--accent-2);display:inline-block;"></span>
+        Now in Beta — Join Free
+    </span>
+
+    <h1 style="
+        font-family: var(--font-display);
+        font-size: clamp(2.8rem, 7vw, 5rem);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.08;
+        margin-bottom: 1.75rem;
+        color: var(--text);
+    ">
+        Elevate your career<br>
+        <em style="color: var(--text-muted); font-weight: 400; font-style: italic;">with SkillSphere.</em>
     </h1>
-    <p style="font-size: 1.25rem; color: var(--text-muted); max-width: 700px; margin: 0 auto 3rem;">
-        The all-in-one platform to manage your skills, find dream jobs, and ace your interviews. 
-        Join thousands of professionals scaling their potential.
+
+    <p style="
+        font-size: 1.05rem; color: var(--text-muted);
+        max-width: 540px; margin: 0 auto 3rem;
+        line-height: 1.85; font-family: var(--font-sans); font-weight: 400;
+    ">
+        The all-in-one platform to verify skills, find dream jobs, and ace your interviews.
     </p>
-    <div style="display: flex; gap: 1rem; justify-content: center;">
-        <a href="{% url 'job_list' %}" class="btn btn-primary" style="font-size: 1.1rem; padding: 1rem 2rem;">Explore Jobs</a>
-        <a href="{% url 'skill_list' %}" class="btn btn-outline" style="font-size: 1.1rem; padding: 1rem 2rem;">Upgrade Skills</a>
-    </div>
-</div>
 
-<div class="features" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 4rem;">
-    <div class="card glass">
-        <div style="font-size: 2rem; margin-bottom: 1rem;">💼</div>
-        <h3 style="margin-bottom: 1rem;">Job Matching</h3>
-        <p style="color: var(--text-muted);">Find the perfect role that matches your verified skills and professional aspirations.</p>
+    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+        <a href="{% url 'job_list' %}" class="btn btn-primary">Explore Jobs →</a>
+        <a href="{% url 'skill_list' %}" class="btn btn-outline">Browse Skills</a>
     </div>
-    <div class="card glass">
-        <div style="font-size: 2rem; margin-bottom: 1rem;">🎯</div>
-        <h3 style="margin-bottom: 1rem;">Skill Assessments</h3>
-        <p style="color: var(--text-muted);">Get certified and prove your expertise through our rigorous assessment modules.</p>
-    </div>
-    <div class="card glass">
-        <div style="font-size: 2rem; margin-bottom: 1rem;">🤝</div>
-        <h3 style="margin-bottom: 1rem;">Interview Hub</h3>
-        <p style="color: var(--text-muted);">Schedule interviews, get feedback, and track your progress through the hiring funnel.</p>
-    </div>
-</div>
 
-<div style="margin-top: 8rem; text-align: center;">
-    <h2 style="font-size: 2.5rem; margin-bottom: 3rem;">Why Professionals Choose SkillSphere</h2>
-    <div class="glass" style="padding: 4rem; text-align: left; display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;">
-        <div>
-            <h3 style="font-size: 2rem; margin-bottom: 1.5rem;">Verified Skill Identity</h3>
-            <p style="color: var(--text-muted); font-size: 1.1rem; margin-bottom: 2rem;">
-                Don't just list skills on a resume. Earn verified certificates that employers trust. Our blockchain-integrated assessment system ensures your credentials are valid and immutable.
-            </p>
-            <ul style="list-style: none; display: grid; gap: 1rem;">
-                <li style="display: flex; align-items: center; gap: 0.5rem;">
-                    <span style="color: var(--primary);">✔</span> Industrial Grade Assessments
-                </li>
-                <li style="display: flex; align-items: center; gap: 0.5rem;">
-                    <span style="color: var(--primary);">✔</span> Shareable Digital Certificates
-                </li>
-                <li style="display: flex; align-items: center; gap: 0.5rem;">
-                    <span style="color: var(--primary);">✔</span> Personalized Learning Paths
-                </li>
-            </ul>
-        </div>
-        <div style="position: relative;">
-            <div style="width: 100%; height: 300px; background: linear-gradient(45deg, var(--primary), var(--secondary)); border-radius: 20px; opacity: 0.2;"></div>
-            <div class="glass" style="position: absolute; top: 20px; right: -20px; padding: 2rem; border-radius: 12px; width: 250px;">
-                <h4 style="margin-bottom: 0.5rem;">Progress Track</h4>
-                <div style="height: 8px; background: var(--border); border-radius: 4px; margin-top: 1rem; overflow: hidden;">
-                    <div style="width: 75%; height: 100%; background: var(--primary);"></div>
-                </div>
-                <p style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--text-muted);">Python Mastery: 75%</p>
+    <!-- Stats -->
+    <div style="
+        display: inline-flex; gap: 4rem; flex-wrap: wrap; justify-content: center;
+        margin-top: 4.5rem; padding: 1.75rem 3.5rem;
+        background: var(--surface); border: 1px solid var(--border);
+        border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
+    ">
+        {% if hero_stats %}
+            {% for label, value in hero_stats.items %}
+            <div>
+                <div style="font-size:1.9rem;font-weight:700;">{{ value }}</div>
+                <div style="font-size:0.65rem;color:var(--text-muted);">{{ label }}</div>
             </div>
-        </div>
+            {% endfor %}
+        {% else %}
+            <div><div>10k+</div><div>Candidates</div></div>
+            <div><div>2k+</div><div>Jobs</div></div>
+            <div><div>95%</div><div>Placement</div></div>
+        {% endif %}
     </div>
-</div>
+</section>
+
+<!-- ── Cards ───────────────────────────────────────────────── -->
+<section style="margin-top: 5rem;">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;">
+
+        <div class="card">
+            <h3>Job Matching</h3>
+            <p>Find jobs based on your verified skills.</p>
+            <a href="{% url 'job_list' %}">Browse Jobs →</a>
+        </div>
+
+        <div class="card">
+            <h3>Skill Assessments</h3>
+            <p>Get certified and prove your expertise.</p>
+            <a href="{% url 'skill_list' %}">Explore Skills →</a>
+        </div>
+
+        <div class="card">
+            <h3>Interview Hub</h3>
+            <p>Track and manage your interviews.</p>
+            <a href="{% url 'dashboard' %}">Dashboard →</a>
+        </div>
+
+    </div>
+</section>
+
+<!-- ── Why Section ─────────────────────────────────────────── -->
+<section style="margin-top: 8rem;">
+
+    <h2>Why SkillSphere?</h2>
+
+    <div class="card" style="padding:2rem;">
+
+        <!-- Skills Progress -->
+        <div>
+
+            {% if featured_skills %}
+                {% for item in featured_skills %}
+                <div style="margin-bottom:1rem;">
+                    <div style="display:flex;justify-content:space-between;">
+                        <span>{{ item.0 }}</span>
+                        <span>{{ item.1 }}%</span>
+                    </div>
+                    <div style="height:5px;background:#eee;border-radius:3px;overflow:hidden;">
+                        <div style="width:{{ item.1 }}%;background:{{ item.2 }};height:100%;border-radius:3px;" aria-hidden="true">&nbsp;</div>
+                    </div>
+                </div>
+                {% endfor %}
+
+            {% else %}
+                <!-- fallback -->
+                <div>Python 82%</div>
+                <div>React 74%</div>
+                <div>System Design 60%</div>
+                <div>DevOps 48%</div>
+            {% endif %}
+
+        </div>
+
+    </div>
+</section>
+
+<!-- ── CTA ────────────────────────────────────────────────── -->
+<section style="margin-top: 8rem; text-align:center;">
+
+    <h2>Ready to get started?</h2>
+
+    {% if not user.is_authenticated %}
+        <a href="{% url 'register' %}" class="btn btn-primary">Create Account</a>
+    {% else %}
+        <a href="{% url 'dashboard' %}" class="btn btn-primary">Go to Dashboard</a>
+    {% endif %}
+
+</section>
+
 {% endblock %}

@@ -1,121 +1,78 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Interview Details</title>
+{% extends "base.html" %}
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f9;
-            margin: 0;
-            padding: 0;
-        }
+{% block title %}Interview Details | SkillSphere{% endblock %}
 
-        .container {
-            width: 500px;
-            margin: 60px auto;
-        }
+{% block content %}
+<div style="max-width: 700px; margin: 0 auto;">
 
-        .card {
-            background: #ffffff;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
+    <!-- Back link -->
+    <a href="{% url 'interview_list' %}" style="
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase;
+        letter-spacing: 0.08em; color: var(--text-muted); text-decoration: none;
+        margin-bottom: 2.5rem; transition: color var(--transition);
+    " onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-muted)'">
+        <i data-lucide="arrow-left" style="width:13px;height:13px;"></i> Interview Pipeline
+    </a>
 
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #333;
-        }
+    <!-- Header card -->
+    <div class="card glass animate-fade-in" style="padding: 2.5rem; margin-bottom: 1.5rem;">
+        <!-- Accent stripe -->
+        <div style="height:2px;background:linear-gradient(90deg,var(--accent),transparent);margin:-2.5rem -2.5rem 2rem;border-radius:var(--radius-xl) var(--radius-xl) 0 0;"></div>
 
-        .info {
-            margin-bottom: 12px;
-            font-size: 15px;
-        }
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;margin-bottom:2rem;">
+            <div>
+                <span style="font-family:var(--font-mono);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);">Interview — Round {{ interview.round_number }}</span>
+                <h1 style="font-family:var(--font-mono);font-size:1.6rem;font-weight:700;letter-spacing:-0.02em;margin-top:0.4rem;">{{ interview.job }}</h1>
+            </div>
+            {% if interview.status == 'scheduled' %}
+                <span class="badge badge-primary">Scheduled</span>
+            {% elif interview.status == 'completed' %}
+                <span class="badge badge-success">Completed</span>
+            {% elif interview.status == 'cancelled' %}
+                <span class="badge badge-danger">Cancelled</span>
+            {% else %}
+                <span class="badge badge-neutral">{{ interview.status|title }}</span>
+            {% endif %}
+        </div>
 
-        .info strong {
-            color: #555;
-        }
+        <!-- Detail rows -->
+        <div style="display:flex;flex-direction:column;gap:0;">
+            {% include "interviews/_detail_row.html" with icon="user" label="Candidate" value=interview.candidate %}
+            {% include "interviews/_detail_row.html" with icon="briefcase" label="Interviewer" value=interview.interviewer %}
+            {% include "interviews/_detail_row.html" with icon="layers" label="Type" value=interview.interview_type %}
+            {% include "interviews/_detail_row.html" with icon="calendar" label="Scheduled" value=interview.scheduled_date|date:"M d, Y — H:i" %}
+        </div>
 
-        .status {
-            display: inline-block;
-            padding: 5px 10px;
-            border-radius: 5px;
-            color: white;
-            font-size: 13px;
-        }
+        {% if interview.location %}
+        <div style="margin-top:1.5rem;padding:1rem 1.25rem;background:var(--surface-3);border-radius:var(--radius-sm);border:1px solid var(--border);display:flex;gap:0.75rem;align-items:flex-start;">
+            <i data-lucide="map-pin" style="width:14px;height:14px;color:var(--text-muted);flex-shrink:0;margin-top:0.1rem;"></i>
+            <div>
+                <div style="font-family:var(--font-mono);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:0.3rem;">Location</div>
+                <div style="font-family:var(--font-sans);font-size:0.88rem;color:var(--text);">{{ interview.location }}</div>
+            </div>
+        </div>
+        {% endif %}
 
-        .scheduled {
-            background: #007bff;
-        }
+        {% if interview.meeting_link %}
+        <div style="margin-top:0.75rem;padding:1rem 1.25rem;background:var(--surface-3);border-radius:var(--radius-sm);border:1px solid var(--border);display:flex;gap:0.75rem;align-items:flex-start;">
+            <i data-lucide="video" style="width:14px;height:14px;color:var(--accent);flex-shrink:0;margin-top:0.1rem;"></i>
+            <div>
+                <div style="font-family:var(--font-mono);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:0.3rem;">Meeting Link</div>
+                <a href="{{ interview.meeting_link }}" target="_blank" style="font-family:var(--font-mono);font-size:0.82rem;color:var(--accent);word-break:break-all;text-decoration:none;">
+                    {{ interview.meeting_link }}
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
 
-        .completed {
-            background: #28a745;
-        }
-
-        .cancelled {
-            background: #dc3545;
-        }
-
-        .btn {
-            display: block;
-            text-align: center;
-            margin-top: 20px;
-            padding: 10px;
-            background: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-
-        .btn:hover {
-            background: #0056b3;
-        }
-
-        a.link {
-            color: #007bff;
-            word-break: break-all;
-        }
-    </style>
-
-</head>
-
-<body>
-
-<div class="container">
-    <div class="card">
-        <h2>Interview Details</h2>
-
-        <p class="info"><strong>Candidate:</strong> {{ interview.candidate }}</p>
-        <p class="info"><strong>Job:</strong> {{ interview.job }}</p>
-        <p class="info"><strong>Interviewer:</strong> {{ interview.interviewer }}</p>
-        <p class="info"><strong>Type:</strong> {{ interview.interview_type }}</p>
-        <p class="info"><strong>Round:</strong> {{ interview.round_number }}</p>
-        <p class="info"><strong>Date:</strong> {{ interview.scheduled_date }}</p>
-        <p class="info"><strong>Time:</strong> {{ interview.scheduled_time }}</p>
-
-        <p class="info">
-            <strong>Status:</strong>
-            <span class="status {{ interview.status }}">
-                {{ interview.status }}
-            </span>
-        </p>
-
-        <p class="info">
-            <strong>Meeting Link:</strong>
-            <a class="link" href="{{ interview.meeting_link }}">
-                {{ interview.meeting_link }}
-            </a>
-        </p>
-
-        <p class="info"><strong>Location:</strong> {{ interview.location }}</p>
-
-        <a class="btn" href="{% url 'submit_feedback' interview.id %}">
-            Give Feedback
+    <!-- Feedback CTA -->
+    <div style="text-align:center;">
+        <a href="{% url 'submit_feedback' interview.id %}" class="btn btn-primary" style="padding:0.85rem 2.5rem;font-size:0.85rem;">
+            Submit Feedback →
         </a>
     </div>
-</div>
 
-</body>
-</html>
+</div>
+{% endblock %}
