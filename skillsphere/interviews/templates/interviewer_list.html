@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Interviewers | SkillSphere{% endblock %}
+
+{% block content %}
+
+<!-- Page header -->
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <span style="font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted);">Directory</span>
+        <h1 style="font-family: var(--font-mono); font-size: 2.2rem; font-weight: 700; letter-spacing: -0.03em; margin-top: 0.4rem;">
+            Interviewers
+        </h1>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 0.3rem; font-family: var(--font-sans);">
+            Manage all registered interviewers.
+        </p>
+    </div>
+    <a href="{% url 'add_interviewer' %}" class="btn btn-primary" style="font-size: 0.82rem; padding: 0.7rem 1.5rem;">
+        <i data-lucide="user-plus" style="width:14px;height:14px;"></i> Add Interviewer
+    </a>
+</div>
+
+<!-- Table card -->
+<div class="card glass animate-fade-in" style="padding: 0; overflow: hidden;">
+    {% if interviewers %}
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr style="border-bottom: 1px solid var(--border);">
+                    <th style="padding: 1rem 1.5rem; font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700;">Name</th>
+                    <th style="padding: 1rem 1.5rem; font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700;">Email</th>
+                    <th style="padding: 1rem 1.5rem; font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700;">Designation</th>
+                    <th style="padding: 1rem 1.5rem; font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700;">Department</th>
+                    <th style="padding: 1rem 1.5rem; font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700;">Phone</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for interviewer in interviewers %}
+                <tr style="border-bottom: 1px solid var(--border); transition: background var(--transition);"
+                    onmouseover="this.style.background='var(--surface-3)'"
+                    onmouseout="this.style.background='transparent'">
+                    <td style="padding: 1.1rem 1.5rem;">
+                        <span style="font-family: var(--font-mono); font-size: 0.88rem; font-weight: 700;">{{ interviewer.full_name }}</span>
+                    </td>
+                    <td style="padding: 1.1rem 1.5rem;">
+                        <span style="font-family: var(--font-sans); font-size: 0.85rem; color: var(--text-muted);">{{ interviewer.email }}</span>
+                    </td>
+                    <td style="padding: 1.1rem 1.5rem;">
+                        <span class="badge badge-neutral">{{ interviewer.designation }}</span>
+                    </td>
+                    <td style="padding: 1.1rem 1.5rem;">
+                        <span style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--text-muted);">{{ interviewer.department }}</span>
+                    </td>
+                    <td style="padding: 1.1rem 1.5rem;">
+                        <span style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--text-muted);">{{ interviewer.phone }}</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 5rem 2rem;">
+        <div style="width:52px;height:52px;background:var(--surface-3);border:1px solid var(--border);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;color:var(--text-subtle);">
+            <i data-lucide="users" style="width:22px;height:22px;"></i>
+        </div>
+        <p style="color: var(--text-muted); font-family: var(--font-mono); font-size: 0.9rem; margin-bottom: 0.4rem;">No interviewers registered yet.</p>
+        <p style="color: var(--text-subtle); font-family: var(--font-sans); font-size: 0.82rem; margin-bottom: 1.5rem;">Add your first interviewer to get started.</p>
+        <a href="{% url 'add_interviewer' %}" class="btn btn-primary" style="font-size: 0.82rem; padding: 0.7rem 1.5rem;">
+            Add Interviewer →
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

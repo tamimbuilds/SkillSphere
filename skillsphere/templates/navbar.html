@@ -1,19 +1,34 @@
-<nav style="padding:1rem;border-bottom:1px solid #ddd;">
-  <a href="{% url 'home' %}">Home</a>
-  {% if user.is_authenticated %}
-    {% if user.role == 'candidate' %}
-      <a href="{% url 'candidate_profile' %}">My Profile</a>
-    {% elif user.role == 'recruiter' %}
-      <a href="{% url 'recruiter_profile' %}">My Profile</a>
-    {% endif %}
-    <a href="{% url 'notifications' %}">Notifications</a>
-    <form method="post" action="{% url 'logout' %}" style="display:inline">
-      {% csrf_token %}
-      <button type="submit">Logout</button>
-    </form>
-    <span>({{ user.username }})</span>
-  {% else %}
-    <a href="{% url 'login' %}">Login</a>
-    <a href="{% url 'register' %}">Register</a>
-  {% endif %}
+<nav>
+    <a href="{% url 'home' %}" class="logo" style="font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; letter-spacing: -0.02em;">SkillSphere</a>
+
+    <ul class="nav-links">
+        <li><a href="{% url 'home' %}">Home</a></li>
+        <li><a href="{% url 'job_list' %}">Jobs</a></li>
+        {% if user.is_authenticated %}
+            {% if user.role == 'candidate' %}
+                <li><a href="{% url 'my_skills' %}">Skills</a></li>
+                <li><a href="{% url 'interview_list' %}">Interviews</a></li>
+            {% elif user.role == 'recruiter' %}
+                <li><a href="{% url 'interviewer_list' %}">Interviewers</a></li>
+            {% endif %}
+            <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li><a href="{% url 'profile' %}">Profile</a></li>
+            <li>
+                <a href="{% url 'logout' %}" class="btn btn-outline" style="padding: 0.4rem 1.1rem; font-size: 0.78rem;">
+                    Logout
+                </a>
+            </li>
+        {% else %}
+            <li>
+                <a href="{% url 'register' %}" class="btn btn-ghost" style="padding: 0.4rem 1.1rem; font-size: 0.78rem;">
+                    Register
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'login' %}" class="btn btn-primary" style="padding: 0.4rem 1.1rem; font-size: 0.78rem;">
+                    Login
+                </a>
+            </li>
+        {% endif %}
+    </ul>
 </nav>

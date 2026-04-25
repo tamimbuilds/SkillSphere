@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Skills Library | SkillSphere{% endblock %}
+
+{% block content %}
+
+<!-- Page header -->
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3rem; flex-wrap: wrap; gap: 1.5rem;">
+    <div>
+        <span style="font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted);">
+            {{ skills|length }} Skill{{ skills|length|pluralize }} Available
+        </span>
+        <h1 style="font-family: var(--font-mono); font-size: 2.2rem; font-weight: 700; letter-spacing: -0.03em; margin-top: 0.4rem;">
+            Skills Library
+        </h1>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 0.3rem; font-family: var(--font-sans);">
+            Discover and master the skills that unlock your dream job.
+        </p>
+    </div>
+    {% if user.is_staff %}
+    <a href="{% url 'add_skill' %}" class="btn btn-primary" style="font-size: 0.82rem; padding: 0.7rem 1.5rem;">
+        <i data-lucide="plus" style="width:14px;height:14px;"></i> Add Skill
+    </a>
+    {% endif %}
+</div>
+
+<!-- Grid -->
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+    {% for skill in skills %}
+    <div class="card animate-fade-in" style="display: flex; flex-direction: column;">
+
+        <!-- Accent stripe (color cycles via CSS) -->
+        <div style="height: 2px; background: linear-gradient(90deg, var(--accent), transparent); margin: -2rem -2rem 1.75rem; border-radius: var(--radius-lg) var(--radius-lg) 0 0;"></div>
+
+        <!-- Header -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; margin-bottom: 1rem;">
+            <h3 style="font-family: var(--font-mono); font-size: 1rem; font-weight: 700; line-height: 1.4;">{{ skill.skill_name }}</h3>
+            <span class="badge badge-neutral" style="flex-shrink:0; text-transform: uppercase; font-size: 0.65rem;">{{ skill.category }}</span>
+        </div>
+
+        <!-- Description -->
+        <p style="color: var(--text-muted); font-size: 0.88rem; line-height: 1.8; font-family: var(--font-sans); flex: 1; margin-bottom: 1.75rem;">
+            {{ skill.description|truncatewords:20 }}
+        </p>
+
+        <!-- Actions -->
+        <div style="display: flex; gap: 0.75rem; padding-top: 1.25rem; border-top: 1px solid var(--border);">
+            <a href="{% url 'add_assessment' skill.pk %}" class="btn btn-outline" style="flex: 1; font-size: 0.75rem; padding: 0.5rem 0.75rem; text-align: center;">
+                Take Test
+            </a>
+            <a href="{% url 'add_candidate_skill' %}" class="btn btn-primary" style="flex: 1; font-size: 0.75rem; padding: 0.5rem 0.75rem; text-align: center;">
+                Add to Profile
+            </a>
+        </div>
+    </div>
+    {% empty %}
+    <div class="card glass" style="grid-column: 1 / -1; text-align: center; padding: 5rem 2rem;">
+        <div style="width:52px;height:52px;background:var(--surface-3);border:1px solid var(--border);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;color:var(--text-subtle);">
+            <i data-lucide="layers" style="width:22px;height:22px;"></i>
+        </div>
+        <p style="color: var(--text-muted); font-family: var(--font-mono); font-size: 0.9rem;">No skills available yet.</p>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

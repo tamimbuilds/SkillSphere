@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Profile | SkillSphere{% endblock %}
+
+{% block content %}
+<div style="display: flex; flex-direction: column; gap: 2rem;">
+
+    <!-- ── Profile Header ─────────────────────────────── -->
+    <div class="card animate-fade-in" style="
+        padding: 2.5rem 3rem;
+        display: flex; align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap; gap: 2rem;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+    ">
+        <!-- Avatar + Name -->
+        <div style="display: flex; align-items: center; gap: 2rem;">
+            {% if request.user.profile_image %}
+                <img src="{{ request.user.profile_image.url }}" alt="Profile"
+                     style="width:96px;height:96px;border-radius:var(--radius-lg);object-fit:cover;border:2px solid var(--border-hover);">
+            {% else %}
+                <div style="
+                    width:96px;height:96px;border-radius:var(--radius-lg);
+                    background:var(--surface-3);border:2px solid var(--border-hover);
+                    display:flex;align-items:center;justify-content:center;
+                    font-family:var(--font-mono);font-size:2.2rem;font-weight:700;color:var(--text-muted);
+                ">{{ request.user.username|slice:":1"|upper }}</div>
+            {% endif %}
+            <div>
+                <h1 style="font-family:var(--font-display);font-size:2rem;font-weight:700;letter-spacing:-0.01em;margin-bottom:0.4rem;">
+                    {{ request.user.username }}
+                </h1>
+                <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+                    <span class="badge badge-primary">{{ role|title }}</span>
+                    {% if role == 'candidate' %}
+                    <a href="{% url 'my_skills' %}" class="btn btn-outline" style="padding:0.3rem 0.9rem;font-size:0.72rem;">
+                        <i data-lucide="award" style="width:11px;height:11px;"></i> Manage Skills
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div style="display:flex;gap:1.25rem;flex-wrap:wrap;">
+            <a href="{% url 'dashboard' %}" style="text-decoration:none;color:inherit;">
+                <div class="stat-card">
+                    <span class="stat-value">{{ total_jobs }}</span>
+                    <span class="stat-label">{% if role == 'candidate' %}Applied{% else %}Posted{% endif %}</span>
+                </div>
+            </a>
+            {% if role == 'candidate' %}
+            <a href="{% url 'interview_list' %}" style="text-decoration:none;color:inherit;">
+                <div class="stat-card">
+                    <span class="stat-value">{{ total_interviews }}</span>
+                    <span class="stat-label">Interviews</span>
+                </div>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ── Form Grid ──────────────────────────────────── -->
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;">
+
+            <!-- Account Settings -->
+            <div class="card animate-fade-in delay-1" style="padding:2.5rem;">
+                <h2 style="font-family:var(--font-mono);font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:2rem;display:flex;align-items:center;gap:0.5rem;">
+                    <i data-lucide="user" style="width:13px;height:13px;"></i> Account Settings
+                </h2>
+                {% for field in user_form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div style="color:var(--danger);font-size:0.78rem;margin-top:0.4rem;font-family:var(--font-mono);">↳ {{ field.errors }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Role Profile -->
+            <div class="card animate-fade-in delay-2" style="padding:2.5rem;">
+                <h2 style="font-family:var(--font-mono);font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:2rem;display:flex;align-items:center;gap:0.5rem;">
+                    <i data-lucide="briefcase" style="width:13px;height:13px;"></i> {{ role|title }} Profile
+                </h2>
+                {% for field in profile_form %}
+                    {% if field.name == 'specialized_sector' %}
+                    <div class="form-group" style="grid-column:1/-1;">
+                        <label>{{ field.label }}</label>
+                        <div style="
+                            display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));
+                            gap:0.75rem;margin-top:0.75rem;
+                        ">
+                            {% for value, label in field.field.choices %}
+                            <div class="sector-card {% if field.value == value %}sector-active{% endif %}"
+                                 onclick="selectSector('{{ value }}', this)"
+                                 style="
+                                    background:var(--surface-3);border:1px solid var(--border);
+                                    border-radius:var(--radius-sm);padding:1.1rem 0.75rem;
+                                    display:flex;flex-direction:column;align-items:center;gap:0.5rem;
+                                    cursor:pointer;transition:all var(--transition);text-align:center;
+                                 ">
+                                <div style="color:var(--text-muted);">
+                                    {% if value == 'android' %}<i data-lucide="smartphone" style="width:16px;height:16px;"></i>
+                                    {% elif value == 'ios' %}<i data-lucide="smartphone" style="width:16px;height:16px;"></i>
+                                    {% elif value == 'web_app' %}<i data-lucide="globe" style="width:16px;height:16px;"></i>
+                                    {% elif value == 'frontend' %}<i data-lucide="layout" style="width:16px;height:16px;"></i>
+                                    {% elif value == 'backend' %}<i data-lucide="database" style="width:16px;height:16px;"></i>
+                                    {% elif value == 'devops' %}<i data-lucide="terminal" style="width:16px;height:16px;"></i>
+                                    {% elif value == 'fullstack' %}<i data-lucide="layers" style="width:16px;height:16px;"></i>
+                                    {% elif value == 'ui_ux' %}<i data-lucide="feather" style="width:16px;height:16px;"></i>
+                                    {% else %}<i data-lucide="briefcase" style="width:16px;height:16px;"></i>
+                                    {% endif %}
+                                </div>
+                                <span style="font-family:var(--font-mono);font-size:0.72rem;font-weight:700;color:var(--text);">{{ label }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div style="display:none;">{{ field }}</div>
+                        {% if field.errors %}<div style="color:var(--danger);font-size:0.78rem;margin-top:0.4rem;font-family:var(--font-mono);">↳ {{ field.errors }}</div>{% endif %}
+                    </div>
+                    {% else %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}<div style="color:var(--danger);font-size:0.78rem;margin-top:0.4rem;font-family:var(--font-mono);">↳ {{ field.errors }}</div>{% endif %}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <!-- Skills Summary (candidate only, full width) -->
+            {% if role == 'candidate' %}
+            <div class="card animate-fade-in delay-3" style="padding:2.5rem;grid-column:1/-1;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;">
+                    <h2 style="font-family:var(--font-mono);font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);display:flex;align-items:center;gap:0.5rem;">
+                        <i data-lucide="award" style="width:13px;height:13px;"></i> My Specialized Skills
+                    </h2>
+                    <a href="{% url 'my_skills' %}" class="btn btn-outline" style="font-size:0.72rem;padding:0.38rem 0.9rem;">
+                        Manage →
+                    </a>
+                </div>
+
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.25rem;">
+                    {% for s in skills %}
+                    <div style="
+                        background:var(--surface-3);border:1px solid var(--border);
+                        border-radius:var(--radius-md);padding:1.25rem;
+                        display:flex;flex-direction:column;gap:0.75rem;
+                        transition:border-color var(--transition);
+                    " onmouseover="this.style.borderColor='var(--border-hover)'" onmouseout="this.style.borderColor='var(--border)'">
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <span style="font-family:var(--font-mono);font-size:0.88rem;font-weight:700;">{{ s.skill.skill_name }}</span>
+                            <span class="badge badge-primary" style="font-size:0.62rem;">{{ s.proficiency_level }}</span>
+                        </div>
+                        <div>
+                            {% if s.has_assessment %}
+                                <span style="display:inline-flex;align-items:center;gap:0.35rem;font-family:var(--font-mono);font-size:0.72rem;color:var(--success);">
+                                    <i data-lucide="check" style="width:11px;height:11px;"></i> Verified
+                                </span>
+                            {% else %}
+                                <span style="display:inline-flex;align-items:center;gap:0.35rem;font-family:var(--font-mono);font-size:0.72rem;color:var(--warning);">
+                                    <i data-lucide="alert-circle" style="width:11px;height:11px;"></i> No Assessment
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text-muted);">
+                        <p style="font-family:var(--font-mono);font-size:0.88rem;margin-bottom:1rem;">No skills added yet.</p>
+                        <a href="{% url 'my_skills' %}" class="btn btn-primary" style="font-size:0.78rem;padding:0.6rem 1.25rem;">Add Skills →</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Save button -->
+        <div style="text-align:center;margin-top:2.5rem;">
+            <button type="submit" name="action" value="update_profile" class="btn btn-primary" style="padding:0.9rem 3rem;font-size:0.85rem;">
+                Save All Changes →
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+    .sector-card:hover {
+        border-color: var(--border-hover) !important;
+        background: var(--surface-2) !important;
+    }
+    .sector-active {
+        background: rgba(26,26,46,0.05) !important;
+        border-color: var(--accent) !important;
+    }
+    .sector-active div[style*="color:var(--text-muted)"] {
+        color: var(--accent) !important;
+    }
+
+    @media (max-width: 900px) {
+        div[style*="grid-template-columns:1fr 1fr"] {
+            grid-template-columns: 1fr !important;
+        }
+        div[style*="grid-column:1/-1"] {
+            grid-column: auto !important;
+        }
+    }
+</style>
+
+<script>
+    function selectSector(value, element) {
+        document.querySelectorAll('.sector-card').forEach(c => c.classList.remove('sector-active'));
+        element.classList.add('sector-active');
+        const select = document.querySelector('select[name="specialized_sector"]');
+        if (select) select.value = value;
+    }
+</script>
+{% endblock %}

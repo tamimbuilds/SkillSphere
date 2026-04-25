@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | SkillSphere{% endblock %}
+
+{% block content %}
+
+<!-- Page header -->
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <span class="overline">
+            {% if role == 'candidate' %}Candidate{% elif role == 'recruiter' %}Recruiter{% endif %} Dashboard
+        </span>
+        <h1 style="font-family: var(--font-display); font-size: 2.4rem; font-weight: 700; letter-spacing: -0.02em; margin-top: 0.3rem;">
+            Dashboard
+        </h1>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 0.3rem; font-family: var(--font-sans);">
+            {% if role == 'candidate' %}Track your job applications and their current status.
+            {% elif role == 'recruiter' %}Manage your posted jobs and review applicants.{% endif %}
+        </p>
+    </div>
+    {% if role == 'recruiter' %}
+    <a href="{% url 'job_create' %}" class="btn btn-primary" style="font-size: 0.82rem; padding: 0.7rem 1.5rem;">
+        <i data-lucide="plus" style="width:14px;height:14px;"></i> Post a Job
+    </a>
+    {% elif role == 'candidate' %}
+    <a href="{% url 'job_list' %}" class="btn btn-outline" style="font-size: 0.82rem; padding: 0.7rem 1.5rem;">
+        Browse Jobs →
+    </a>
+    {% endif %}
+</div>
+
+<!-- ── Candidate View ──────────────────────────────────────── -->
+{% if role == 'candidate' %}
+
+{% if applications %}
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.5rem;">
+    {% for application in applications %}
+    <div class="card animate-fade-in" style="display: flex; flex-direction: column;">
+
+        <!-- Accent top stripe -->
+        <div style="height: 2px; background: linear-gradient(90deg, var(--accent-2), transparent); margin: -2rem -2rem 1.75rem; border-radius: var(--radius-lg) var(--radius-lg) 0 0;"></div>
+
+        <!-- Title & badge -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; margin-bottom: 1rem;">
+            <h3 style="font-family: var(--font-display); font-size: 1rem; font-weight: 700; line-height: 1.35;">
+                <a href="{% url 'job_detail' application.job.pk %}" style="text-decoration: none; color: inherit;">
+                    {{ application.job.title }}
+                </a>
+            </h3>
+            <span class="badge badge-{% if application.status == 'pending' %}warning{% elif application.status == 'shortlisted' %}success{% elif application.status == 'rejected' %}danger{% else %}primary{% endif %}" style="flex-shrink:0;">
+                {{ application.get_status_display }}
+            </span>
+        </div>
+
+        <!-- Meta -->
+        <div style="display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem;">
+            <span style="display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);">
+                <i data-lucide="building-2" style="width:11px;height:11px;"></i>
+                {{ application.job.recruiter.company_name }}
+            </span>
+            <span style="display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);">
+                <i data-lucide="map-pin" style="width:11px;height:11px;"></i>
+                {{ application.job.location }}
+            </span>
+        </div>
+
+        <!-- Footer -->
+        <div style="margin-top: auto; padding-top: 1.25rem; border-top: 1px solid var(--border);">
+            <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-subtle);">
+                Applied {{ application.applied_at|timesince }} ago
+            </span>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% else %}
+<!-- Empty state -->
+<div class="card" style="text-align: center; padding: 5rem 2rem;">
+    <div style="width:56px;height:56px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;color:var(--text-subtle);">
+        <i data-lucide="file-x" style="width:24px;height:24px;"></i>
+    </div>
+    <h3 style="font-family:var(--font-display);font-size:1.2rem;font-weight:700;margin-bottom:0.5rem;">No applications yet</h3>
+    <p style="color:var(--text-muted);font-size:0.9rem;font-family:var(--font-sans);margin-bottom:1.75rem;">
+        You haven't applied to any jobs. Start exploring opportunities.
+    </p>
+    <a href="{% url 'job_list' %}" class="btn btn-primary" style="font-size:0.85rem;padding:0.75rem 1.75rem;">
+        Browse Jobs →
+    </a>
+</div>
+{% endif %}
+
+<!-- ── Recruiter View ──────────────────────────────────────── -->
+{% elif role == 'recruiter' %}
+
+{% if jobs %}
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.5rem;">
+    {% for job in jobs %}
+    <div class="card animate-fade-in" style="display: flex; flex-direction: column;">
+
+        <!-- Accent top stripe -->
+        <div style="height: 2px; background: linear-gradient(90deg, var(--accent-2), transparent); margin: -2rem -2rem 1.75rem; border-radius: var(--radius-lg) var(--radius-lg) 0 0;"></div>
+
+        <!-- Title & badge -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; margin-bottom: 1rem;">
+            <h3 style="font-family: var(--font-display); font-size: 1rem; font-weight: 700; line-height: 1.35;">
+                <a href="{% url 'job_detail' job.pk %}" style="text-decoration: none; color: inherit;">
+                    {{ job.title }}
+                </a>
+            </h3>
+            <span class="badge badge-{% if job.status == 'open' %}success{% else %}neutral{% endif %}" style="flex-shrink:0;">
+                {{ job.get_status_display }}
+            </span>
+        </div>
+
+        <!-- Meta -->
+        <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem;">
+            <span style="display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);">
+                <i data-lucide="map-pin" style="width:11px;height:11px;"></i> {{ job.location }}
+            </span>
+            <span style="display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);">
+                <i data-lucide="banknote" style="width:11px;height:11px;"></i> {{ job.salary_range }}
+            </span>
+        </div>
+
+        <!-- Applicant count pill -->
+        <div style="margin-top: auto; padding-top: 1.25rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+            <span style="
+                display: inline-flex; align-items: center; gap: 0.5rem;
+                font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-muted);
+            ">
+                <i data-lucide="users" style="width:13px;height:13px;"></i>
+                {{ job.application_set.count }} Applicant{{ job.application_set.count|pluralize }}
+            </span>
+            <a href="{% url 'job_detail' job.pk %}" class="btn btn-outline" style="padding: 0.38rem 1rem; font-size: 0.74rem;">
+                View →
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% else %}
+<!-- Empty state -->
+<div class="card" style="text-align: center; padding: 5rem 2rem;">
+    <div style="width:56px;height:56px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;color:var(--text-subtle);">
+        <i data-lucide="briefcase" style="width:24px;height:24px;"></i>
+    </div>
+    <h3 style="font-family:var(--font-display);font-size:1.2rem;font-weight:700;margin-bottom:0.5rem;">No jobs posted yet</h3>
+    <p style="color:var(--text-muted);font-size:0.9rem;font-family:var(--font-sans);margin-bottom:1.75rem;">
+        Create your first job listing to start receiving applications.
+    </p>
+    <a href="{% url 'job_create' %}" class="btn btn-primary" style="font-size:0.85rem;padding:0.75rem 1.75rem;">
+        Post a Job →
+    </a>
+</div>
+{% endif %}
+
+{% endif %}
+{% endblock %}

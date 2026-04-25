@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Register | SkillSphere{% endblock %}
+
+{% block content %}
+<div style="max-width: 480px; margin: 5rem auto;">
+
+    <!-- Header -->
+    <div style="text-align: center; margin-bottom: 2.5rem;">
+        <span style="
+            font-family: var(--font-mono); font-size: 0.68rem;
+            letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-2);
+            background: rgba(201,169,110,0.08); border: 1px solid rgba(201,169,110,0.25);
+            padding: 0.3rem 0.9rem; border-radius: var(--radius-full);
+            display: inline-block; margin-bottom: 1.5rem;
+        ">Free — No Credit Card</span>
+        <h1 style="
+            font-family: var(--font-display); font-size: 2.2rem;
+            font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.5rem;
+        ">Join SkillSphere.</h1>
+        <p style="color: var(--text-muted); font-size: 0.88rem; font-family: var(--font-sans);">
+            Create your professional profile and start your journey today.
+        </p>
+    </div>
+
+    <!-- Card -->
+    <div class="card animate-fade-in" style="padding: 2.5rem; box-shadow: var(--shadow-lg);">
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                {% for error in form.non_field_errors %}
+                    <div style="
+                        background: rgba(248,113,113,0.08); color: var(--danger);
+                        padding: 0.8rem 1rem; border-radius: var(--radius-sm);
+                        margin-bottom: 1.5rem; font-size: 0.82rem;
+                        border: 1px solid rgba(248,113,113,0.2);
+                        font-family: var(--font-mono);
+                    ">{{ error }}</div>
+                {% endfor %}
+            {% endif %}
+
+            {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                    <small style="color: var(--text-subtle); display: block; margin-top: 0.3rem; font-size: 0.75rem; font-family: var(--font-mono);">
+                        {{ field.help_text }}
+                    </small>
+                {% endif %}
+                {% for error in field.errors %}
+                    <div style="color: var(--danger); font-size: 0.78rem; margin-top: 0.4rem; font-family: var(--font-mono);">
+                        ↳ {{ error }}
+                    </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem; margin-top: 0.5rem; font-size: 0.85rem;">
+                Create Account →
+            </button>
+        </form>
+
+        <div style="
+            margin-top: 2rem; text-align: center;
+            border-top: 1px solid var(--border); padding-top: 1.5rem;
+            color: var(--text-muted); font-size: 0.82rem; font-family: var(--font-mono);
+        ">
+            Already have an account?
+            <a href="{% url 'login' %}" style="
+                color: var(--text); text-decoration: none; font-weight: 700;
+                border-bottom: 1px solid var(--border-hover); padding-bottom: 1px;
+            ">Sign in</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
