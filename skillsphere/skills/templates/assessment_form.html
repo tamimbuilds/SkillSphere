@@ -90,8 +90,21 @@
         background:var(--surface);
     }
 
+    .answer-option.selected {
+        border-color: var(--primary);
+        background: var(--surface);
+        box-shadow: 0 0 0 1px var(--primary);
+    }
+
+    .answer-option.selected .question-text {
+        font-weight: 600;
+        color: var(--primary);
+    }
+
     .answer-option input {
         margin-top:0.2rem;
+        accent-color: var(--primary);
+        transform: scale(1.2);
     }
 </style>
 
@@ -153,6 +166,21 @@
                     event.preventDefault();
                 }
             }
+        });
+
+        // Add explicit .selected class to answer-options
+        const radios = document.querySelectorAll('input[type="radio"]');
+        radios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                const name = this.name;
+                // Remove selected class from all options in the same group
+                document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+                    r.closest('.answer-option').classList.remove('selected');
+                });
+                if(this.checked) {
+                    this.closest('.answer-option').classList.add('selected');
+                }
+            });
         });
 
         tick();

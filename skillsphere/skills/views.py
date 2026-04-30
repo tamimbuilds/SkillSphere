@@ -247,6 +247,11 @@ def add_assessment(request, pk):
 
             skill.verified = passed
             skill.save(update_fields=['verified'])
+            
+            # Update match scores for all applications
+            from jobs.utils import update_candidate_match_scores
+            update_candidate_match_scores(profile)
+
             request.session.pop(timer_session_key, None)
 
             status_text = 'passed' if passed else 'completed'
@@ -281,3 +286,4 @@ def add_job_skill_requirement(request):
         form.save()
         return redirect('job_skill_requirement_list')
     return render(request, 'job_skill_requirement_form.html', {'form': form})
+

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}My Applications | SkillSphere{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in">
+    <div style="margin-bottom: 2.5rem;">
+        <h1 style="font-family: var(--font-display); font-size: 2.4rem; font-weight: 700; letter-spacing: -0.02em;">My Applications</h1>
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.4rem;">Track the status of your job applications and match scores.</p>
+    </div>
+
+    {% if applications %}
+    <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
+        {% for app in applications %}
+        <div class="card glass" style="padding: 1.5rem; display: flex; align-items: center; gap: 2rem; border-radius: 16px;">
+            <!-- Match Score -->
+            <div style="flex-shrink: 0; text-align: center; width: 70px; padding: 0.75rem; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border);">
+                <div style="font-family: var(--font-mono); font-size: 0.6rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.2rem;">Match</div>
+                <div style="font-family: var(--font-display); font-size: 1.25rem; font-weight: 800; color: {% if app.match_score >= 8 %}var(--success){% elif app.match_score >= 5 %}var(--accent){% else %}var(--danger){% endif %};">
+                    {{ app.match_score|floatformat:1 }} / 10
+                </div>
+            </div>
+
+            <!-- Job Info -->
+            <div style="flex-grow: 1;">
+                <h3 style="font-size: 1.15rem; font-weight: 600; margin-bottom: 0.4rem;">{{ app.job.title }}</h3>
+                <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+                    <span style="display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);">
+                        <i data-lucide="building" style="width:13px;height:13px;"></i> {{ app.job.recruiter.company_name }}
+                    </span>
+                    <span style="display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);">
+                        <i data-lucide="calendar" style="width:13px;height:13px;"></i> Applied on {{ app.applied_at|date:"M d, Y" }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Status Badge -->
+            <div style="flex-shrink: 0;">
+                <span style="padding: 0.5rem 1rem; border-radius: 20px; font-family: var(--font-mono); font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; 
+                    {% if app.status == 'applied' %}background: rgba(59,130,246,0.1); color: #3b82f6; border: 1px solid rgba(59,130,246,0.2);
+                    {% elif app.status == 'shortlisted' %}background: rgba(245,158,11,0.1); color: #f59e0b; border: 1px solid rgba(245,158,11,0.2);
+                    {% elif app.status == 'rejected' %}background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2);
+                    {% elif app.status == 'hired' %}background: rgba(34,197,94,0.1); color: #22c55e; border: 1px solid rgba(34,197,94,0.2);
+                    {% else %}background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--border);{% endif %}">
+                    {{ app.status }}
+                </span>
+            </div>
+
+            <!-- Actions -->
+            <div style="flex-shrink: 0; display: flex; gap: 0.5rem;">
+                <a href="{% url 'job_detail' app.job.pk %}" class="btn btn-outline btn-sm" style="font-size: 0.75rem; border-radius: 8px;">View Job</a>
+                <a href="{% url 'job_analysis' app.job.pk %}" target="_blank" class="btn btn-outline btn-sm" style="font-size: 0.75rem; border-radius: 8px; color: var(--accent); border-color: var(--accent);">
+                    <i data-lucide="bar-chart-2" style="width:12px;height:12px;"></i> Analysis
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card glass" style="padding: 4rem; text-align: center; border-radius: 20px;">
+        <i data-lucide="file-text" style="width:40px;height:40px;color:var(--text-muted);margin-bottom:1rem;opacity:0.3;"></i>
+        <h3 style="color:var(--text-muted);font-weight:500; font-family: var(--font-display);">No applications yet</h3>
+        <p style="color: var(--text-subtle); font-size: 0.9rem; margin-top: 0.5rem;">Start exploring jobs and apply to see them here.</p>
+        <a href="{% url 'job_list' %}" class="btn btn-primary" style="margin-top: 1.5rem; border-radius: 12px;">Browse Jobs</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
