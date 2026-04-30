@@ -13,44 +13,48 @@
             <p style="color: var(--text-muted);">Verify your proficiency in <strong>{{ skill_name }}</strong></p>
         </div>
 
-        <form method="POST" class="assessment-form">
+        <div class="info-alert glass timer-box no-copy-area" style="background: rgba(239, 68, 68, 0.07); padding: 1rem 1.5rem; border-radius: 12px; margin-bottom: 1rem; border: 1px solid rgba(239, 68, 68, 0.2); display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap;">
+            <span style="font-size:0.9rem;color:var(--text-bright);">Time Limit: {{ time_limit_minutes }} minutes</span>
+            <strong id="assessment-timer" style="font-family:var(--font-mono);font-size:1rem;color:var(--danger);">10:00</strong>
+        </div>
+
+        <form method="POST" class="assessment-form" id="assessment-form">
             {% csrf_token %}
             
-            <div class="info-alert glass" style="background: rgba(99, 102, 241, 0.05); padding: 1.5rem; border-radius: 12px; margin-bottom: 2.5rem; border: 1px solid rgba(99, 102, 241, 0.2);">
+            <div class="info-alert glass no-copy-area" style="background: rgba(99, 102, 241, 0.05); padding: 1.5rem; border-radius: 12px; margin-bottom: 2.5rem; border: 1px solid rgba(99, 102, 241, 0.2);">
                 <p style="margin: 0; font-size: 0.9rem; color: var(--text-bright);">
                     <i data-lucide="info" style="margin-right: 0.5rem; color: var(--primary);"></i>
-                    This is a simulated assessment. Please enter your score and test details for verification.
+                    Attempt {{ attempt_number }} of 3. You are taking set {{ set_number }} for {{ skill_name }}. This test contains 10 multiple-choice questions, and you have {{ remaining_attempts }} attempt{% if remaining_attempts != 1 %}s{% endif %} available including this one.
                 </p>
             </div>
 
-            <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-                <div class="form-group">
-                    <label>Test Type</label>
-                    <select name="test_type" class="form-control" required>
-                        <option value="multiple_choice">Multiple Choice</option>
-                        <option value="coding_challenge">Coding Challenge</option>
-                        <option value="practical_task">Practical Task</option>
-                    </select>
+            <div style="display:flex;flex-direction:column;gap:1.25rem;">
+                {% for question in questions %}
+                <div class="no-copy-area" style="padding:1.5rem;border:1px solid var(--border);border-radius:16px;background:var(--surface-2);">
+                    <div class="question-text" style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.75rem;">
+                        Question {{ forloop.counter }}
+                    </div>
+                    <p class="question-text" style="font-size:1rem;font-weight:600;margin-bottom:1rem;">{{ question.question_text }}</p>
+                    <div style="display:grid;gap:0.75rem;">
+                        <label class="answer-option">
+                            <input type="radio" name="question_{{ question.pk }}" value="A" required>
+                            <span class="question-text">A. {{ question.option_a }}</span>
+                        </label>
+                        <label class="answer-option">
+                            <input type="radio" name="question_{{ question.pk }}" value="B" required>
+                            <span class="question-text">B. {{ question.option_b }}</span>
+                        </label>
+                        <label class="answer-option">
+                            <input type="radio" name="question_{{ question.pk }}" value="C" required>
+                            <span class="question-text">C. {{ question.option_c }}</span>
+                        </label>
+                        <label class="answer-option">
+                            <input type="radio" name="question_{{ question.pk }}" value="D" required>
+                            <span class="question-text">D. {{ question.option_d }}</span>
+                        </label>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Total Questions / Tasks</label>
-                    <input type="number" name="total_questions" class="form-control" value="20" required>
-                </div>
-                <div class="form-group">
-                    <label>Your Score</label>
-                    <input type="number" step="0.1" name="score" class="form-control" placeholder="e.g. 18.5" required>
-                </div>
-                <div class="form-group">
-                    <label>Attempt Duration (minutes)</label>
-                    <input type="number" name="attempt_time" class="form-control" value="30" required>
-                </div>
-            </div>
-
-            <div class="form-group" style="margin-top: 2rem;">
-                <label class="checkbox-container" style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
-                    <input type="checkbox" name="passed" checked style="width: 20px; height: 20px; accent-color: var(--primary);">
-                    <span>I declare that I have completed this assessment fairly.</span>
-                </label>
+                {% endfor %}
             </div>
 
             <div class="actions" style="margin-top: 3.5rem; display: flex; gap: 1.5rem;">
@@ -62,28 +66,97 @@
 </div>
 
 <style>
-    .form-group label {
-        display: block;
-        margin-bottom: 0.75rem;
-        font-weight: 600;
-        color: var(--text-muted);
-        font-size: 0.9rem;
+    .no-copy-area,
+    .question-text {
+        user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
     }
-    
-    .form-control {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 10px;
-        color: white;
-        transition: all 0.3s ease;
+
+    .answer-option {
+        display:flex;
+        align-items:flex-start;
+        gap:0.75rem;
+        padding:0.9rem 1rem;
+        border:1px solid var(--border);
+        border-radius:12px;
+        background:var(--surface-3);
+        cursor:pointer;
+        transition:all var(--transition);
     }
-    
-    .form-control:focus {
-        border-color: var(--primary);
-        background: rgba(255, 255, 255, 0.08);
-        outline: none;
+
+    .answer-option:hover {
+        border-color:var(--border-hover);
+        background:var(--surface);
+    }
+
+    .answer-option input {
+        margin-top:0.2rem;
     }
 </style>
+
+<script>
+    (function () {
+        const expiresAt = {{ expires_at_unix_ms }};
+        const timerEl = document.getElementById('assessment-timer');
+        const formEl = document.getElementById('assessment-form');
+        let intervalId = null;
+
+        function formatTime(msRemaining) {
+            const totalSeconds = Math.max(0, Math.floor(msRemaining / 1000));
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function tick() {
+            const remaining = expiresAt - Date.now();
+            if (timerEl) {
+                timerEl.textContent = formatTime(remaining);
+            }
+
+            if (remaining <= 0) {
+                clearInterval(intervalId);
+                if (formEl) {
+                    formEl.submit();
+                }
+            }
+        }
+
+        const blockedSelector = '.question-text, .no-copy-area';
+        document.addEventListener('copy', function (event) {
+            if (event.target.closest(blockedSelector)) {
+                event.preventDefault();
+            }
+        });
+        document.addEventListener('cut', function (event) {
+            if (event.target.closest(blockedSelector)) {
+                event.preventDefault();
+            }
+        });
+        document.addEventListener('contextmenu', function (event) {
+            if (event.target.closest(blockedSelector)) {
+                event.preventDefault();
+            }
+        });
+        document.addEventListener('selectstart', function (event) {
+            if (event.target.closest(blockedSelector)) {
+                event.preventDefault();
+            }
+        });
+        document.addEventListener('keydown', function (event) {
+            const key = event.key.toLowerCase();
+            if ((event.ctrlKey || event.metaKey) && ['a', 'c', 'x'].includes(key)) {
+                if (document.activeElement && document.activeElement.closest(blockedSelector)) {
+                    event.preventDefault();
+                } else if (document.getSelection() && document.getSelection().toString()) {
+                    event.preventDefault();
+                }
+            }
+        });
+
+        tick();
+        intervalId = setInterval(tick, 1000);
+    })();
+</script>
 {% endblock %}

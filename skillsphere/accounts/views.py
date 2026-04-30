@@ -73,10 +73,13 @@ def profile_view(request):
     from interviews.models import Interview
 
     if user.role == 'candidate':
-        from skills.models import CandidateSkill, Assessment
-        skills = CandidateSkill.objects.filter(candidate=profile)
+        from skills.models import CandidateSkill, Score
+        skills = CandidateSkill.objects.filter(candidate=profile).select_related('skill')
         for s in skills:
-            s.has_assessment = Assessment.objects.filter(candidate_skill=s).exists()
+            score_qs = Score.objects.filter(user=user, candidate_skill=s).order_by('-attempt_number', '-completed_at')
+            s.latest_score = score_qs.first()
+            s.attempt_count = score_qs.count()
+            s.has_assessment = s.latest_score is not None
         total_jobs = Application.objects.filter(candidate=profile).count()
         total_interviews = Interview.objects.filter(candidate=profile).count()
     elif user.role == 'recruiter':
