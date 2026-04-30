@@ -162,8 +162,15 @@
                         <div>
                             {% if s.has_assessment %}
                                 <span style="display:inline-flex;align-items:center;gap:0.35rem;font-family:var(--font-mono);font-size:0.72rem;color:var(--success);">
-                                    <i data-lucide="check" style="width:11px;height:11px;"></i> Verified
+                                    <i data-lucide="check" style="width:11px;height:11px;"></i> {{ s.latest_score.score }}%
                                 </span>
+                                <div style="margin-top:0.35rem;font-family:var(--font-mono);font-size:0.68rem;color:var(--text-muted);">
+                                    {{ s.latest_score.correct_answers }}/{{ s.latest_score.total_questions }}
+                                    {% if s.latest_score.passed %}• Passed{% else %}• Failed{% endif %}
+                                </div>
+                                <div style="font-family:var(--font-mono);font-size:0.68rem;color:var(--text-muted);">
+                                    Attempts: {{ s.attempt_count }}/3
+                                </div>
                             {% else %}
                                 <span style="display:inline-flex;align-items:center;gap:0.35rem;font-family:var(--font-mono);font-size:0.72rem;color:var(--warning);">
                                     <i data-lucide="alert-circle" style="width:11px;height:11px;"></i> No Assessment

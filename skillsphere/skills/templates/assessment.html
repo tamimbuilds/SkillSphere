@@ -31,11 +31,13 @@
 <div class="container">
     <h2>Assessment Results</h2>
 
-    {% for a in assessments %}
+    {% for a in scores %}
         <div class="card">
             <p><b>Skill:</b> {{ a.candidate_skill.skill.skill_name }}</p>
-            <p><b>Test:</b> {{ a.test_type }}</p>
-            <p class="score">Score: {{ a.score }}</p>
+            <p><b>Sector:</b> {{ a.candidate_skill.skill.get_category_display }}</p>
+            <p><b>Attempt:</b> {{ a.attempt_number }}/3</p>
+            <p><b>Question Set:</b> {{ a.question_set_number }}</p>
+            <p class="score">Score: {{ a.correct_answers }}/{{ a.total_questions }} ({{ a.score }}%)</p>
             <p>Passed: {{ a.passed }}</p>
         </div>
     {% empty %}
