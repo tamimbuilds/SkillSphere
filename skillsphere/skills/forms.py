@@ -48,3 +48,4 @@ class JobSkillRequirementForm(forms.ModelForm):
     class Meta:
         model = JobSkillRequirement
         fields = ['job', 'skill', 'required_level', 'is_mandatory']
+

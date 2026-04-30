@@ -15,6 +15,8 @@ class Skill(models.Model):
         ('devops', 'DevOps'),
         ('fullstack', 'Fullstack'),
         ('ui_ux', 'UI/UX Design'),
+        ('mobile', 'Mobile Development'),
+        ('data_science', 'Data Science'),
     ]
     skill_name = models.CharField(max_length=100)
     category = models.CharField(max_length=100, choices=SECTOR_CHOICES)
