@@ -5,11 +5,15 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404, redirect, render
 
+from accounts.models import Notification
 from skills.models import JobSkillRequirement, Skill
 
 from .forms import ApplicationForm, JobPostForm
 from .models import Application, JobPost
 from .utils import calculate_match_score
+
+
+INTERVIEW_MATCH_THRESHOLD = 8.0
 
 
 def _get_recruiter_profile(user):
@@ -32,17 +36,35 @@ def _build_skills_json():
 
 
 def _save_skill_requirements(request, job):
-    skill_ids = request.POST.getlist("req_skill")
-    levels = request.POST.getlist("req_level")
+    skill_ids = request.POST.getlist("skill_id")
+    levels = request.POST.getlist("required_level")
 
-    for skill_id, level in zip(skill_ids, levels):
+    if not skill_ids:
+        skill_ids = request.POST.getlist("req_skill")
+        levels = request.POST.getlist("req_level")
+
+    if not skill_ids:
+        skill_id = request.POST.get("skill_id")
+        level = request.POST.get("required_level")
+        if skill_id:
+            skill_ids = [skill_id]
+            levels = [level or "beginner"]
+
+    for index, skill_id in enumerate(skill_ids):
         if not skill_id:
             continue
-        JobSkillRequirement.objects.get_or_create(
+        JobSkillRequirement.objects.update_or_create(
             job=job,
             skill_id=skill_id,
-            defaults={"required_level": level or "beginner"},
+            defaults={"required_level": levels[index] if index < len(levels) else "beginner"},
         )
+
+
+def _refresh_job_match_scores(job):
+    applications = Application.objects.filter(candidate__isnull=False, job=job).select_related("candidate")
+    for application in applications:
+        application.match_score = calculate_match_score(application.candidate, job)
+        application.save(update_fields=["match_score", "updated_at"])
 
 
 def job_list(request):
@@ -204,6 +226,7 @@ def job_edit(request, pk):
         form = JobPostForm(request.POST, instance=job)
         if form.is_valid():
             form.save()
+            _refresh_job_match_scores(job)
             messages.success(request, "Job post updated successfully.")
             return redirect("job_detail", pk=job.pk)
     else:
@@ -269,17 +292,15 @@ def job_applicants(request, pk):
         messages.error(request, "You are not allowed to review applicants for this job.")
         return redirect("job_detail", pk=job.pk)
 
+    _refresh_job_match_scores(job)
     applicants = list(
         Application.objects.filter(job=job)
         .select_related("candidate", "candidate__user", "job")
         .order_by("-match_score", "-applied_at")
     )
 
-    for app in applicants:
-        app.match_score = calculate_match_score(app.candidate, job)
-
     total_count = len(applicants)
-    qualified_count = len([app for app in applicants if app.match_score >= 8])
+    qualified_count = len([app for app in applicants if app.match_score >= INTERVIEW_MATCH_THRESHOLD])
     avg_score = round(
         sum(app.match_score for app in applicants) / total_count, 1
     ) if total_count else 0
@@ -293,6 +314,7 @@ def job_applicants(request, pk):
             "total_count": total_count,
             "qualified_count": qualified_count,
             "avg_score": avg_score,
+            "interview_threshold": INTERVIEW_MATCH_THRESHOLD,
         },
     )
 
@@ -307,18 +329,17 @@ def job_analysis(request, pk):
             messages.error(request, "You are not allowed to view this analysis.")
             return redirect("job_detail", pk=job.pk)
 
+        _refresh_job_match_scores(job)
         applicants = list(
             Application.objects.filter(job=job)
             .select_related("candidate", "candidate__user")
             .order_by("-match_score", "-applied_at")
         )
-        for app in applicants:
-            app.match_score = calculate_match_score(app.candidate, job)
 
         return render(
             request,
             "job_analysis.html",
-            {"job": job, "applicants": applicants},
+            {"job": job, "applicants": applicants, "interview_threshold": INTERVIEW_MATCH_THRESHOLD},
         )
 
     if request.user.role == "candidate":
@@ -332,11 +353,45 @@ def job_analysis(request, pk):
         return render(
             request,
             "job_analysis.html",
-            {"job": job, "applicants": [application]},
+            {"job": job, "applicants": [application], "interview_threshold": INTERVIEW_MATCH_THRESHOLD},
         )
 
     messages.error(request, "You are not allowed to view this analysis.")
     return redirect("job_detail", pk=job.pk)
+
+
+@login_required
+def call_for_interview(request, application_pk):
+    application = get_object_or_404(
+        Application.objects.select_related("candidate", "candidate__user", "job", "job__recruiter"),
+        pk=application_pk,
+    )
+    recruiter_profile = _get_recruiter_profile(request.user)
+
+    if request.user.role != "recruiter" or recruiter_profile != application.job.recruiter:
+        messages.error(request, "You are not allowed to call this candidate for interview.")
+        return redirect("dashboard")
+
+    application.match_score = calculate_match_score(application.candidate, application.job)
+    if application.match_score < INTERVIEW_MATCH_THRESHOLD:
+        application.save(update_fields=["match_score", "updated_at"])
+        messages.error(request, "This candidate needs a match score of 8.0 or higher before you can call them for interview.")
+        return redirect("job_applicants", pk=application.job.pk)
+
+    application.status = "shortlisted"
+    application.save(update_fields=["status", "match_score", "updated_at"])
+
+    Notification.objects.create(
+        user=application.candidate.user,
+        title="Interview Invitation",
+        message=(
+            f"{application.job.recruiter.company_name} has called you for an interview "
+            f"for the {application.job.title} role. Please watch this Notifications page for the next update."
+        ),
+    )
+
+    messages.success(request, f"{application.candidate.full_name} has been notified for interview.")
+    return redirect("job_applicants", pk=application.job.pk)
 
 
 @login_required
@@ -367,6 +422,7 @@ def job_skill_manage(request, pk):
                 skill_id=skill_id,
                 required_level=required_level,
             )
+            _refresh_job_match_scores(job)
             messages.success(request, "Required skill added.")
             return redirect("job_skill_manage", pk=job.pk)
 
@@ -399,6 +455,7 @@ def job_skill_delete(request, pk, skill_req_id):
 
     if request.method == "POST":
         requirement.delete()
+        _refresh_job_match_scores(job)
         messages.success(request, "Required skill removed.")
 
     return redirect("job_skill_manage", pk=job.pk)

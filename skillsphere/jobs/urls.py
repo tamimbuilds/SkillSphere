@@ -12,6 +12,7 @@ urlpatterns = [
     path('<int:pk>/apply/', views.apply_job, name='apply_job'),
     path('<int:pk>/applicants/', views.job_applicants, name='job_applicants'),
     path('<int:pk>/analysis/', views.job_analysis, name='job_analysis'),
+    path('applications/<int:application_pk>/call-interview/', views.call_for_interview, name='call_for_interview'),
 
     # Job Skill Requirement management
     path('<int:pk>/skills/', views.job_skill_manage, name='job_skill_manage'),
