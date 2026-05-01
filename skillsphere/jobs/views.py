@@ -50,6 +50,11 @@ def job_create(request):
     if request.user.role != 'recruiter':
         return redirect('job_list')
 
+    recruiter_profile = getattr(request.user, 'recruiter_profile', None)
+    if recruiter_profile is None:
+        messages.error(request, 'Please complete your recruiter profile before posting a job.')
+        return redirect('profile')
+
     all_skills = Skill.objects.all().order_by('category', 'skill_name')
     
     # Group skills by category for dynamic JS dropdowns
@@ -61,11 +66,12 @@ def job_create(request):
         skills_dict[cat_name].append({'id': skill.pk, 'name': skill.skill_name})
     skills_json = json.dumps(skills_dict)
 
+
     if request.method == 'POST':
         form = JobPostForm(request.POST)
         if form.is_valid():
             job = form.save(commit=False)
-            job.recruiter = request.user.recruiter_profile
+            job.recruiter = recruiter_profile
             job.save()
             _save_skill_requirements(request, job)
             messages.success(request, 'Job post created successfully!')
@@ -234,7 +240,7 @@ def apply_job(request, pk):
             app.match_score = match_score
             app.save()
             messages.success(request, 'Application submitted successfully!')
-            return redirect('my_applications')
+            return redirect('dashboard')
     else:
         form = ApplicationForm()
 
