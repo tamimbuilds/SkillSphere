@@ -6,6 +6,8 @@ from django.db.models import Avg
 from django.shortcuts import get_object_or_404, redirect, render
 
 from accounts.models import Notification
+from interviews.forms import RecruiterInterviewInviteForm
+from interviews.models import Interview
 from skills.models import JobSkillRequirement, Skill
 
 from .forms import ApplicationForm, JobPostForm
@@ -378,20 +380,57 @@ def call_for_interview(request, application_pk):
         messages.error(request, "This candidate needs a match score of 8.0 or higher before you can call them for interview.")
         return redirect("job_applicants", pk=application.job.pk)
 
-    application.status = "shortlisted"
-    application.save(update_fields=["status", "match_score", "updated_at"])
+    existing_interview = Interview.objects.filter(
+        candidate=application.candidate,
+        job=application.job,
+    ).first()
 
-    Notification.objects.create(
-        user=application.candidate.user,
-        title="Interview Invitation",
-        message=(
-            f"{application.job.recruiter.company_name} has called you for an interview "
-            f"for the {application.job.title} role. Please watch this Notifications page for the next update."
-        ),
+    if request.method == "POST":
+        form = RecruiterInterviewInviteForm(request.POST, instance=existing_interview)
+        if form.is_valid():
+            interview = form.save(commit=False)
+            interview.candidate = application.candidate
+            interview.job = application.job
+            interview.status = "scheduled"
+            if not interview.interview_type:
+                interview.interview_type = "hr"
+            if not interview.round_number:
+                interview.round_number = 1
+            interview.scheduled_time = interview.scheduled_time.strftime("%H:%M")
+            interview.save()
+
+            application.status = "shortlisted"
+            application.save(update_fields=["status", "match_score", "updated_at"])
+
+            Notification.objects.update_or_create(
+                user=application.candidate.user,
+                interview=interview,
+                defaults={
+                    "title": "Interview Invitation",
+                    "message": (
+                        f"You have been selected for an interview for {application.job.title} "
+                        f"at {application.job.recruiter.company_name}."
+                    ),
+                    "is_read": False,
+                },
+            )
+
+            messages.success(request, f"Interview invitation sent to {application.candidate.full_name}.")
+            return redirect("interview_detail", pk=interview.pk)
+    else:
+        form = RecruiterInterviewInviteForm(instance=existing_interview)
+
+    return render(
+        request,
+        "call_for_interview.html",
+        {
+            "application": application,
+            "job": application.job,
+            "candidate": application.candidate,
+            "form": form,
+            "existing_interview": existing_interview,
+        },
     )
-
-    messages.success(request, f"{application.candidate.full_name} has been notified for interview.")
-    return redirect("job_applicants", pk=application.job.pk)
 
 
 @login_required

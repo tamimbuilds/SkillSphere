@@ -30,14 +30,17 @@ class Interview(models.Model):
     STATUS = [('scheduled','Scheduled'),('completed','Completed'),('cancelled','Cancelled')]
 
     candidate = models.ForeignKey(CandidateProfile, on_delete=models.CASCADE)
-    interviewer = models.ForeignKey(Interviewer, on_delete=models.CASCADE)
+    interviewer = models.ForeignKey(Interviewer, on_delete=models.CASCADE, null=True, blank=True)
     job = models.ForeignKey(JobPost, on_delete=models.CASCADE)
-    interview_type = models.CharField(max_length=20, choices=TYPE)
-    round_number = models.IntegerField()
+    interview_type = models.CharField(max_length=20, choices=TYPE, default='hr')
+    round_number = models.IntegerField(default=1)
     scheduled_date = models.DateField()
     scheduled_time = models.CharField(max_length=10)
     meeting_link = models.URLField(blank=True)
     location = models.CharField(max_length=200, blank=True)
+    welcome_message = models.TextField(blank=True)
+    contact_details = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     status = models.CharField(max_length=20, choices=STATUS, default='scheduled')
     feedback = models.TextField(blank=True)
