@@ -1,64 +1,273 @@
 {% extends "base.html" %}
 
-{% block title %}Post a Job | SkillSphere{% endblock %}
+{% block title %}{% if job %}Edit Job Post{% else %}Create Job Post{% endif %} | SkillSphere{% endblock %}
 
 {% block content %}
-<div style="max-width: 760px; margin: 0 auto;">
+<div class="animate-fade-in" style="max-width: 800px; margin: 0 auto;">
 
-    <!-- Back -->
-    <a href="{% url 'job_list' %}" style="
-        display: inline-flex; align-items: center; gap: 0.5rem;
-        font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-muted);
-        text-decoration: none; margin-bottom: 2rem; transition: color var(--transition);
-    " onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-muted)'">
-        <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> Back to Jobs
-    </a>
-
-    <!-- Header -->
     <div style="margin-bottom: 2.5rem;">
-        <span style="
-            font-family: var(--font-mono); font-size: 0.72rem;
-            letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted);
-        ">Recruiter</span>
-        <h1 style="
-            font-family: var(--font-mono); font-size: 2rem;
-            font-weight: 700; letter-spacing: -0.03em; margin-top: 0.4rem;
-        ">Post a New Job</h1>
-        <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 0.3rem; font-family: var(--font-sans);">
-            Fill in the details below to publish your job listing.
+        <a href="{% url 'job_list' %}" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); text-decoration: none; margin-bottom: 1rem;">
+            <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> Back to Jobs
+        </a>
+        <h1 style="font-family: var(--font-display); font-size: 2rem; font-weight: 700; letter-spacing: -0.02em;">
+            {% if job %}Edit Job Post{% else %}Create New Job Post{% endif %}
+        </h1>
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.4rem;">
+            {% if job %}Update the details of your job posting.{% else %}Fill in the job details. You can add required skills on the next step.{% endif %}
         </p>
     </div>
 
-    <!-- Form card -->
-    <div class="card glass animate-fade-in" style="padding: 2.5rem;">
-        <form method="post" novalidate>
+    <div class="card glass" style="padding: 2rem; border-radius: 24px;">
+        <form method="POST" novalidate>
             {% csrf_token %}
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
 
-            {% for field in form %}
-            <div class="form-group">
-                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                {{ field }}
-                {% if field.help_text %}
-                    <small style="color: var(--text-subtle); display: block; margin-top: 0.3rem; font-size: 0.75rem; font-family: var(--font-mono);">{{ field.help_text }}</small>
+                <!-- Title (full width) -->
+                <div style="grid-column: 1 / -1;">
+                    <label style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 0.4rem;">Job Title *</label>
+                    {{ form.title }}
+                    {% if form.title.errors %}<div style="color: var(--danger); font-size: 0.75rem; margin-top: 0.3rem;">{{ form.title.errors }}</div>{% endif %}
+                </div>
+
+                <!-- Description (full width) -->
+                <div style="grid-column: 1 / -1;">
+                    <label style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 0.4rem;">Description *</label>
+                    {{ form.description }}
+                    {% if form.description.errors %}<div style="color: var(--danger); font-size: 0.75rem; margin-top: 0.3rem;">{{ form.description.errors }}</div>{% endif %}
+                </div>
+
+                <!-- Location -->
+                <div>
+                    <label style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 0.4rem;">Location *</label>
+                    {{ form.location }}
+                    {% if form.location.errors %}<div style="color: var(--danger); font-size: 0.75rem; margin-top: 0.3rem;">{{ form.location.errors }}</div>{% endif %}
+                </div>
+
+                <!-- Salary Range -->
+                <div>
+                    <label style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 0.4rem;">Salary Range *</label>
+                    {{ form.salary_range }}
+                    {% if form.salary_range.errors %}<div style="color: var(--danger); font-size: 0.75rem; margin-top: 0.3rem;">{{ form.salary_range.errors }}</div>{% endif %}
+                </div>
+
+                <!-- Min CGPA -->
+                <div>
+                    <label style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 0.4rem;">Minimum CGPA *</label>
+                    {{ form.required_cgpa }}
+                    {% if form.required_cgpa.errors %}<div style="color: var(--danger); font-size: 0.75rem; margin-top: 0.3rem;">{{ form.required_cgpa.errors }}</div>{% endif %}
+                </div>
+
+                <!-- Experience -->
+                <div>
+                    <label style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 0.4rem;">Min. Experience (years) *</label>
+                    {{ form.required_experience }}
+                    {% if form.required_experience.errors %}<div style="color: var(--danger); font-size: 0.75rem; margin-top: 0.3rem;">{{ form.required_experience.errors }}</div>{% endif %}
+                </div>
+
+                <!-- Deadline -->
+                <div>
+                    <label style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 0.4rem;">Application Deadline *</label>
+                    {{ form.deadline }}
+                    {% if form.deadline.errors %}<div style="color: var(--danger); font-size: 0.75rem; margin-top: 0.3rem;">{{ form.deadline.errors }}</div>{% endif %}
+                </div>
+
+                <!-- Status -->
+                <div>
+                    <label style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 0.4rem;">Status</label>
+                    {{ form.status }}
+                    {% if form.status.errors %}<div style="color: var(--danger); font-size: 0.75rem; margin-top: 0.3rem;">{{ form.status.errors }}</div>{% endif %}
+                </div>
+
+                {% if not job %}
+                <!-- Initial Required Skills (Only on Create) -->
+                <div style="grid-column: 1 / -1; margin-top: 1rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+                    <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text);">Required Skills</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">Select a category and add up to 3 required skills for this job.</p>
+                    
+                    <div style="margin-bottom: 1.5rem;">
+                        <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 0.3rem;">Job Category</label>
+                        <select id="master-category-select" style="max-width: 300px;">
+                            <option value="">Select Category</option>
+                        </select>
+                    </div>
+
+                    <div id="skills-container" style="display: none;">
+                        <!-- Skill rows will be added here -->
+                        <div class="skill-row" style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 1rem; margin-bottom: 1rem; align-items: end;">
+                            <div>
+                                <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 0.3rem;">Skill</label>
+                                <select name="req_skill" class="skill-name-select">
+                                    <option value="">Select Skill</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 0.3rem;">Required Level</label>
+                                <select name="req_level">
+                                    {% for value, label in level_choices %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-outline btn-remove-skill" style="padding: 0.65rem;" title="Remove">
+                                    <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="button" id="btn-add-skill" class="btn btn-outline" style="font-size: 0.85rem; padding: 0.5rem 1rem; display: none;">
+                        <i data-lucide="plus" style="width: 14px; height: 14px;"></i> Add Another Skill
+                    </button>
+                    <div id="max-skills-warning" style="display: none; color: var(--danger); font-size: 0.8rem; margin-top: 0.5rem;">Maximum of 3 skills allowed.</div>
+                </div>
                 {% endif %}
-                {% for error in field.errors %}
-                    <div style="color: var(--danger); font-size: 0.78rem; margin-top: 0.4rem; font-family: var(--font-mono);">↳ {{ error }}</div>
-                {% endfor %}
+
             </div>
-            {% endfor %}
 
-            <div style="height: 1px; background: var(--border); margin: 1.5rem 0;"></div>
-
-            <div style="display: flex; gap: 1rem; align-items: center;">
-                <button type="submit" class="btn btn-primary" style="padding: 0.85rem 2rem; font-size: 0.82rem;">
-                    <i data-lucide="send" style="width:14px;height:14px;"></i>
-                    Publish Job Post
+            <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border); display: flex; gap: 1rem; align-items: center;">
+                <button type="submit" class="btn btn-primary" style="border-radius: 12px; padding: 0.75rem 2rem;">
+                    {% if job %}
+                        <i data-lucide="save" style="width:16px;height:16px;"></i> Save Changes
+                    {% else %}
+                        <i data-lucide="save" style="width:16px;height:16px;"></i> Create Job Post
+                    {% endif %}
                 </button>
-                <a href="{% url 'job_list' %}" class="btn btn-outline" style="padding: 0.85rem 2rem; font-size: 0.82rem;">
-                    Cancel
-                </a>
+                <a href="{% url 'job_list' %}" class="btn btn-outline" style="border-radius: 12px;">Cancel</a>
             </div>
         </form>
     </div>
 </div>
+
+<style>
+    input[type="text"], input[type="number"], input[type="date"], textarea, select {
+        width: 100%;
+        padding: 0.65rem 0.9rem;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        color: var(--text);
+        font-size: 0.9rem;
+        font-family: inherit;
+        box-sizing: border-box;
+        transition: border-color 0.2s ease;
+    }
+    input:focus, textarea:focus, select:focus {
+        outline: none;
+        border-color: var(--accent);
+    }
+    textarea { resize: vertical; min-height: 120px; }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        {% if not job and skills_json %}
+        const skillsData = {{ skills_json|safe }};
+        const container = document.getElementById('skills-container');
+        const btnAdd = document.getElementById('btn-add-skill');
+        const masterCategorySelect = document.getElementById('master-category-select');
+        const maxSkillsWarning = document.getElementById('max-skills-warning');
+
+        function populateCategories() {
+            masterCategorySelect.innerHTML = '<option value="">Select Category</option>';
+            for (const category in skillsData) {
+                const opt = document.createElement('option');
+                opt.value = category;
+                opt.textContent = category;
+                masterCategorySelect.appendChild(opt);
+            }
+        }
+
+        function populateSkillSelect(skillSelect, category) {
+            skillSelect.innerHTML = '<option value="">Select Skill</option>';
+            if (category && skillsData[category]) {
+                skillsData[category].forEach(skill => {
+                    const opt = document.createElement('option');
+                    opt.value = skill.id;
+                    opt.textContent = skill.name;
+                    skillSelect.appendChild(opt);
+                });
+                skillSelect.disabled = false;
+            } else {
+                skillSelect.disabled = true;
+            }
+        }
+
+        masterCategorySelect.addEventListener('change', function(e) {
+            const category = e.target.value;
+            
+            // Reset container to just 1 row
+            const rows = container.querySelectorAll('.skill-row');
+            for (let i = 1; i < rows.length; i++) {
+                rows[i].remove();
+            }
+            
+            if (category) {
+                container.style.display = 'block';
+                btnAdd.style.display = 'inline-flex';
+                
+                const firstSkillSelect = container.querySelector('.skill-name-select');
+                populateSkillSelect(firstSkillSelect, category);
+                container.querySelector('select[name="req_level"]').selectedIndex = 0;
+            } else {
+                container.style.display = 'none';
+                btnAdd.style.display = 'none';
+            }
+            updateAddButton();
+        });
+
+        function handleRemoveSkill(e) {
+            const btn = e.target.closest('.btn-remove-skill');
+            if (!btn) return;
+            
+            const rows = container.querySelectorAll('.skill-row');
+            if (rows.length > 1) {
+                btn.closest('.skill-row').remove();
+            } else {
+                // If only one left, just clear it
+                const row = btn.closest('.skill-row');
+                row.querySelector('.skill-name-select').value = '';
+                row.querySelector('select[name="req_level"]').selectedIndex = 0;
+            }
+            updateAddButton();
+        }
+
+        function addSkillRow() {
+            const rows = container.querySelectorAll('.skill-row');
+            if (rows.length >= 3) return;
+
+            const firstRow = container.querySelector('.skill-row');
+            if (!firstRow) return;
+
+            const newRow = firstRow.cloneNode(true);
+            newRow.querySelector('.skill-name-select').value = '';
+            newRow.querySelector('select[name="req_level"]').selectedIndex = 0;
+
+            container.appendChild(newRow);
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons({ root: newRow });
+            }
+            updateAddButton();
+        }
+
+        function updateAddButton() {
+            const rows = container.querySelectorAll('.skill-row');
+            if (rows.length >= 3) {
+                btnAdd.style.display = 'none';
+                maxSkillsWarning.style.display = 'block';
+            } else if (masterCategorySelect.value) {
+                btnAdd.style.display = 'inline-flex';
+                maxSkillsWarning.style.display = 'none';
+            }
+        }
+
+        populateCategories();
+
+        container.addEventListener('click', handleRemoveSkill);
+        if (btnAdd) {
+            btnAdd.addEventListener('click', addSkillRow);
+        }
+        {% endif %}
+    });
+</script>
 {% endblock %}

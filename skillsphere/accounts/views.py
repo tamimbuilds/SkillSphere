@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -73,10 +73,13 @@ def profile_view(request):
     from interviews.models import Interview
 
     if user.role == 'candidate':
-        from skills.models import CandidateSkill, Assessment
-        skills = CandidateSkill.objects.filter(candidate=profile)
+        from skills.models import CandidateSkill, Score
+        skills = CandidateSkill.objects.filter(candidate=profile).select_related('skill')
         for s in skills:
-            s.has_assessment = Assessment.objects.filter(candidate_skill=s).exists()
+            score_qs = Score.objects.filter(user=user, candidate_skill=s).order_by('-attempt_number', '-completed_at')
+            s.latest_score = score_qs.first()
+            s.attempt_count = score_qs.count()
+            s.has_assessment = s.latest_score is not None
         total_jobs = Application.objects.filter(candidate=profile).count()
         total_interviews = Interview.objects.filter(candidate=profile).count()
     elif user.role == 'recruiter':
@@ -102,6 +105,35 @@ def candidate_profile(request):
 @login_required
 def recruiter_profile(request):
     return redirect('profile')
+
+
+@login_required
+def candidate_detail(request, pk):
+    if request.user.role != 'recruiter':
+        messages.error(request, "Only recruiters can view candidate profiles.")
+        return redirect('home')
+    
+    profile = get_object_or_404(CandidateProfile, pk=pk)
+    
+    # Fetch skills and scores
+    from skills.models import CandidateSkill, Score
+    from jobs.models import Application
+    
+    skills = CandidateSkill.objects.filter(candidate=profile).select_related('skill')
+    for s in skills:
+        score_qs = Score.objects.filter(user=profile.user, candidate_skill=s).order_by('-attempt_number', '-completed_at')
+        s.latest_score = score_qs.first()
+        s.attempt_count = score_qs.count()
+        s.has_assessment = s.latest_score is not None
+
+    applications = Application.objects.filter(candidate=profile).select_related('job', 'job__recruiter')
+    
+    context = {
+        'profile': profile,
+        'skills': skills,
+        'applications': applications,
+    }
+    return render(request, 'candidate_detail.html', context)
 
 
 @login_required

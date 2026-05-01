@@ -3,151 +3,161 @@
 {% block title %}{{ job.title }} | SkillSphere{% endblock %}
 
 {% block content %}
-<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2.5rem; align-items: start;">
-
-    <!-- ── Left Column ──────────────────────────────────── -->
-    <div class="animate-fade-in">
-
-        <!-- Back link -->
-        <a href="{% url 'job_list' %}" style="
-            display: inline-flex; align-items: center; gap: 0.5rem;
-            font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-muted);
-            text-decoration: none; margin-bottom: 2rem;
-            transition: color var(--transition);
-        " onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-muted)'">
-            <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> Back to Jobs
+<div class="animate-fade-in" style="max-width: 900px; margin: 0 auto;">
+    <!-- Breadcrumbs -->
+    <div style="margin-bottom: 2rem;">
+        <a href="{% url 'job_list' %}" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); text-decoration: none;">
+            <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> Back to Browse Jobs
         </a>
-
-        <!-- Title block -->
-        <div style="margin-bottom: 2.5rem;">
-            <h1 style="
-                font-family: var(--font-display); font-size: clamp(2rem, 4vw, 2.8rem);
-                font-weight: 700; letter-spacing: -0.02em; line-height: 1.15;
-                margin-bottom: 1.25rem;
-            ">{{ job.title }}</h1>
-
-            <div style="display: flex; flex-wrap: wrap; gap: 1.25rem;">
-                <span style="display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);font-size:0.8rem;color:var(--text-muted);">
-                    <i data-lucide="map-pin" style="width:13px;height:13px;"></i> {{ job.location }}
-                </span>
-                <span style="display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);font-size:0.8rem;color:var(--text-muted);">
-                    <i data-lucide="briefcase" style="width:13px;height:13px;"></i> Full-time
-                </span>
-                <span style="display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);font-size:0.8rem;color:var(--text-muted);">
-                    <i data-lucide="calendar" style="width:13px;height:13px;"></i> Deadline: {{ job.deadline }}
-                </span>
-                <span class="badge badge-primary">{{ job.get_status_display }}</span>
-            </div>
-        </div>
-
-        <!-- Description card -->
-        <div class="card" style="margin-bottom: 1.5rem; padding: 2rem;">
-            <h3 style="
-                font-family: var(--font-mono); font-size: 0.72rem;
-                text-transform: uppercase; letter-spacing: 0.1em;
-                color: var(--text-muted); margin-bottom: 1.25rem;
-            ">Job Description</h3>
-            <div style="color: var(--text-muted); line-height: 1.9; font-family: var(--font-sans); font-size: 0.92rem;">
-                {{ job.description|linebreaks }}
-            </div>
-        </div>
-
-        <!-- Requirements card -->
-        <div class="card" style="padding: 2rem;">
-            <h3 style="
-                font-family: var(--font-mono); font-size: 0.72rem;
-                text-transform: uppercase; letter-spacing: 0.1em;
-                color: var(--text-muted); margin-bottom: 1.5rem;
-            ">Requirements</h3>
-            <ul style="list-style: none; display: flex; flex-direction: column; gap: 1rem;">
-                <li style="display: flex; align-items: center; gap: 1rem;">
-                    <div style="width: 28px; height: 28px; background: var(--surface-3); border: 1px solid var(--border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--accent);">
-                        <i data-lucide="star" style="width:12px;height:12px;"></i>
-                    </div>
-                    <div>
-                        <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em;">Min CGPA</span>
-                        <div style="font-family: var(--font-mono); font-size: 0.95rem; font-weight: 700; margin-top: 0.1rem;">{{ job.required_cgpa }}</div>
-                    </div>
-                </li>
-                <li style="height: 1px; background: var(--border);"></li>
-                <li style="display: flex; align-items: center; gap: 1rem;">
-                    <div style="width: 28px; height: 28px; background: var(--surface-3); border: 1px solid var(--border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--success);">
-                        <i data-lucide="clock" style="width:12px;height:12px;"></i>
-                    </div>
-                    <div>
-                        <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em;">Experience</span>
-                        <div style="font-family: var(--font-mono); font-size: 0.95rem; font-weight: 700; margin-top: 0.1rem;">{{ job.required_experience }} year{{ job.required_experience|pluralize }}</div>
-                    </div>
-                </li>
-            </ul>
-        </div>
     </div>
 
-    <!-- ── Right Sidebar ─────────────────────────────────── -->
-    <div class="animate-fade-in delay-2">
-        <div class="card" style="position: sticky; top: 84px; padding: 2rem; box-shadow: var(--shadow-lg);">
-
-            <!-- Salary -->
-            <div style="margin-bottom: 1.75rem; padding-bottom: 1.75rem; border-bottom: 1px solid var(--border);">
-                <div style="font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 0.4rem;">Salary Range</div>
-                <div style="font-family: var(--font-display); font-size: 1.6rem; font-weight: 700; color: var(--text);">
-                    {{ job.salary_range }}
+    <div style="display: grid; grid-template-columns: 1fr 320px; gap: 2rem; align-items: start;">
+        
+        <!-- Main Content -->
+        <div style="display: flex; flex-direction: column; gap: 2rem;">
+            <div class="card glass" style="padding: 2.5rem; border-radius: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem;">
+                    <div>
+                        <span class="badge badge-primary" style="margin-bottom: 0.75rem;">{{ job.get_status_display|upper }}</span>
+                        <h1 style="font-family: var(--font-display); font-size: 2.4rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1;">{{ job.title }}</h1>
+                        <p style="font-size: 1.1rem; color: var(--accent); font-weight: 500; margin-top: 0.5rem;">{{ job.recruiter.company_name }}</p>
+                    </div>
+                    {% if request.user.role == 'recruiter' and request.user.recruiter_profile == job.recruiter %}
+                    <div style="display: flex; gap: 0.75rem;">
+                        <a href="{% url 'job_skill_manage' job.pk %}" class="btn btn-outline" style="border-radius: 12px; padding: 0.6rem 1.2rem; color: var(--accent); border-color: var(--accent);">
+                            <i data-lucide="list-checks" style="width:14px;height:14px;"></i> Required Skills
+                        </a>
+                        <a href="{% url 'job_edit' job.pk %}" class="btn btn-outline" style="border-radius: 12px; padding: 0.6rem 1.2rem;">
+                            <i data-lucide="edit-3" style="width:14px;height:14px;"></i> Edit Job
+                        </a>
+                    </div>
+                    {% endif %}
                 </div>
-            </div>
 
-            <!-- Recruiter -->
-            <div style="margin-bottom: 1.75rem; padding-bottom: 1.75rem; border-bottom: 1px solid var(--border);">
-                <div style="font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 0.5rem;">Posted by</div>
-                <div style="font-family: var(--font-mono); font-size: 0.9rem; font-weight: 700;">
-                    {{ job.recruiter.user.get_full_name|default:job.recruiter.user.username }}
-                </div>
-            </div>
-
-            <!-- CTA -->
-            {% if user.role == 'candidate' %}
-                {% if has_applied %}
-                    <button class="btn" style="
-                        width: 100%; padding: 0.85rem; cursor: default;
-                        background: rgba(26,122,74,0.06);
-                        border: 1px solid rgba(26,122,74,0.20);
-                        color: var(--success); font-size: 0.82rem;
-                    " disabled>
-                        <i data-lucide="check-circle" style="width:14px;height:14px;"></i>
-                        Already Applied
-                    </button>
-                {% else %}
-                    <a href="{% url 'apply_job' job.pk %}" class="btn btn-primary" style="width: 100%; padding: 0.85rem; font-size: 0.82rem;">
-                        Apply for this Job →
+                {% if request.user.role == 'recruiter' and request.user.recruiter_profile == job.recruiter %}
+                {% with skill_count=job.skill_requirements.count %}
+                {% if skill_count == 0 %}
+                <div style="margin-bottom: 1.5rem; padding: 1rem 1.25rem; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); border-radius: 12px; display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem; color: #f59e0b; font-size: 0.85rem;">
+                        <i data-lucide="alert-triangle" style="width:16px;height:16px; flex-shrink:0;"></i>
+                        <span>No required skills set — candidates will receive a <strong>0.0 match score</strong> until you add skill requirements.</span>
+                    </div>
+                    <a href="{% url 'job_skill_manage' job.pk %}" class="btn btn-sm" style="font-size: 0.75rem; border-radius: 8px; background: rgba(245,158,11,0.2); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); white-space: nowrap;">
+                        Add Skills Now
                     </a>
+                </div>
                 {% endif %}
-            {% elif not user.is_authenticated %}
-                <a href="{% url 'login' %}" class="btn btn-primary" style="width: 100%; padding: 0.85rem; font-size: 0.82rem;">
-                    Login to Apply →
-                </a>
-            {% else %}
-                <button class="btn btn-outline" style="width: 100%; padding: 0.85rem; font-size: 0.82rem; opacity: 0.5; cursor: not-allowed;" disabled>
-                    Only candidates can apply
-                </button>
+                {% endwith %}
+                {% endif %}
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; padding: 1.5rem; background: rgba(255,255,255,0.03); border-radius: 16px; border: 1px solid var(--border);">
+                    <div style="display: flex; flex-direction: column; gap: 0.3rem;">
+                        <span style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Location</span>
+                        <span style="font-weight: 600; display: flex; align-items: center; gap: 0.4rem;">
+                            <i data-lucide="map-pin" style="width:14px;height:14px; color: var(--accent);"></i> {{ job.location }}
+                        </span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 0.3rem;">
+                        <span style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Salary Range</span>
+                        <span style="font-weight: 600; display: flex; align-items: center; gap: 0.4rem;">
+                            <i data-lucide="banknote" style="width:14px;height:14px; color: var(--success);"></i> {{ job.salary_range }}
+                        </span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 0.3rem;">
+                        <span style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Experience</span>
+                        <span style="font-weight: 600; display: flex; align-items: center; gap: 0.4rem;">
+                            <i data-lucide="briefcase" style="width:14px;height:14px; color: var(--accent-2);"></i> {{ job.required_experience }}+ Years
+                        </span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 0.3rem;">
+                        <span style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Min. CGPA</span>
+                        <span style="font-weight: 600; display: flex; align-items: center; gap: 0.4rem;">
+                            <i data-lucide="graduation-cap" style="width:14px;height:14px; color: var(--accent);"></i> {{ job.required_cgpa }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="prose">
+                    <h3 style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; margin-bottom: 1rem;">Job Description</h3>
+                    <div style="color: var(--text-subtle); line-height: 1.7; font-size: 1.05rem; white-space: pre-wrap;">{{ job.description }}</div>
+                </div>
+                
+                <hr style="margin: 2.5rem 0; border: none; border-top: 1px solid var(--border);">
+
+                <div class="prose">
+                    <h3 style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; margin-bottom: 1rem;">Required Skills</h3>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+                        {% for req in job.skill_requirements.all %}
+                        <span class="badge" style="background: rgba(165,243,252,0.1); color: var(--accent); border: 1px solid rgba(165,243,252,0.2); padding: 0.5rem 1rem; border-radius: 12px; font-weight: 600;">
+                            {{ req.skill.skill_name }} • {{ req.get_required_level_display }}
+                        </span>
+                        {% empty %}
+                        <p style="color: var(--text-muted); font-style: italic;">No specific skills listed.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Actions -->
+        <aside style="display: flex; flex-direction: column; gap: 1.5rem; position: sticky; top: 2rem;">
+            
+            {% if request.user.role == 'candidate' %}
+                <div class="card glass" style="padding: 1.5rem; border-radius: 20px;">
+                    {% if has_applied %}
+                        <div style="text-align: center;">
+                            <div style="background: rgba(34,197,94,0.1); color: var(--success); padding: 0.75rem; border-radius: 12px; font-size: 0.85rem; font-weight: 600; margin-bottom: 1rem;">
+                                <i data-lucide="check-circle" style="width:16px;height:16px;vertical-align:middle;margin-right:0.3rem;"></i> You have applied
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                <a href="{% url 'job_analysis' job.pk %}" target="_blank" class="btn btn-outline btn-sm" style="width: 100%; border-radius: 12px; color: var(--accent); border-color: var(--accent);">
+                                    <i data-lucide="bar-chart-2" style="width:14px;height:14px;"></i> View Match Analysis
+                                </a>
+                                <a href="{% url 'my_applications' %}" class="btn btn-secondary btn-sm" style="width: 100%; border-radius: 12px;">
+                                    My Applications
+                                </a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'apply_job' job.pk %}" class="btn btn-primary" style="width: 100%; border-radius: 12px;">
+                            Apply for this Position
+                        </a>
+                    {% endif %}
+                </div>
             {% endif %}
 
-            <div style="margin-top: 1rem; text-align: center;">
-                <a href="{% url 'job_list' %}" style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); text-decoration: none;">
-                    ← View all jobs
-                </a>
+            <!-- Company Info Card -->
+            <div class="card glass" style="padding: 1.5rem; border-radius: 20px;">
+                <h4 style="font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem;">About Company</h4>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <div style="width: 40px; height: 40px; background: var(--surface-2); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--accent);">
+                            <i data-lucide="building" style="width:20px;height:20px;"></i>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.9rem; font-weight: 600;">{{ job.recruiter.company_name }}</div>
+                            <div style="font-size: 0.7rem; color: var(--text-muted);">{{ job.recruiter.industry_type }}</div>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-subtle); line-height: 1.5;">{{ job.recruiter.company_address }}</p>
+                    <a href="{{ job.recruiter.company_website }}" target="_blank" style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent); text-decoration: none; display: flex; align-items: center; gap: 0.4rem;">
+                        Visit Website <i data-lucide="external-link" style="width:12px;height:12px;"></i>
+                    </a>
+                </div>
             </div>
-        </div>
+
+            <!-- Meta info -->
+            <div style="padding: 0 0.5rem; font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 0.5rem;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Posted At</span>
+                    <span>{{ job.posted_at|date:"M d, Y" }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Application Deadline</span>
+                    <span style="color: var(--danger);">{{ job.deadline|date:"M d, Y" }}</span>
+                </div>
+            </div>
+        </aside>
     </div>
-
 </div>
-
-<style>
-    @media (max-width: 900px) {
-        div[style*="grid-template-columns: 2fr 1fr"] {
-            grid-template-columns: 1fr !important;
-        }
-        div.card.glass[style*="position: sticky"] {
-            position: static !important;
-        }
-    }
-</style>
-{% endblock %}
+{% endblock %}

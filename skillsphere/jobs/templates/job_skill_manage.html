@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Required Skills — {{ job.title }} | SkillSphere{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in" style="max-width: 800px; margin: 0 auto;">
+
+    <!-- Header -->
+    <div style="margin-bottom: 2.5rem;">
+        <a href="{% url 'job_detail' job.pk %}" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); text-decoration: none; margin-bottom: 1rem;">
+            <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> Back to Job Post
+        </a>
+        <h1 style="font-family: var(--font-display); font-size: 2rem; font-weight: 700; letter-spacing: -0.02em;">Required Skills</h1>
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.4rem;">
+            Define the skills candidates need for <strong>{{ job.title }}</strong>. 
+            Match scores are calculated based on these requirements.
+        </p>
+
+        {% if not existing %}
+        <div style="margin-top: 1rem; padding: 1rem 1.25rem; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); border-radius: 12px; display: flex; align-items: center; gap: 0.75rem; color: #f59e0b; font-size: 0.85rem;">
+            <i data-lucide="alert-triangle" style="width:16px;height:16px; flex-shrink:0;"></i>
+            <span>No required skills added yet. Candidates will receive a <strong>0.0 match score</strong> until you add at least one skill.</span>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Existing Required Skills -->
+    {% if existing %}
+    <div class="card glass" style="padding: 1.5rem; border-radius: 20px; margin-bottom: 2rem;">
+        <h3 style="font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i data-lucide="check-circle" style="width:16px;height:16px;color:var(--success);"></i> Current Requirements ({{ existing|length }})
+        </h3>
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            {% for req in existing %}
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px;">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="width: 36px; height: 36px; background: rgba(165,243,252,0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                        <i data-lucide="code-2" style="width:16px;height:16px;color:var(--accent);"></i>
+                    </div>
+                    <div>
+                        <div style="font-weight: 600; font-size: 0.95rem;">{{ req.skill.skill_name }}</div>
+                        <div style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted);">
+                            {{ req.skill.get_category_display }} · Level: <span style="color: var(--accent);">{{ req.get_required_level_display }}</span>
+                        </div>
+                    </div>
+                </div>
+                <form method="POST" action="{% url 'job_skill_delete' job.pk req.pk %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #ef4444; padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 0.4rem;" onclick="return confirm('Remove this skill requirement?')">
+                        <i data-lucide="trash-2" style="width:12px;height:12px;"></i> Remove
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Add New Skill Requirement -->
+    {% if all_skills %}
+    <div class="card glass" style="padding: 1.5rem; border-radius: 20px; margin-bottom: 2rem;">
+        <h3 style="font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i data-lucide="plus-circle" style="width:16px;height:16px;color:var(--accent);"></i> Add Required Skill
+        </h3>
+        <form method="POST">
+            {% csrf_token %}
+            <div style="display: grid; grid-template-columns: 1fr 180px auto; gap: 1rem; align-items: end;">
+                <div>
+                    <label style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 0.4rem;">Skill</label>
+                    <select name="skill_id" required style="width: 100%; padding: 0.65rem 0.9rem; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 0.9rem;">
+                        <option value="">— Select a skill —</option>
+                        {% regroup all_skills by get_category_display as skill_groups %}
+                        {% for group in skill_groups %}
+                        <optgroup label="{{ group.grouper }}">
+                            {% for skill in group.list %}
+                            <option value="{{ skill.pk }}">{{ skill.skill_name }}</option>
+                            {% endfor %}
+                        </optgroup>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 0.4rem;">Required Level</label>
+                    <select name="required_level" style="width: 100%; padding: 0.65rem 0.9rem; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 0.9rem;">
+                        {% for val, label in level_choices %}
+                        <option value="{{ val }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary" style="padding: 0.65rem 1.2rem; border-radius: 10px; white-space: nowrap;">
+                    <i data-lucide="plus" style="width:14px;height:14px;"></i> Add
+                </button>
+            </div>
+        </form>
+    </div>
+    {% else %}
+    <div class="card glass" style="padding: 1.5rem; border-radius: 20px; margin-bottom: 2rem; text-align: center; color: var(--text-muted);">
+        All available skills have been added as requirements.
+    </div>
+    {% endif %}
+
+    <!-- Done / Preview -->
+    <div style="display: flex; gap: 1rem;">
+        <a href="{% url 'job_detail' job.pk %}" class="btn btn-primary" style="border-radius: 12px;">
+            <i data-lucide="check" style="width:16px;height:16px;"></i> Done — View Job Post
+        </a>
+        {% if existing %}
+        <a href="{% url 'job_applicants' job.pk %}" class="btn btn-outline" style="border-radius: 12px;">
+            View Applicants
+        </a>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

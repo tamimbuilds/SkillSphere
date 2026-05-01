@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Applicants for {{ job.title }} | SkillSphere{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in">
+    <!-- Header -->
+    <div style="margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <a href="{% url 'dashboard' %}" style="display: flex; align-items: center; gap: 0.5rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); text-decoration: none; margin-bottom: 1rem;">
+                <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> Back to Dashboard
+            </a>
+            <h1 style="font-family: var(--font-display); font-size: 2.4rem; font-weight: 700; letter-spacing: -0.02em;">Applicants</h1>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.4rem;">{{ total_count }} people applied for <strong>{{ job.title }}</strong></p>
+        </div>
+        
+        <!-- Summary Stats -->
+        <div style="display: flex; gap: 1.5rem;">
+            <div class="card glass" style="padding: 0.75rem 1.25rem; border-radius: 12px; text-align: center;">
+                <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Avg. Match</div>
+                <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent);">
+                    {{ avg_score }}
+                </div>
+            </div>
+            <div class="card glass" style="padding: 0.75rem 1.25rem; border-radius: 12px; text-align: center; border-bottom: 2px solid var(--success);">
+                <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Qualified</div>
+                <div style="font-size: 1.25rem; font-weight: 700; color: var(--success);">
+                    {{ qualified_count }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Applicants List -->
+    <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
+        {% for app in applicants %}
+        <div class="card glass" style="padding: 1.5rem; display: flex; align-items: center; gap: 2rem; transition: transform 0.2s ease; border-radius: 16px;">
+            <!-- Candidate Info -->
+            <div style="flex-grow: 1;">
+                <h3 style="font-size: 1.15rem; font-weight: 600; margin-bottom: 0.4rem;">{{ app.candidate.full_name }}</h3>
+                <div style="display: flex; gap: 1.25rem; flex-wrap: wrap;">
+                    <span style="display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);">
+                        <i data-lucide="graduation-cap" style="width:13px;height:13px;"></i> {{ app.candidate.university }}
+                    </span>
+                    <span style="display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);">
+                        <i data-lucide="award" style="width:13px;height:13px;"></i> CGPA: {{ app.candidate.cgpa }}
+                    </span>
+                    <span style="display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);">
+                        <i data-lucide="calendar" style="width:13px;height:13px;"></i> Applied: {{ app.applied_at|date:"M d, Y" }}
+                    </span>
+                    <span style="display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);font-size:0.75rem; font-weight: 600; color: {% if app.match_score >= 8 %}var(--success){% elif app.match_score >= 5 %}var(--accent){% else %}var(--danger){% endif %};">
+                        <i data-lucide="bar-chart-2" style="width:13px;height:13px;"></i> Match: {{ app.match_score|floatformat:1 }} / 10
+                    </span>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div style="flex-shrink: 0; display: flex; gap: 0.75rem;">
+                <a href="{% url 'candidate_detail' app.candidate.pk %}" class="btn btn-outline btn-sm" style="font-size: 0.75rem; border-radius: 8px;">View Profile</a>
+                <button class="btn btn-primary btn-sm" style="font-size: 0.75rem; border-radius: 8px;">Invite to Interview</button>
+            </div>
+        </div>
+        {% empty %}
+        <div class="card glass" style="padding: 4rem; text-align: center; border-radius: 20px;">
+            <i data-lucide="users" style="width:40px;height:40px;color:var(--text-muted);margin-bottom:1rem;opacity:0.3;"></i>
+            <h3 style="color:var(--text-muted);font-weight:500; font-family: var(--font-display);">
+                No applications yet
+            </h3>
+            <p style="color: var(--text-subtle); font-size: 0.9rem; margin-top: 0.5rem;">
+                Applications will appear here once candidates apply.
+            </p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

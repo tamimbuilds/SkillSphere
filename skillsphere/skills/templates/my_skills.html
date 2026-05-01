@@ -80,8 +80,20 @@
             <div style="margin-bottom: 1.5rem;">
                 {% if s.has_assessment %}
                     <span style="display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);font-size:0.75rem;color:var(--success);">
-                        <i data-lucide="check-circle" style="width:12px;height:12px;"></i> Verified by Assessment
+                        <i data-lucide="check-circle" style="width:12px;height:12px;"></i> Assessed
                     </span>
+                    <div style="margin-top:0.6rem;font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);">
+                        Score: <strong style="color:var(--text);">{{ s.latest_score.correct_answers }}/{{ s.latest_score.total_questions }}</strong>
+                        ({{ s.latest_score.score }}%)
+                        {% if s.latest_score.passed %}
+                            <span style="color:var(--success);">• Passed</span>
+                        {% else %}
+                            <span style="color:var(--danger);">• Failed</span>
+                        {% endif %}
+                    </div>
+                    <div style="margin-top:0.35rem;font-family:var(--font-mono);font-size:0.72rem;color:var(--text-muted);">
+                        Attempt {{ s.latest_score.attempt_number }}/3 • Set {{ s.latest_score.question_set_number }}
+                    </div>
                 {% else %}
                     <span style="display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);font-size:0.75rem;color:var(--warning);">
                         <i data-lucide="alert-circle" style="width:12px;height:12px;"></i> No Assessment Taken
@@ -91,10 +103,14 @@
 
             <!-- Actions -->
             <div style="display: flex; gap: 0.75rem; margin-top: auto; padding-top: 1.25rem; border-top: 1px solid var(--border);">
-                {% if not s.has_assessment %}
+                {% if s.can_retry %}
                     <a href="{% url 'add_assessment' s.pk %}" class="btn btn-primary" style="flex: 2; font-size: 0.75rem; padding: 0.5rem 0.75rem;">
-                        Take Assessment
+                        {% if s.has_assessment %}Try Next Set{% else %}Take Assessment{% endif %}
                     </a>
+                {% else %}
+                    <div class="btn btn-outline" style="flex: 2; font-size: 0.75rem; padding: 0.5rem 0.75rem; text-align:center; opacity:0.7; pointer-events:none;">
+                        {% if s.latest_score and s.latest_score.passed %}Assessment Passed{% else %}No Attempts Left{% endif %}
+                    </div>
                 {% endif %}
                 <form action="{% url 'delete_candidate_skill' s.pk %}" method="POST" style="flex: 1;">
                     {% csrf_token %}
