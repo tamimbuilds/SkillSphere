@@ -8,6 +8,7 @@
             {% if user.role == 'candidate' %}
                 <li><a href="{% url 'my_skills' %}">Skills</a></li>
                 <li><a href="{% url 'interview_list' %}">Interviews</a></li>
+                <li><a href="{% url 'notifications' %}">Notifications</a></li>
             {% elif user.role == 'recruiter' %}
                 <li><a href="{% url 'interviewer_list' %}">Interviewers</a></li>
             {% endif %}
