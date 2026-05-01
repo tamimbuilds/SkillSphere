@@ -3,8 +3,6 @@
 {% block title %}Interviews | SkillSphere{% endblock %}
 
 {% block content %}
-
-<!-- Page header -->
 <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3rem; flex-wrap: wrap; gap: 1rem;">
     <div>
         <span style="font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted);">Pipeline</span>
@@ -22,14 +20,15 @@
     {% endif %}
 </div>
 
-<!-- Table card -->
 <div class="card glass animate-fade-in" style="padding: 0; overflow: hidden;">
     {% if interviews %}
     <div style="overflow-x: auto;">
         <table style="width: 100%; border-collapse: collapse; text-align: left;">
             <thead>
                 <tr style="border-bottom: 1px solid var(--border);">
-                    <th style="padding: 1rem 1.5rem; font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700;">Candidate</th>
+                    <th style="padding: 1rem 1.5rem; font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700;">
+                        {% if user.role == 'candidate' %}Company{% else %}Candidate{% endif %}
+                    </th>
                     <th style="padding: 1rem 1.5rem; font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700;">Position</th>
                     <th style="padding: 1rem 1.5rem; font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700;">Type</th>
                     <th style="padding: 1rem 1.5rem; font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700;">Date &amp; Time</th>
@@ -43,7 +42,12 @@
                     onmouseover="this.style.background='var(--surface-3)'"
                     onmouseout="this.style.background='transparent'">
                     <td style="padding: 1.1rem 1.5rem;">
+                        {% if user.role == 'candidate' %}
+                        <span style="font-family: var(--font-mono); font-size: 0.88rem; font-weight: 700;">{{ interview.job.recruiter.company_name }}</span>
+                        <span style="font-family: var(--font-sans); font-size: 0.78rem; color: var(--text-subtle); display: block;">Sent by {{ interview.job.recruiter.recruiter_name }}</span>
+                        {% else %}
                         <span style="font-family: var(--font-mono); font-size: 0.88rem; font-weight: 700;">{{ interview.candidate }}</span>
+                        {% endif %}
                     </td>
                     <td style="padding: 1.1rem 1.5rem;">
                         <span style="font-family: var(--font-sans); font-size: 0.88rem; color: var(--text-muted);">{{ interview.job.title }}</span>
@@ -53,7 +57,7 @@
                     </td>
                     <td style="padding: 1.1rem 1.5rem;">
                         <span style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--text-muted);">{{ interview.scheduled_date|date:"M d, Y" }}</span>
-                        <span style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-subtle); display: block;">{{ interview.scheduled_date|date:"H:i" }}</span>
+                        <span style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-subtle); display: block;">{{ interview.scheduled_time }}</span>
                     </td>
                     <td style="padding: 1.1rem 1.5rem;">
                         {% if interview.status == 'scheduled' %}
@@ -68,7 +72,7 @@
                     </td>
                     <td style="padding: 1.1rem 1.5rem;">
                         <a href="{% url 'interview_detail' interview.pk %}" class="btn btn-outline" style="padding: 0.38rem 0.9rem; font-size: 0.72rem;">
-                            View →
+                            View
                         </a>
                     </td>
                 </tr>
@@ -86,5 +90,4 @@
     </div>
     {% endif %}
 </div>
-
 {% endblock %}

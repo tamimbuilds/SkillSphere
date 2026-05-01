@@ -4,8 +4,6 @@
 
 {% block content %}
 <div style="max-width: 700px; margin: 0 auto;">
-
-    <!-- Back link -->
     <a href="{% url 'interview_list' %}" style="
         display: inline-flex; align-items: center; gap: 0.4rem;
         font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase;
@@ -15,15 +13,14 @@
         <i data-lucide="arrow-left" style="width:13px;height:13px;"></i> Interview Pipeline
     </a>
 
-    <!-- Header card -->
     <div class="card glass animate-fade-in" style="padding: 2.5rem; margin-bottom: 1.5rem;">
-        <!-- Accent stripe -->
         <div style="height:2px;background:linear-gradient(90deg,var(--accent),transparent);margin:-2.5rem -2.5rem 2rem;border-radius:var(--radius-xl) var(--radius-xl) 0 0;"></div>
 
         <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;margin-bottom:2rem;">
             <div>
-                <span style="font-family:var(--font-mono);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);">Interview — Round {{ interview.round_number }}</span>
-                <h1 style="font-family:var(--font-mono);font-size:1.6rem;font-weight:700;letter-spacing:-0.02em;margin-top:0.4rem;">{{ interview.job }}</h1>
+                <span style="font-family:var(--font-mono);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);">Interview Invitation</span>
+                <h1 style="font-family:var(--font-mono);font-size:1.6rem;font-weight:700;letter-spacing:-0.02em;margin-top:0.4rem;">{{ interview.job.title }}</h1>
+                <p style="margin-top:0.5rem;color:var(--text-muted);font-size:0.9rem;">{{ interview.job.recruiter.company_name }}</p>
             </div>
             {% if interview.status == 'scheduled' %}
                 <span class="badge badge-primary">Scheduled</span>
@@ -36,20 +33,38 @@
             {% endif %}
         </div>
 
-        <!-- Detail rows -->
         <div style="display:flex;flex-direction:column;gap:0;">
             {% include "interviews/_detail_row.html" with icon="user" label="Candidate" value=interview.candidate %}
-            {% include "interviews/_detail_row.html" with icon="briefcase" label="Interviewer" value=interview.interviewer %}
-            {% include "interviews/_detail_row.html" with icon="layers" label="Type" value=interview.interview_type %}
-            {% include "interviews/_detail_row.html" with icon="calendar" label="Scheduled" value=interview.scheduled_date|date:"M d, Y — H:i" %}
+            {% include "interviews/_detail_row.html" with icon="briefcase" label="Sent by" value=interview.job.recruiter.recruiter_name %}
+            {% include "interviews/_detail_row.html" with icon="building-2" label="Company" value=interview.job.recruiter.company_name %}
+            {% include "interviews/_detail_row.html" with icon="calendar" label="Interview on" value=interview.scheduled_date|date:"M d, Y" %}
+            {% include "interviews/_detail_row.html" with icon="clock-3" label="Interview time" value=interview.scheduled_time %}
+            {% include "interviews/_detail_row.html" with icon="send" label="Invitation sent" value=interview.created_at|date:"M d, Y H:i" %}
         </div>
+
+        {% if interview.welcome_message %}
+        <div style="margin-top:1.5rem;padding:1rem 1.25rem;background:var(--surface-3);border-radius:var(--radius-sm);border:1px solid var(--border);">
+            <div style="font-family:var(--font-mono);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:0.55rem;">Welcome Message</div>
+            <div style="font-size:0.9rem;line-height:1.65;color:var(--text);white-space:pre-line;">{{ interview.welcome_message }}</div>
+        </div>
+        {% endif %}
 
         {% if interview.location %}
         <div style="margin-top:1.5rem;padding:1rem 1.25rem;background:var(--surface-3);border-radius:var(--radius-sm);border:1px solid var(--border);display:flex;gap:0.75rem;align-items:flex-start;">
             <i data-lucide="map-pin" style="width:14px;height:14px;color:var(--text-muted);flex-shrink:0;margin-top:0.1rem;"></i>
             <div>
-                <div style="font-family:var(--font-mono);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:0.3rem;">Location</div>
+                <div style="font-family:var(--font-mono);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:0.3rem;">Venue</div>
                 <div style="font-family:var(--font-sans);font-size:0.88rem;color:var(--text);">{{ interview.location }}</div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if interview.contact_details %}
+        <div style="margin-top:0.75rem;padding:1rem 1.25rem;background:var(--surface-3);border-radius:var(--radius-sm);border:1px solid var(--border);display:flex;gap:0.75rem;align-items:flex-start;">
+            <i data-lucide="phone" style="width:14px;height:14px;color:var(--accent);flex-shrink:0;margin-top:0.1rem;"></i>
+            <div>
+                <div style="font-family:var(--font-mono);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:0.3rem;">Contact Details</div>
+                <div style="font-family:var(--font-sans);font-size:0.88rem;color:var(--text);white-space:pre-line;">{{ interview.contact_details }}</div>
             </div>
         </div>
         {% endif %}
@@ -67,12 +82,12 @@
         {% endif %}
     </div>
 
-    <!-- Feedback CTA -->
     <div style="text-align:center;">
+        {% if user.role == 'recruiter' %}
         <a href="{% url 'submit_feedback' interview.id %}" class="btn btn-primary" style="padding:0.85rem 2.5rem;font-size:0.85rem;">
-            Submit Feedback →
+            Submit Feedback
         </a>
+        {% endif %}
     </div>
-
 </div>
 {% endblock %}

@@ -60,12 +60,9 @@
             <div style="flex-shrink: 0; display: flex; gap: 0.75rem;">
                 <a href="{% url 'candidate_detail' app.candidate.pk %}" class="btn btn-outline btn-sm" style="font-size: 0.75rem; border-radius: 8px;">View Profile</a>
                 {% if app.match_score >= interview_threshold %}
-                <form method="POST" action="{% url 'call_for_interview' app.pk %}" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-primary btn-sm" style="font-size: 0.75rem; border-radius: 8px;">
-                        <i data-lucide="calendar-check" style="width:12px;height:12px;"></i> Call for Interview
-                    </button>
-                </form>
+                <a href="{% url 'call_for_interview' app.pk %}" class="btn btn-primary btn-sm" style="font-size: 0.75rem; border-radius: 8px;">
+                    <i data-lucide="calendar-check" style="width:12px;height:12px;"></i> Call for Interview
+                </a>
                 {% else %}
                 <button class="btn btn-outline btn-sm" disabled title="Match score must be 8.0 or higher" style="font-size: 0.75rem; border-radius: 8px; opacity: 0.45; cursor: not-allowed;">
                     <i data-lucide="lock" style="width:12px;height:12px;"></i> Score Below 8
