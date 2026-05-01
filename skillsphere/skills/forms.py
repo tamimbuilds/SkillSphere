@@ -1,5 +1,5 @@
 from django import forms
-from .models import Skill, CandidateSkill, Certificate, Assessment, JobSkillRequirement
+from .models import Skill, CandidateSkill, Certificate, JobSkillRequirement
 
 
 class SkillForm(forms.ModelForm):
@@ -44,20 +44,8 @@ class CertificateForm(forms.ModelForm):
             'verified_by_admin'
         ]
 
-
-class AssessmentForm(forms.ModelForm):
-    class Meta:
-        model = Assessment
-        fields = [
-            'test_type',
-            'score',
-            'passed',
-            'attempt_time',
-            'total_questions'
-        ]
-
-
 class JobSkillRequirementForm(forms.ModelForm):
     class Meta:
         model = JobSkillRequirement
         fields = ['job', 'skill', 'required_level', 'is_mandatory']
+

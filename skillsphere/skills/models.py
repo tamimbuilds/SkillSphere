@@ -1,4 +1,6 @@
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.conf import settings
 from accounts.models import CandidateProfile
 from jobs.models import JobPost
 
@@ -13,6 +15,8 @@ class Skill(models.Model):
         ('devops', 'DevOps'),
         ('fullstack', 'Fullstack'),
         ('ui_ux', 'UI/UX Design'),
+        ('mobile', 'Mobile Development'),
+        ('data_science', 'Data Science'),
     ]
     skill_name = models.CharField(max_length=100)
     category = models.CharField(max_length=100, choices=SECTOR_CHOICES)
@@ -20,6 +24,59 @@ class Skill(models.Model):
 
     def __str__(self):
         return f"{self.skill_name} ({self.get_category_display()})"
+
+
+class Question(models.Model):
+    OPTION_CHOICES = [
+        ('A', 'Option A'),
+        ('B', 'Option B'),
+        ('C', 'Option C'),
+        ('D', 'Option D'),
+    ]
+
+    skill = models.ForeignKey(Skill, on_delete=models.CASCADE, related_name='questions', null=True, blank=True)
+    sector = models.CharField(max_length=100, choices=Skill.SECTOR_CHOICES)
+    set_number = models.PositiveSmallIntegerField(default=1)
+    question_order = models.PositiveSmallIntegerField(default=1)
+    question_text = models.TextField()
+    option_a = models.CharField(max_length=255)
+    option_b = models.CharField(max_length=255)
+    option_c = models.CharField(max_length=255)
+    option_d = models.CharField(max_length=255)
+    correct_option = models.CharField(max_length=1, choices=OPTION_CHOICES)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['sector', 'skill_id', 'set_number', 'question_order', 'id']
+        unique_together = ('skill', 'set_number', 'question_order')
+
+    def clean(self):
+        super().clean()
+        if self.skill_id:
+            if self.skill.category != self.sector:
+                raise ValidationError("Question sector must match the linked skill sector.")
+            if not 1 <= self.set_number <= 3:
+                raise ValidationError("Each skill can only have question sets 1 to 3.")
+            if not 1 <= self.question_order <= 10:
+                raise ValidationError("Each question set can only have question order 1 to 10.")
+
+            existing = Question.objects.filter(skill=self.skill, set_number=self.set_number)
+            if self.pk:
+                existing = existing.exclude(pk=self.pk)
+            if existing.count() >= 10:
+                raise ValidationError("Each skill set can have a maximum of 10 questions.")
+
+    def save(self, *args, **kwargs):
+        if self.skill_id:
+            self.sector = self.skill.category
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        if self.skill_id:
+            return f"{self.skill.skill_name} - Set {self.set_number} - Q{self.question_order}"
+        return f"{self.get_sector_display()} - Q{self.pk or 'new'}"
 
 class CandidateSkill(models.Model):
     PROFICIENCY_CHOICES = [
@@ -86,16 +143,39 @@ class Certificate(models.Model):
         return self.title
 
 class Assessment(models.Model):
-    candidate_skill = models.ForeignKey(CandidateSkill, on_delete=models.CASCADE)
-    test_type = models.CharField(max_length=100)
-    score = models.FloatField()
-    passed = models.BooleanField(default=False)
-    attempt_time = models.IntegerField()
-    total_questions = models.IntegerField()
-    attempt_date = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='assessments')
+    candidate_skill = models.ForeignKey(CandidateSkill, on_delete=models.CASCADE, related_name='assessments')
+    score_record = models.ForeignKey('Score', on_delete=models.CASCADE, related_name='answers', null=True, blank=True)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='assessments')
+    user_answer = models.CharField(max_length=1, choices=Question.OPTION_CHOICES)
+    is_correct = models.BooleanField(default=False)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('score_record', 'question')
+        ordering = ['candidate_skill', 'question_id']
 
     def __str__(self):
-        return f"{self.candidate_skill} - {self.score}"
+        return f"{self.user} - {self.candidate_skill.skill.skill_name} - Q{self.question_id}"
+
+
+class Score(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='scores')
+    candidate_skill = models.ForeignKey(CandidateSkill, on_delete=models.CASCADE, related_name='scores')
+    attempt_number = models.PositiveSmallIntegerField(default=1)
+    question_set_number = models.PositiveSmallIntegerField(default=1)
+    total_questions = models.PositiveIntegerField(default=0)
+    correct_answers = models.PositiveIntegerField(default=0)
+    score = models.FloatField(help_text='Percentage score')
+    passed = models.BooleanField(default=False)
+    completed_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('user', 'candidate_skill', 'attempt_number')
+        ordering = ['-completed_at']
+
+    def __str__(self):
+        return f"{self.user} - {self.candidate_skill.skill.skill_name} - Attempt {self.attempt_number} - {self.score}%"
 
 class JobSkillRequirement(models.Model):
     LEVEL = [

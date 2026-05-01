@@ -17,6 +17,10 @@ class JobPost(models.Model):
     def __str__(self):
         return self.title
 
+    @property
+    def qualified_applicants_count(self):
+        return self.application_set.filter(match_score__gte=8.0).count()
+
 class HiringInvitation(models.Model):
     STATUS = [('pending','Pending'),('accepted','Accepted'),('rejected','Rejected')]
     recruiter = models.ForeignKey(RecruiterProfile, on_delete=models.CASCADE)
@@ -49,6 +53,7 @@ class Application(models.Model):
     job = models.ForeignKey(JobPost, on_delete=models.CASCADE)
     cover_letter = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS, default='applied')
+    match_score = models.FloatField(default=0.0)
     applied_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
