@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -396,7 +397,15 @@ def call_for_interview(request, application_pk):
                 interview.interview_type = "hr"
             if not interview.round_number:
                 interview.round_number = 1
-            interview.scheduled_time = interview.scheduled_time.strftime("%H:%M")
+            scheduled_time_value = interview.scheduled_time
+            if hasattr(scheduled_time_value, "strftime"):
+                interview.scheduled_time = scheduled_time_value.strftime("%H:%M")
+            elif isinstance(scheduled_time_value, str):
+                # Keep existing HH:MM strings and normalize HH:MM:SS values.
+                try:
+                    interview.scheduled_time = datetime.strptime(scheduled_time_value, "%H:%M:%S").strftime("%H:%M")
+                except ValueError:
+                    interview.scheduled_time = scheduled_time_value
             interview.save()
 
             application.status = "shortlisted"
