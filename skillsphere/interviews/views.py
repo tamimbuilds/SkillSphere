@@ -46,11 +46,34 @@ def schedule_interview(request):
         return redirect('interview_list')
     return render(request, 'schedule_interview.html', {'form': form})
 
+@login_required
 def submit_feedback(request, pk):
     interview = get_object_or_404(Interview, pk=pk)
     if request.method == 'POST':
-        feedback = request.POST.get('feedback')
-        score = request.POST.get('score')
+        feedback = (request.POST.get('feedback') or '').strip()
+        score_raw = (request.POST.get('score') or '').strip()
+
+        if score_raw == '':
+            score = None
+        else:
+            try:
+                score = float(score_raw)
+            except ValueError:
+                messages.error(request, "Score must be a valid number between 0 and 10.")
+                return render(
+                    request,
+                    'feedback_form.html',
+                    {'interview': interview, 'submitted_feedback': feedback, 'submitted_score': score_raw},
+                )
+
+            if score < 0 or score > 10:
+                messages.error(request, "Score must be between 0 and 10.")
+                return render(
+                    request,
+                    'feedback_form.html',
+                    {'interview': interview, 'submitted_feedback': feedback, 'submitted_score': score_raw},
+                )
+
         interview.feedback = feedback
         interview.score = score
         interview.status = 'completed'
