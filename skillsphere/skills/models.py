@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
 from accounts.models import CandidateProfile
 from jobs.models import JobPost
 
@@ -122,6 +123,34 @@ class CandidateSkill(models.Model):
 
     def __str__(self):
         return f"{self.candidate} - {self.skill}"
+
+
+class CandidateSkillProgress(models.Model):
+    """
+    Persistent assessment history for a candidate-skill pair.
+    Keeps lock/penalty state even if CandidateSkill is removed and re-added.
+    """
+    candidate = models.ForeignKey(CandidateProfile, on_delete=models.CASCADE, related_name='skill_progress_records')
+    skill = models.ForeignKey(Skill, on_delete=models.CASCADE, related_name='candidate_progress_records')
+    add_count = models.PositiveSmallIntegerField(default=0)
+    total_attempts = models.PositiveSmallIntegerField(default=0)
+    total_failures = models.PositiveSmallIntegerField(default=0)
+    current_cycle_attempts = models.PositiveSmallIntegerField(default=0)
+    consecutive_failures = models.PositiveSmallIntegerField(default=0)
+    times_blocked = models.PositiveSmallIntegerField(default=0)
+    blocked_until = models.DateTimeField(null=True, blank=True)
+    penalty_points = models.FloatField(default=0.0)
+    last_attempt_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('candidate', 'skill')
+
+    @property
+    def is_blocked(self):
+        return bool(self.blocked_until and self.blocked_until > timezone.now())
+
+    def __str__(self):
+        return f"{self.candidate} - {self.skill} progress"
 
 class Certificate(models.Model):
     STATUS = [
