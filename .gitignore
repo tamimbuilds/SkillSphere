@@ -7,9 +7,8 @@ __pycache__/
 db.sqlite3
 db.sqlite3-journal
 media/
-static/
-# If you decide to collect static files for production later
-staticfiles/
+# Generated static build output
+skillsphere/staticfiles/
 
 # Environments
 .venv/
@@ -17,6 +16,7 @@ venv/
 ENV/
 env/
 *.env
+.env.example
 
 # VS Code settings
 .vscode/
