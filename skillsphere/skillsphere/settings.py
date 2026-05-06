@@ -11,7 +11,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-only-key')
 
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
-allowed_hosts = ['127.0.0.1', 'localhost']
+allowed_hosts = ['127.0.0.1', 'localhost', 'healthcheck.railway.app']
 allowed_hosts.extend(host.strip() for host in os.getenv('ALLOWED_HOSTS', '').split(',') if host.strip())
 
 railway_public_domain = os.getenv('RAILWAY_PUBLIC_DOMAIN', '').strip()
