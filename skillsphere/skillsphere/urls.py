@@ -1,6 +1,7 @@
 import os
 
 from django.contrib import admin
+from django.http import HttpResponse
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
@@ -9,6 +10,7 @@ from django.views.static import serve
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('health/', lambda request: HttpResponse('ok', content_type='text/plain'), name='health'),
     path('', TemplateView.as_view(template_name='home.html'), name='home'),
     path('accounts/', include('accounts.urls')),
     path('jobs/', include('jobs.urls')),
