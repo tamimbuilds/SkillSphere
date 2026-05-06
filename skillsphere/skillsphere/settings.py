@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 
 import dj_database_url
 
@@ -11,10 +11,35 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-only-key')
 
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
-allowed_hosts = ['127.0.0.1', 'localhost', 'healthcheck.railway.app']
-allowed_hosts.extend(host.strip() for host in os.getenv('ALLOWED_HOSTS', '').split(',') if host.strip())
 
-railway_public_domain = os.getenv('RAILWAY_PUBLIC_DOMAIN', '').strip()
+def _normalize_host(value):
+    value = (value or '').strip()
+    if not value:
+        return ''
+
+    if '://' in value:
+        parsed = urlparse(value)
+        return parsed.hostname or ''
+
+    # Drop any path or port from accidentally pasted host values.
+    value = value.split('/')[0].strip()
+    if ':' in value and value.count(':') == 1:
+        value = value.split(':', 1)[0].strip()
+    return value
+
+allowed_hosts = [
+    '127.0.0.1',
+    'localhost',
+    'healthcheck.railway.app',
+    '.up.railway.app',
+]
+allowed_hosts.extend(
+    host
+    for host in (_normalize_host(item) for item in os.getenv('ALLOWED_HOSTS', '').split(','))
+    if host
+)
+
+railway_public_domain = _normalize_host(os.getenv('RAILWAY_PUBLIC_DOMAIN', ''))
 if railway_public_domain:
     allowed_hosts.append(railway_public_domain)
 
