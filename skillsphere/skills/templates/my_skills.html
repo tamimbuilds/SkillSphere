@@ -92,13 +92,25 @@
                         {% endif %}
                     </div>
                     <div style="margin-top:0.35rem;font-family:var(--font-mono);font-size:0.72rem;color:var(--text-muted);">
-                        Attempt {{ s.latest_score.attempt_number }}/3 • Set {{ s.latest_score.question_set_number }}
+                        Attempt {{ s.latest_score.question_set_number }}/3 • Set {{ s.latest_score.question_set_number }}
                     </div>
                 {% else %}
                     <span style="display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);font-size:0.75rem;color:var(--warning);">
                         <i data-lucide="alert-circle" style="width:12px;height:12px;"></i> No Assessment Taken
                     </span>
                 {% endif %}
+                <div style="margin-top:0.5rem;font-family:var(--font-mono);font-size:0.7rem;color:var(--text-muted);line-height:1.5;">
+                    Added {{ s.progress.add_count }} time{{ s.progress.add_count|pluralize }} • Total fails: {{ s.progress.total_failures }} • Blocks: {{ s.progress.times_blocked }}
+                    {% if s.readd_count > 0 %}
+                        <span style="color:var(--warning);">• Re-added after failure</span>
+                    {% endif %}
+                    {% if s.penalty_points > 0 %}
+                        <span style="color:var(--danger);">• Match penalty: -{{ s.penalty_points }}</span>
+                    {% endif %}
+                    {% if s.blocked and s.blocked_until %}
+                        <span style="color:var(--danger);">• Blocked until {{ s.blocked_until|date:"M d, Y H:i" }}</span>
+                    {% endif %}
+                </div>
             </div>
 
             <!-- Actions -->
@@ -109,7 +121,7 @@
                     </a>
                 {% else %}
                     <div class="btn btn-outline" style="flex: 2; font-size: 0.75rem; padding: 0.5rem 0.75rem; text-align:center; opacity:0.7; pointer-events:none;">
-                        {% if s.latest_score and s.latest_score.passed %}Assessment Passed{% else %}No Attempts Left{% endif %}
+                        {% if s.latest_score and s.latest_score.passed %}Assessment Passed{% elif s.blocked %}Blocked 7 Days{% else %}No Attempts Left{% endif %}
                     </div>
                 {% endif %}
                 <form action="{% url 'delete_candidate_skill' s.pk %}" method="POST" style="flex: 1;">
