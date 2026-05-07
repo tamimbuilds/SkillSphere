@@ -1,104 +1,180 @@
 {% extends "base.html" %}
 
-{% block title %}Applicants for {{ job.title }} | SkillSphere{% endblock %}
+{% block title %}Applicants: {{ job.title }} | SkillSphere{% endblock %}
+
+{% block extra_head %}
+<style>
+    .applicant-card {
+        padding: 1.5rem 2rem;
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .applicant-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.05);
+        border-color: var(--accent);
+    }
+    .score-box {
+        width: 70px;
+        height: 70px;
+        border-radius: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #f8fafc;
+        border: 1px solid var(--border);
+        flex-shrink: 0;
+    }
+    .high-score { color: #16a34a; background: #f0fdf4; border-color: #dcfce7; }
+    .mid-score  { color: #d97706; background: #fffbeb; border-color: #fef3c7; }
+    .low-score  { color: #dc2626; background: #fef2f2; border-color: #fee2e2; }
+
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 12px;
+        font-family: var(--font-mono);
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .status-applied { background: #eff6ff; color: #2563eb; border: 1px solid #dbeafe; }
+    .status-shortlisted { background: #fffbeb; color: #d97706; border: 1px solid #fef3c7; }
+    .status-interviewing { background: #f5f3ff; color: #7c3aed; border: 1px solid #ede9fe; }
+    .status-offered { background: #f0fdf4; color: #16a34a; border: 1px solid #dcfce7; }
+    .status-hired { background: #16a34a; color: white; }
+    .status-rejected { background: #dc2626; color: white; }
+
+    .stat-mini-card {
+        padding: 1.25rem 1.75rem;
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        min-width: 160px;
+    }
+
+    @media (max-width: 992px) {
+        .applicant-card {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1.5rem;
+        }
+        .actions-group {
+            width: 100%;
+            justify-content: space-between;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="animate-fade-in">
+<div class="animate-fade-in" style="max-width: 1100px; margin: 0 auto;">
     <!-- Header -->
-    <div style="margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: flex-end;">
+    <div style="margin-bottom: 3.5rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 2rem;">
         <div>
-            <a href="{% url 'dashboard' %}" style="display: flex; align-items: center; gap: 0.5rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); text-decoration: none; margin-bottom: 1rem;">
-                <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> Back to Dashboard
+            <a href="{% url 'dashboard' %}" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); text-decoration: none; margin-bottom: 1.5rem; font-weight: 600;">
+                <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> BACK TO DASHBOARD
             </a>
-            <h1 style="font-family: var(--font-display); font-size: 2.4rem; font-weight: 700; letter-spacing: -0.02em;">Applicants</h1>
-            <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.4rem;">{{ total_count }} people applied for <strong>{{ job.title }}</strong></p>
+            <h1 style="font-family: var(--font-display); font-size: 3rem; font-weight: 800; letter-spacing: -0.03em; color: var(--text-main); margin: 0;">
+                Review <span class="text-gradient">Applicants</span>
+            </h1>
+            <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0.5rem;">
+                Managing <strong>{{ applicants|length }}</strong> candidates for <strong style="color: var(--text-main);">{{ job.title }}</strong>
+            </p>
         </div>
         
         <!-- Summary Stats -->
-        <div style="display: flex; gap: 1.5rem;">
-            <div class="card glass" style="padding: 0.75rem 1.25rem; border-radius: 12px; text-align: center;">
-                <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Avg. Match</div>
-                <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent);">
-                    {{ avg_score }}
-                </div>
+        <div style="display: flex; gap: 1rem;">
+            <div class="stat-mini-card">
+                <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.25rem;">Avg. Match</div>
+                <div style="font-family: var(--font-display); font-size: 1.75rem; font-weight: 800; color: var(--accent);">{{ avg_score|floatformat:1 }}</div>
             </div>
-            <div class="card glass" style="padding: 0.75rem 1.25rem; border-radius: 12px; text-align: center; border-bottom: 2px solid var(--success);">
-                <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Qualified</div>
-                <div style="font-size: 1.25rem; font-weight: 700; color: var(--success);">
-                    {{ qualified_count }}
-                </div>
+            <div class="stat-mini-card" style="border-bottom: 4px solid var(--success);">
+                <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.25rem;">Qualified</div>
+                <div style="font-family: var(--font-display); font-size: 1.75rem; font-weight: 800; color: var(--success);">{{ qualified_count }}</div>
             </div>
         </div>
     </div>
 
-
-
     <!-- Applicants List -->
-    <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
+    <div style="display: grid; grid-template-columns: 1fr; gap: 1.25rem;">
         {% for app in applicants %}
-        <div class="card glass" style="padding: 1.5rem; display: flex; align-items: center; gap: 2rem; transition: transform 0.2s ease; border-radius: 16px;">
-            <!-- Candidate Info -->
+        <div class="applicant-card">
+            <!-- Score Visual -->
+            <div class="score-box {% if app.match_score >= 8 %}high-score{% elif app.match_score >= 5 %}mid-score{% else %}low-score{% endif %}">
+                <span style="font-family: var(--font-mono); font-size: 0.6rem; text-transform: uppercase; opacity: 0.8;">Match</span>
+                <span style="font-family: var(--font-display); font-size: 1.5rem; font-weight: 800;">{{ app.match_score|floatformat:1 }}</span>
+            </div>
+
+            <!-- Candidate Details -->
             <div style="flex-grow: 1;">
-                <h3 style="font-size: 1.15rem; font-weight: 600; margin-bottom: 0.4rem;">{{ app.candidate.full_name }}</h3>
-                <div style="display: flex; gap: 1.25rem; flex-wrap: wrap;">
-                    <span style="display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);">
-                        <i data-lucide="graduation-cap" style="width:13px;height:13px;"></i> {{ app.candidate.university }}
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                    <h3 style="font-size: 1.4rem; font-weight: 700; color: var(--text-main); margin: 0;">{{ app.candidate.full_name }}</h3>
+                    <span class="status-badge status-{{ app.status }}">
+                        {{ app.get_status_display }}
                     </span>
-                    <span style="display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);">
-                        <i data-lucide="award" style="width:13px;height:13px;"></i> CGPA: {{ app.candidate.cgpa }}
+                </div>
+                
+                <div style="display: flex; gap: 1.75rem; flex-wrap: wrap;">
+                    <span style="display:inline-flex;align-items:center;gap:0.5rem;font-family:var(--font-mono);font-size:0.85rem;color: var(--text-muted);">
+                        <i data-lucide="graduation-cap" style="width:16px;height:16px;"></i> 
+                        {{ app.candidate.university }}
                     </span>
-                    <span style="display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);">
-                        <i data-lucide="calendar" style="width:13px;height:13px;"></i> Applied: {{ app.applied_at|date:"M d, Y" }}
+                    <span style="display:inline-flex;align-items:center;gap:0.5rem;font-family:var(--font-mono);font-size:0.85rem;color: var(--text-muted);">
+                        <i data-lucide="award" style="width:16px;height:16px;"></i> 
+                        CGPA {{ app.candidate.cgpa }}
                     </span>
-                    <span style="display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);font-size:0.75rem; font-weight: 600; color: {% if app.match_score >= 8 %}var(--success){% elif app.match_score >= 5 %}var(--accent){% else %}var(--danger){% endif %};">
-                        <i data-lucide="bar-chart-2" style="width:13px;height:13px;"></i> Match: {{ app.match_score|floatformat:1 }} / 10
+                    <span style="display:inline-flex;align-items:center;gap:0.5rem;font-family:var(--font-mono);font-size:0.85rem;color: var(--text-muted);">
+                        <i data-lucide="calendar" style="width:16px;height:16px;"></i> 
+                        Applied {{ app.applied_at|date:"M d" }}
                     </span>
                 </div>
             </div>
 
             <!-- Actions -->
-            <div style="flex-shrink: 0; display: flex; gap: 0.75rem;">
-                <a href="{% url 'candidate_detail' app.candidate.pk %}" class="btn btn-outline btn-sm" style="font-size: 0.75rem; border-radius: 8px;">View Profile</a>
+            <div class="actions-group" style="display: flex; gap: 0.75rem; align-items: center;">
+                <a href="{% url 'candidate_detail' app.candidate.pk %}" class="btn btn-outline" style="padding: 0.75rem 1.5rem; border-radius: 12px;">
+                    View Profile
+                </a>
+                
                 {% if app.match_score >= interview_threshold %}
-                    <a href="{% url 'call_for_interview' app.pk %}" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; border-radius: 8px;">
-                        <i data-lucide="calendar-check" style="width:12px;height:12px;"></i> Interview
-                    </a>
-                    {% if app.status == 'offered' %}
-                        <span style="display:inline-flex; align-items:center; gap:0.4rem; font-family:var(--font-mono); font-size:0.7rem; padding: 0.4rem 0.8rem; background: rgba(59, 130, 246, 0.1); color: #3b82f6; border-radius: 8px; font-weight: 600;">
-                            <i data-lucide="mail-check" style="width:12px;height:12px;"></i> OFFERED
-                        </span>
-                    {% elif app.status == 'hired' %}
-                        <span style="display:inline-flex; align-items:center; gap:0.4rem; font-family:var(--font-mono); font-size:0.7rem; padding: 0.4rem 0.8rem; background: rgba(16, 185, 129, 0.1); color: #10b981; border-radius: 8px; font-weight: 600;">
-                            <i data-lucide="user-check" style="width:12px;height:12px;"></i> HIRED
-                        </span>
-                    {% elif app.status == 'rejected' %}
-                        <span style="display:inline-flex; align-items:center; gap:0.4rem; font-family:var(--font-mono); font-size:0.7rem; padding: 0.4rem 0.8rem; background: rgba(239, 68, 68, 0.1); color: #ef4444; border-radius: 8px; font-weight: 600;">
-                            <i data-lucide="user-x" style="width:12px;height:12px;"></i> REJECTED
-                        </span>
-                    {% else %}
-                        <a href="{% url 'send_job_offer' app.pk %}" class="btn btn-primary btn-sm" style="font-size: 0.75rem; border-radius: 8px;">
-                            <i data-lucide="gift" style="width:12px;height:12px;"></i> Send Offer
+                    {% if app.status == 'applied' %}
+                        <a href="{% url 'call_for_interview' app.pk %}" class="btn btn-primary" style="padding: 0.75rem 1.5rem; border-radius: 12px; display: inline-flex; align-items: center; gap: 0.5rem;">
+                            <i data-lucide="calendar-days" style="width:16px;height:16px;"></i> Interview
+                        </a>
+                    {% elif app.status == 'interviewing' %}
+                        <a href="{% url 'send_job_offer' app.pk %}" class="btn btn-primary" style="background: var(--text-main); color: white; padding: 0.75rem 1.5rem; border-radius: 12px; display: inline-flex; align-items: center; gap: 0.5rem;">
+                            <i data-lucide="send" style="width:16px;height:16px;"></i> Send Offer
                         </a>
                     {% endif %}
                 {% else %}
-                    <button class="btn btn-outline btn-sm" disabled title="Match score must be {{ interview_threshold }} or higher" style="font-size: 0.75rem; border-radius: 8px; opacity: 0.45; cursor: not-allowed;">
-                        <i data-lucide="lock" style="width:12px;height:12px;"></i> Score Below {{ interview_threshold }}
-                    </button>
+                    <div style="background: #f1f5f9; padding: 0.75rem 1rem; border-radius: 12px; font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.5rem; border: 1px solid var(--border);">
+                        <i data-lucide="lock" style="width:14px;height:14px;"></i> Below Threshold
+                    </div>
                 {% endif %}
             </div>
-
         </div>
         {% empty %}
-        <div class="card glass" style="padding: 4rem; text-align: center; border-radius: 20px;">
-            <i data-lucide="users" style="width:40px;height:40px;color:var(--text-muted);margin-bottom:1rem;opacity:0.3;"></i>
-            <h3 style="color:var(--text-muted);font-weight:500; font-family: var(--font-display);">
-                No applications yet
-            </h3>
-            <p style="color: var(--text-subtle); font-size: 0.9rem; margin-top: 0.5rem;">
-                Applications will appear here once candidates apply.
+        <div style="padding: 6rem 2rem; text-align: center; background: white; border: 2px dashed var(--border); border-radius: 32px;">
+            <div style="width: 80px; height: 80px; background: #f8fafc; border-radius: 24px; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem;">
+                <i data-lucide="users" style="width:40px;height:40px;color:var(--text-muted); opacity: 0.4;"></i>
+            </div>
+            <h2 style="font-family: var(--font-display); font-size: 1.8rem; font-weight: 700; color: var(--text-main);">No applicants yet</h2>
+            <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0.75rem; max-width: 450px; margin-left: auto; margin-right: auto;">
+                This position is open for applications. Candidates matching the requirements will appear here once they apply.
             </p>
         </div>
         {% endfor %}
     </div>
 </div>
 {% endblock %}
+

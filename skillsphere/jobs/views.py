@@ -70,8 +70,40 @@ def _refresh_job_match_scores(job):
         application.save(update_fields=["match_score", "updated_at"])
 
 
+from django.db.models import Q
+
 def job_list(request):
-    jobs = list(JobPost.objects.filter(status="open").select_related("recruiter"))
+    query = request.GET.get('q', '')
+    location_filter = request.GET.get('location', '')
+    level_filter = request.GET.get('level', '')
+
+    jobs_queryset = JobPost.objects.filter(status="open").select_related("recruiter")
+
+    if query:
+        jobs_queryset = jobs_queryset.filter(
+            Q(title__icontains=query) |
+            Q(description__icontains=query) |
+            Q(recruiter__company_name__icontains=query)
+        )
+
+    if location_filter:
+        jobs_queryset = jobs_queryset.filter(location__icontains=location_filter)
+
+    if level_filter:
+        if level_filter == 'junior':
+            jobs_queryset = jobs_queryset.filter(required_experience__lte=2)
+        elif level_filter == 'mid':
+            jobs_queryset = jobs_queryset.filter(required_experience__gte=3, required_experience__lte=5)
+        elif level_filter == 'senior':
+            jobs_queryset = jobs_queryset.filter(required_experience__gte=6, required_experience__lte=9)
+        elif level_filter == 'lead':
+            jobs_queryset = jobs_queryset.filter(required_experience__gte=10)
+
+    jobs = list(jobs_queryset)
+    
+    # Get unique locations for the filter
+    locations = JobPost.objects.filter(status="open").values_list('location', flat=True).distinct()
+    
     candidate_profile = None
 
     if request.user.is_authenticated and request.user.role == "candidate":
@@ -92,6 +124,7 @@ def job_list(request):
         {
             "jobs": jobs,
             "candidate_profile": candidate_profile,
+            "locations": locations,
         },
     )
 

@@ -1,351 +1,520 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}SkillSphere | Empowering Your Professional Journey{% endblock %}
+{% block title %}SkillSphere | Premium Talent Verification & Recruitment{% endblock %}
 
 {% block extra_head %}
 <style>
-/* ── Hero ──────────────────────────────────────────────── */
-.hero { padding: 7rem 0 5rem; text-align: center; position: relative; }
-.hero-bg {
-    position: absolute; inset: 0; pointer-events: none;
-    background-image: radial-gradient(circle, rgba(26,26,46,0.06) 1px, transparent 1px);
-    background-size: 30px 30px;
-    mask-image: radial-gradient(ellipse 80% 70% at 50% 0%, black 20%, transparent 80%);
-    -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 0%, black 20%, transparent 80%);
-}
-.hero-badge {
-    display: inline-flex; align-items: center; gap: 0.5rem;
-    font-family: var(--font-mono); font-size: 0.68rem;
-    letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-2);
-    background: rgba(201,169,110,0.09); border: 1px solid rgba(201,169,110,0.28);
-    padding: 0.3rem 1rem; border-radius: var(--radius-full); margin-bottom: 2.5rem;
-}
-.hero-badge span { width:5px;height:5px;border-radius:50%;background:var(--accent-2);display:inline-block; animation: pulse-dot 2.5s ease-in-out infinite; }
-.hero h1 {
-    font-family: var(--font-display); font-size: clamp(2.6rem, 6.5vw, 4.8rem);
-    font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 1.5rem; color: var(--text);
-}
-.hero h1 em { color: var(--text-muted); font-weight: 400; font-style: italic; }
-.hero p { font-size: 1.05rem; color: var(--text-muted); max-width: 520px; margin: 0 auto 2.5rem; line-height: 1.85; }
+    /* ── Hero Section ────────────────────────────────────────── */
+    .hero {
+        position: relative;
+        padding: 10rem 0 6rem;
+        overflow: hidden;
+        background: var(--background);
+    }
 
-/* ── Stat Bar ─────────────────────────────────────────── */
-.stat-bar {
-    display: inline-flex; gap: 3.5rem; flex-wrap: wrap; justify-content: center;
-    margin-top: 4rem; padding: 1.6rem 3rem;
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius-xl); box-shadow: var(--shadow-md);
-}
-.stat-bar-item { text-align: center; }
-.stat-bar-item .val { font-family: var(--font-display); font-size: 2rem; font-weight: 700; color: var(--text); }
-.stat-bar-item .lbl { font-family: var(--font-mono); font-size: 0.63rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.2rem; }
+    /* Mesh Gradient Background */
+    .hero::before {
+        content: '';
+        position: absolute;
+        top: -20%;
+        right: -10%;
+        width: 70%;
+        height: 140%;
+        background: 
+            radial-gradient(circle at 70% 30%, rgba(201, 169, 110, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 30% 70%, rgba(26, 26, 46, 0.03) 0%, transparent 50%);
+        z-index: 0;
+        filter: blur(80px);
+    }
 
-/* ── Section label ────────────────────────────────────── */
-.section-label {
-    font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.14em;
-    text-transform: uppercase; color: var(--accent-2); margin-bottom: 0.6rem; display: block;
-}
-.section-heading { font-family: var(--font-display); font-size: clamp(1.6rem,3.5vw,2.4rem); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 1rem; }
-.section-sub { color: var(--text-muted); font-size: 0.95rem; max-width: 480px; line-height: 1.75; }
+    .hero-container {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 4rem;
+        align-items: center;
+        position: relative;
+        z-index: 2;
+    }
 
-/* ── Feature Cards ────────────────────────────────────── */
-.feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap: 1.5rem; margin-top: 3rem; }
-.feature-card {
-    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
-    padding: 2rem; box-shadow: var(--shadow-sm); position: relative; overflow: hidden;
-    transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
-}
-.feature-card::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(201,169,110,0.4), transparent);
-}
-.feature-card:hover { border-color: var(--border-hover); transform: translateY(-3px); box-shadow: var(--shadow-md); }
-.feature-icon {
-    width: 42px; height: 42px; border-radius: var(--radius-sm);
-    background: var(--surface-3); border: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 1.25rem; color: var(--accent-2);
-}
-.feature-card h3 { font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem; }
-.feature-card p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 1.25rem; }
-.feature-card a { font-family: var(--font-mono); font-size: 0.72rem; color: var(--accent-2); text-decoration: none; letter-spacing: 0.05em; }
-.feature-card a:hover { color: var(--accent); }
+    .hero-content {
+        max-width: 680px;
+    }
 
-/* ── Candidate Cards ──────────────────────────────────── */
-.candidates-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px,1fr)); gap: 1.5rem; margin-top: 3rem; }
-.candidate-card {
-    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
-    padding: 1.75rem; box-shadow: var(--shadow-sm); overflow: hidden; position: relative;
-    transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
-}
-.candidate-card::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-    background: linear-gradient(90deg, var(--accent-2), transparent);
-}
-.candidate-card:hover { border-color: var(--border-hover); transform: translateY(-3px); box-shadow: var(--shadow-md); }
-.candidate-avatar {
-    width: 52px; height: 52px; border-radius: var(--radius-md);
-    background: var(--accent); color: #fff; font-family: var(--font-display);
-    font-size: 1.4rem; font-weight: 700; display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-}
-.candidate-meta { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); margin-top: 0.25rem; }
-.skill-pill {
-    display: inline-flex; align-items: center; gap: 0.35rem;
-    padding: 0.25rem 0.65rem; border-radius: var(--radius-full);
-    font-family: var(--font-mono); font-size: 0.65rem; font-weight: 700;
-    letter-spacing: 0.04em; border: 1px solid var(--border);
-    background: var(--surface-2); color: var(--text-muted);
-    transition: all var(--transition);
-}
-.skill-pill.verified { background: rgba(26,122,74,0.07); border-color: rgba(26,122,74,0.25); color: var(--success); }
-.skill-pill.pending  { background: rgba(184,134,11,0.07); border-color: rgba(184,134,11,0.22); color: var(--warning); }
-.skill-score { font-weight: 700; }
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.4rem 1rem;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-full);
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        font-weight: 700;
+        color: var(--accent-2);
+        margin-bottom: 2rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        box-shadow: var(--shadow-sm);
+    }
 
-/* ── Skill Bars ───────────────────────────────────────── */
-.skill-bar-row { margin-bottom: 1rem; }
-.skill-bar-top { display: flex; justify-content: space-between; margin-bottom: 0.4rem; font-size: 0.85rem; }
-.skill-bar-track { height: 6px; background: var(--surface-3); border-radius: 99px; overflow: hidden; }
-.skill-bar-fill { height: 100%; border-radius: 99px; transition: width 1s cubic-bezier(0.4,0,0.2,1); }
+    .hero h1 {
+        font-size: clamp(3.2rem, 6vw, 5.2rem);
+        line-height: 1.05;
+        margin-bottom: 2rem;
+        letter-spacing: -0.03em;
+    }
 
-/* ── CTA ──────────────────────────────────────────────── */
-.cta-section {
-    margin-top: 8rem; text-align: center;
-    padding: 5rem 2rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-md);
-    position: relative; overflow: hidden;
-}
-.cta-section::before {
-    content: ''; position: absolute; inset: 0;
-    background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(201,169,110,0.07), transparent);
-    pointer-events: none;
-}
-.cta-section h2 { font-family: var(--font-display); font-size: clamp(2rem,4vw,3rem); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 1rem; }
-.cta-section p { color: var(--text-muted); font-size: 1rem; max-width: 420px; margin: 0 auto 2.5rem; line-height: 1.8; }
+    .hero h1 span.accent-text {
+        color: var(--accent-2);
+        font-style: italic;
+        font-weight: 500;
+    }
 
-/* divider */
-.home-divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); margin: 6rem 0 0; }
+    .hero p {
+        font-size: 1.15rem;
+        color: var(--text-muted);
+        max-width: 520px;
+        margin-bottom: 3.5rem;
+        line-height: 1.8;
+    }
 
-@media (max-width: 768px) {
-    .stat-bar { gap: 2rem; padding: 1.25rem 1.75rem; }
-    .candidates-grid { grid-template-columns: 1fr; }
-}
+    /* ── Hero Visual ────────────────────────────────────────── */
+    .hero-visual {
+        position: relative;
+    }
+
+    .visual-card {
+        background: var(--surface);
+        padding: 1rem;
+        border-radius: var(--radius-xl);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-xl);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .visual-card img {
+        width: 100%;
+        border-radius: var(--radius-lg);
+        display: block;
+    }
+
+    .floating-stats {
+        position: absolute;
+        bottom: -2rem;
+        left: -2rem;
+        background: var(--surface);
+        padding: 1.5rem;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-lg);
+        display: flex;
+        gap: 2rem;
+        z-index: 3;
+    }
+
+    /* ── Trusted By ─────────────────────────────────────────── */
+    .trusted-section {
+        padding: 4rem 0;
+        border-bottom: 1px solid var(--border);
+        text-align: center;
+    }
+
+    .brand-grid {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 5rem;
+        opacity: 0.4;
+        filter: grayscale(1);
+        flex-wrap: wrap;
+    }
+
+    .brand-item {
+        font-family: var(--font-display);
+        font-size: 1.4rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+    }
+
+    /* ── Features ───────────────────────────────────────────── */
+    .features-section {
+        padding: 10rem 0;
+    }
+
+    .feature-card-premium {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 3rem;
+        transition: all var(--transition-slow);
+        height: 100%;
+    }
+
+    .feature-card-premium:hover {
+        transform: translateY(-8px);
+        border-color: var(--accent-2);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .feature-icon-box {
+        width: 64px;
+        height: 64px;
+        background: var(--surface-2);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 2rem;
+        color: var(--accent);
+        transition: all var(--transition);
+    }
+
+    .feature-card-premium:hover .feature-icon-box {
+        background: var(--accent-2);
+        color: white;
+    }
+
+    /* ── Trending Skills ────────────────────────────────────── */
+    .skills-section {
+        background: var(--surface-2);
+        padding: 8rem 0;
+        border-radius: var(--radius-xl);
+        margin: 4rem 0;
+    }
+
+    .skill-bar-container {
+        margin-bottom: 2rem;
+    }
+
+    .skill-info {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        font-weight: 700;
+    }
+
+    .skill-progress {
+        height: 8px;
+        background: var(--surface-3);
+        border-radius: var(--radius-full);
+        overflow: hidden;
+    }
+
+    .skill-fill {
+        height: 100%;
+        border-radius: var(--radius-full);
+        transition: width 1.5s ease-out;
+    }
+
+    /* ── Candidate Showcase ─────────────────────────────────── */
+    .talent-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 2.5rem;
+        margin-top: 4rem;
+    }
+
+    .talent-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 2.5rem;
+        transition: all var(--transition);
+        position: relative;
+    }
+
+    .talent-card:hover {
+        border-color: var(--border-hover);
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-4px);
+    }
+
+    .talent-verified {
+        position: absolute;
+        top: 1.5rem;
+        right: 1.5rem;
+        background: rgba(201, 169, 110, 0.1);
+        color: var(--accent-2);
+        padding: 0.3rem 0.6rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.65rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .talent-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: var(--radius-md);
+        object-fit: cover;
+        margin-bottom: 1.5rem;
+        border: 2px solid var(--surface-2);
+    }
+
+    .avatar-placeholder {
+        width: 80px;
+        height: 80px;
+        background: var(--accent);
+        color: white;
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-display);
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+    }
+
+    .talent-skill-tag {
+        display: inline-block;
+        padding: 0.3rem 0.8rem;
+        background: var(--surface-2);
+        border-radius: var(--radius-sm);
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin: 0 0.4rem 0.4rem 0;
+    }
+
+    /* ── Responsive ─────────────────────────────────────────── */
+    @media (max-width: 1024px) {
+        .hero-container { grid-template-columns: 1fr; text-align: center; }
+        .hero-content { margin: 0 auto; }
+        .hero p { margin: 0 auto 3rem; }
+        .hero-visual { display: none; }
+        .brand-grid { gap: 3rem; }
+    }
+
+    @media (max-width: 768px) {
+        .hero { padding: 8rem 0 4rem; }
+        .hero h1 { font-size: 3.5rem; }
+        .visual-card { max-width: 500px; margin: 0 auto; }
+        .feature-grid { grid-template-columns: 1fr; }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 
-<!-- ── Hero ─────────────────────────────────────────────── -->
+<!-- Hero Section -->
 <section class="hero">
-    <div class="hero-bg" aria-hidden="true"></div>
-
-    <div class="hero-badge">
-        <span></span> Now in Beta &mdash; Join Free
-    </div>
-
-    <h1>
-        Elevate your career<br>
-        <em>with SkillSphere.</em>
-    </h1>
-
-    <p>The all-in-one platform to verify skills, discover top talent, and ace your interviews — all in one place.</p>
-
-    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
-        <a href="{% url 'job_list' %}" class="btn btn-primary" style="padding:0.75rem 1.8rem;font-size:0.88rem;">Explore Jobs →</a>
-        <a href="{% url 'skill_list' %}" class="btn btn-outline" style="padding:0.75rem 1.8rem;font-size:0.88rem;">Browse Skills</a>
-    </div>
-
-    <!-- Stats Bar -->
-    <div class="stat-bar">
-        {% if hero_stats %}
-            {% for label, value in hero_stats.items %}
-            <div class="stat-bar-item">
-                <div class="val">{{ value }}</div>
-                <div class="lbl">{{ label }}</div>
+    <div class="container hero-container">
+        <div class="hero-content animate-fade-in">
+            <div class="hero-badge">
+                <i data-lucide="sparkles" style="width: 12px; height: 12px;"></i>
+                The Standard for Professional Excellence
             </div>
-            {% endfor %}
-        {% else %}
-            <div class="stat-bar-item"><div class="val">10k+</div><div class="lbl">Candidates</div></div>
-            <div class="stat-bar-item"><div class="val">2k+</div><div class="lbl">Active Jobs</div></div>
-            <div class="stat-bar-item"><div class="val">95%</div><div class="lbl">Placement</div></div>
-        {% endif %}
-    </div>
-</section>
-
-<!-- ── Feature Cards ─────────────────────────────────────── -->
-<section style="margin-top:6rem;">
-    <div style="text-align:center;">
-        <span class="section-label">Platform Features</span>
-        <h2 class="section-heading">Everything you need to succeed</h2>
-        <p class="section-sub" style="margin:0 auto;">From verified skill badges to smart job matching — SkillSphere has you covered at every step of your career.</p>
-    </div>
-    <div class="feature-grid">
-        <div class="feature-card">
-            <div class="feature-icon"><i data-lucide="briefcase" style="width:18px;height:18px;"></i></div>
-            <h3>Job Matching</h3>
-            <p>Discover roles tailored to your verified skill set. Apply with confidence knowing your profile stands out.</p>
-            <a href="{% url 'job_list' %}">Browse all jobs →</a>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon"><i data-lucide="award" style="width:18px;height:18px;"></i></div>
-            <h3>Skill Assessments</h3>
-            <p>Take rigorous assessments and earn verified certificates that recruiters actually trust.</p>
-            <a href="{% url 'skill_list' %}">Explore skills →</a>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon"><i data-lucide="calendar-check" style="width:18px;height:18px;"></i></div>
-            <h3>Interview Hub</h3>
-            <p>Manage interview schedules, track statuses, and get notified instantly — all from your dashboard.</p>
-            <a href="{% url 'dashboard' %}">Go to dashboard →</a>
-        </div>
-    </div>
-</section>
-
-<!-- ── Candidate Showcase ─────────────────────────────────── -->
-{% if featured_candidates %}
-<div class="home-divider"></div>
-<section style="margin-top:6rem;">
-    <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
-        <div>
-            <span class="section-label">Talent Pool</span>
-            <h2 class="section-heading" style="margin-bottom:0.25rem;">Top Verified Candidates</h2>
-            <p class="section-sub">Skilled professionals with verified assessments, ready to be hired.</p>
-        </div>
-        {% if user.is_authenticated and user.role == 'recruiter' %}
-        <a href="{% url 'job_list' %}" class="btn btn-outline" style="font-size:0.78rem;">View All Talent →</a>
-        {% endif %}
-    </div>
-
-    <div class="candidates-grid">
-        {% for item in featured_candidates %}
-        {% with profile=item.profile skills=item.skills %}
-        <div class="candidate-card">
-
-            <!-- Candidate header -->
-            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;">
-                {% if profile.user.profile_image %}
-                    <img src="{{ profile.user.profile_image.url }}" alt="{{ profile.full_name }}"
-                         style="width:52px;height:52px;border-radius:var(--radius-md);object-fit:cover;border:1px solid var(--border);">
-                {% else %}
-                    <div class="candidate-avatar">{{ profile.full_name|slice:":1" }}</div>
-                {% endif %}
-                <div>
-                    <div style="font-family:var(--font-display);font-size:1.05rem;font-weight:700;">{{ profile.full_name }}</div>
-                    <div class="candidate-meta">
-                        {{ profile.get_specialized_sector_display }} &middot; CGPA {{ profile.cgpa }}
-                    </div>
-                </div>
+            
+            <h1>
+                Where Global Talent <br>
+                Meets <span class="accent-text">Verified Opportunity.</span>
+            </h1>
+            
+            <p>SkillSphere is the elite ecosystem for high-stakes recruitment. We replace resumes with real-world verification, ensuring every connection is built on proven expertise.</p>
+            
+            <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 4rem;">
+                <a href="{% url 'job_list' %}" class="btn btn-navy" style="padding: 1.1rem 2.8rem; font-size: 1rem;">Explore Opportunities</a>
+                <a href="{% url 'skill_list' %}" class="btn btn-outline" style="padding: 1.1rem 2.8rem; font-size: 1rem; border-width: 2px;">Verify My Skills</a>
             </div>
 
-            <!-- Skills -->
-            <div style="font-family:var(--font-mono);font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:0.75rem;">
-                Skills &amp; Assessments
-            </div>
-            <div style="display:flex;flex-direction:column;gap:0.55rem;">
-                {% for s in skills %}
-                <div style="display:flex;align-items:center;justify-content:space-between;padding:0.6rem 0.85rem;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);">
-                    <div>
-                        <span style="font-family:var(--font-sans);font-size:0.85rem;font-weight:600;">{{ s.skill.skill_name }}</span>
-                        <span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--text-muted);margin-left:0.5rem;">{{ s.proficiency_level }}</span>
-                    </div>
-                    {% if s.has_assessment %}
-                        <span class="skill-pill verified">
-                            <i data-lucide="check-circle" style="width:10px;height:10px;"></i>
-                            <span class="skill-score">{{ s.latest_score.score|floatformat:0 }}%</span>
-                        </span>
-                    {% else %}
-                        <span class="skill-pill pending">
-                            <i data-lucide="clock" style="width:10px;height:10px;"></i> Pending
-                        </span>
-                    {% endif %}
+            <div style="display: flex; gap: 4rem; padding-top: 3rem; border-top: 1px solid var(--border);">
+                {% for label, val in hero_stats.items %}
+                <div class="stat-item">
+                    <span style="display: block; font-family: var(--font-display); font-size: 2.2rem; font-weight: 800; line-height: 1;">{{ val }}</span>
+                    <span style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.5rem; display: block;">{{ label }}</span>
                 </div>
                 {% endfor %}
             </div>
+        </div>
 
-            <!-- Footer -->
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border);">
-                <span style="font-family:var(--font-mono);font-size:0.68rem;color:var(--text-muted);">{{ profile.university|truncatechars:28 }}</span>
-                {% if user.is_authenticated and user.role == 'recruiter' %}
-                <a href="{% url 'candidate_detail' profile.pk %}" class="btn btn-outline" style="padding:0.3rem 0.85rem;font-size:0.72rem;">View Profile →</a>
-                {% endif %}
+        <div class="hero-visual animate-fade-in delay-2">
+            <div class="visual-card">
+                <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=1200" alt="Collaboration" onerror="this.src='https://via.placeholder.com/600x400/1a1a2e/ffffff?text=SkillSphere+Visual'">
+                <div class="floating-stats animate-fade-in delay-4">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div style="width: 40px; height: 40px; background: var(--success); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i data-lucide="trending-up" style="width: 20px; height: 20px;"></i>
+                        </div>
+                        <div>
+                            <span style="display: block; font-size: 1rem; font-weight: 800;">98% Success</span>
+                            <span style="font-size: 0.7rem; color: var(--text-muted);">Match accuracy rate</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        {% endwith %}
-        {% endfor %}
+    </div>
+</section>
+
+<!-- Trusted Brands -->
+<section class="trusted-section">
+    <div class="container">
+        <span class="overline" style="margin-bottom: 2.5rem;">Trusted by forward-thinking teams</span>
+        <div class="brand-grid">
+            <div class="brand-item">NexusCorp</div>
+            <div class="brand-item">Aether</div>
+            <div class="brand-item">Lumina Tech</div>
+            <div class="brand-item">Stellar.ai</div>
+            <div class="brand-item">Vertex</div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="container">
+        <div style="text-align: center; max-width: 800px; margin: 0 auto 6rem;" class="animate-fade-in">
+            <span class="overline">Core Capabilities</span>
+            <h2 style="font-size: 3.5rem; margin-bottom: 1.5rem;">Precision Recruitment.</h2>
+            <p style="font-size: 1.15rem; color: var(--text-muted);">We've engineered a platform that prioritizes substance over style, connecting the world's most capable professionals with the most ambitious companies.</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2.5rem;">
+            <!-- Feature 1 -->
+            <div class="feature-card-premium animate-fade-in delay-1">
+                <div class="feature-icon-box"><i data-lucide="check-circle-2" style="width: 28px; height: 28px;"></i></div>
+                <h3 style="font-size: 1.5rem; margin-bottom: 1.2rem;">Verified Assessments</h3>
+                <p style="color: var(--text-muted); line-height: 1.7; margin-bottom: 2rem;">Pass rigorous tests designed by industry experts to earn your SkillSphere verification badge. Real skills, real proof.</p>
+                <a href="{% url 'skill_list' %}" class="btn btn-ghost" style="padding-left: 0; color: var(--accent-2); font-weight: 800;">Get Verified →</a>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="feature-card-premium animate-fade-in delay-2">
+                <div class="feature-icon-box"><i data-lucide="zap" style="width: 28px; height: 28px;"></i></div>
+                <h3 style="font-size: 1.5rem; margin-bottom: 1.2rem;">Smart Matching</h3>
+                <p style="color: var(--text-muted); line-height: 1.7; margin-bottom: 2rem;">Our algorithm analyzes your verified skill set to match you with roles where you'll make the most impact. No more noise.</p>
+                <a href="{% url 'job_list' %}" class="btn btn-ghost" style="padding-left: 0; color: var(--accent-2); font-weight: 800;">Browse Jobs →</a>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="feature-card-premium animate-fade-in delay-3">
+                <div class="feature-icon-box"><i data-lucide="award" style="width: 28px; height: 28px;"></i></div>
+                <h3 style="font-size: 1.5rem; margin-bottom: 1.2rem;">Elite Credentials</h3>
+                <p style="color: var(--text-muted); line-height: 1.7; margin-bottom: 2rem;">Receive blockchain-backed certificates and offer letters that carry weight in the global job market. Your legacy starts here.</p>
+                <a href="{% url 'dashboard' %}" class="btn btn-ghost" style="padding-left: 0; color: var(--accent-2); font-weight: 800;">View Dashboard →</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Trending Skills Section -->
+{% if featured_skills %}
+<section class="container">
+    <div class="skills-section animate-fade-in">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; padding: 0 4rem; align-items: center;">
+            <div>
+                <span class="overline">Industry Insights</span>
+                <h2 style="font-size: 3rem; margin-bottom: 2rem;">Trending Skills.</h2>
+                <p style="color: var(--text-muted); margin-bottom: 3rem;">These are the most sought-after expertise areas by our partner companies this month. Stay ahead of the curve.</p>
+                <a href="{% url 'skill_list' %}" class="btn btn-navy" style="padding: 1rem 2.5rem;">Explore All Skills</a>
+            </div>
+            <div>
+                {% for name, val, color in featured_skills %}
+                <div class="skill-bar-container">
+                    <div class="skill-info">
+                        <span>{{ name }}</span>
+                        <span>{{ val }}% Demand</span>
+                    </div>
+                    <div class="skill-progress">
+                        <div class="skill-fill" style="width: {{ val }}%; background: {{ color }};"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
     </div>
 </section>
 {% endif %}
 
-<!-- ── Why SkillSphere ────────────────────────────────────── -->
-<div class="home-divider"></div>
-<section style="margin-top:6rem;">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;">
-
-        <!-- Left: copy -->
-        <div>
-            <span class="section-label">Why SkillSphere?</span>
-            <h2 class="section-heading">Skills that speak for themselves</h2>
-            <p class="section-sub">Traditional resumes don't tell the full story. SkillSphere lets you prove your expertise through verified assessments — so employers can see exactly what you're capable of.</p>
-
-            <div style="display:flex;flex-direction:column;gap:1rem;margin-top:2rem;">
-                {% for label in "Verified Skill Badges,Smart Job Matching,Interview Management,Real-time Notifications" %}
-                <div style="display:flex;align-items:center;gap:0.85rem;">
-                    <div style="width:28px;height:28px;border-radius:50%;background:rgba(26,122,74,0.1);border:1px solid rgba(26,122,74,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <i data-lucide="check" style="width:13px;height:13px;color:var(--success);"></i>
-                    </div>
-                    <span style="font-size:0.9rem;font-weight:500;">{{ label }}</span>
-                </div>
-                {% endfor %}
+<!-- Talent Showcase -->
+{% if featured_candidates %}
+<section style="padding: 8rem 0;">
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 5rem;" class="animate-fade-in">
+            <div>
+                <span class="overline">Talent Spotlight</span>
+                <h2 style="font-size: 3.2rem;">Elite Professionals.</h2>
+                <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 1rem;">The top 1% of candidates who have cleared our verification standards.</p>
             </div>
+            <a href="{% url 'job_list' %}" class="btn btn-outline" style="padding: 0.8rem 2rem;">View Full Talent Pool</a>
         </div>
 
-        <!-- Right: skill popularity bars -->
-        <div class="card" style="padding:2rem;">
-            <div style="font-family:var(--font-mono);font-size:0.65rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-muted);margin-bottom:1.5rem;">
-                Most In-Demand Skills
+        <div class="talent-grid">
+            {% for item in featured_candidates %}
+            {% with profile=item.profile skills=item.skills %}
+            <div class="talent-card animate-fade-in delay-{{ forloop.counter }}">
+                <div class="talent-verified">
+                    <i data-lucide="shield-check" style="width: 14px; height: 14px;"></i> Verified
+                </div>
+
+                {% if profile.user.profile_image %}
+                    <img src="{{ profile.user.profile_image.url }}" alt="{{ profile.full_name }}" class="talent-avatar">
+                {% else %}
+                    <div class="avatar-placeholder">{{ profile.full_name|slice:":1" }}</div>
+                {% endif %}
+
+                <h4 style="font-size: 1.25rem; margin-bottom: 0.5rem;">{{ profile.full_name }}</h4>
+                <p style="font-size: 0.85rem; color: var(--accent-2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1.5rem;">
+                    {{ profile.get_specialized_sector_display }}
+                </p>
+
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.8rem; line-height: 1.6;">
+                    Graduated from <strong>{{ profile.university|truncatechars:35 }}</strong> with a distinguished GPA of <strong>{{ profile.cgpa }}</strong>.
+                </p>
+
+                <div style="margin-bottom: 2rem;">
+                    {% for s in skills|slice:":3" %}
+                    <span class="talent-skill-tag">{{ s.skill.skill_name }}</span>
+                    {% endfor %}
+                </div>
+
+                <div style="padding-top: 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--success); font-weight: 700; text-transform: uppercase;">● Ready for hire</span>
+                    {% if user.role == 'recruiter' %}
+                    <a href="{% url 'candidate_detail' profile.pk %}" class="btn btn-ghost" style="font-size: 0.75rem; padding: 0.4rem 1rem; border: 1px solid var(--border);">Profile Details</a>
+                    {% endif %}
+                </div>
             </div>
-            {% if featured_skills %}
-                {% for skill_name, pct, color in featured_skills %}
-                <div class="skill-bar-row">
-                    <div class="skill-bar-top">
-                        <span style="font-weight:500;font-size:0.88rem;">{{ skill_name }}</span>
-                        <span style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);">{{ pct }}%</span>
-                    </div>
-                    <div class="skill-bar-track">
-                        <div class="skill-bar-fill" style="width:{{ pct }}%;background:{{ color }};"></div>
-                    </div>
-                </div>
-                {% endfor %}
-            {% else %}
-                {% for item in "Python,80|React,72|System Design,61|DevOps,49|UI/UX,44" %}
-                <div class="skill-bar-row">
-                    <div class="skill-bar-top">
-                        <span style="font-weight:500;font-size:0.88rem;">{{ item|cut:"|" }}</span>
-                    </div>
-                    <div class="skill-bar-track"><div class="skill-bar-fill" style="width:70%;background:var(--accent-2);"></div></div>
-                </div>
-                {% endfor %}
-            {% endif %}
+            {% endwith %}
+            {% endfor %}
         </div>
     </div>
 </section>
+{% endif %}
 
-<!-- ── CTA ───────────────────────────────────────────────── -->
-<div class="cta-section">
-    <span class="section-label">Get Started Today</span>
-    <h2>Ready to elevate your career?</h2>
-    <p>Join thousands of candidates and recruiters already using SkillSphere to connect talent with opportunity.</p>
-    {% if not user.is_authenticated %}
-    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
-        <a href="{% url 'register' %}" class="btn btn-primary" style="padding:0.8rem 2rem;font-size:0.88rem;">Create Free Account →</a>
-        <a href="{% url 'login' %}" class="btn btn-outline" style="padding:0.8rem 2rem;font-size:0.88rem;">Sign In</a>
+<!-- CTA Section -->
+<section class="container" style="padding-bottom: 8rem;">
+    <div style="background: var(--accent); border-radius: var(--radius-xl); padding: 8rem 4rem; text-align: center; color: white; position: relative; overflow: hidden;">
+        <!-- Background Decoration -->
+        <div style="position: absolute; top: -50%; left: -10%; width: 50%; height: 200%; background: radial-gradient(circle, rgba(201,169,110,0.1) 0%, transparent 70%); transform: rotate(15deg);"></div>
+        <div style="position: absolute; bottom: -50%; right: -10%; width: 50%; height: 200%; background: radial-gradient(circle, rgba(201,169,110,0.1) 0%, transparent 70%); transform: rotate(-15deg);"></div>
+
+        <div style="position: relative; z-index: 2;">
+            <span class="overline" style="color: rgba(255,255,255,0.6); margin-bottom: 2rem;">Join the Evolution</span>
+            <h2 style="color: white; font-size: 4rem; margin-bottom: 2rem; letter-spacing: -0.03em;">Secure Your Future Today.</h2>
+            <p style="color: rgba(255,255,255,0.7); font-size: 1.25rem; max-width: 680px; margin: 0 auto 4rem;">Whether you're looking for your next career challenge or your next elite hire, SkillSphere is the bridge to professional excellence.</p>
+            
+            <div style="display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;">
+                {% if not user.is_authenticated %}
+                <a href="{% url 'register' %}" class="btn btn-primary" style="padding: 1.2rem 3.5rem; font-size: 1.1rem; background: white; color: var(--accent); border-color: white;">Join SkillSphere</a>
+                <a href="{% url 'login' %}" class="btn btn-outline" style="padding: 1.2rem 3.5rem; font-size: 1.1rem; border-color: rgba(255,255,255,0.3); color: white;">Sign In</a>
+                {% else %}
+                <a href="{% url 'dashboard' %}" class="btn btn-primary" style="padding: 1.2rem 3.5rem; font-size: 1.1rem; background: white; color: var(--accent); border-color: white;">Return to Console</a>
+                {% endif %}
+            </div>
+        </div>
     </div>
-    {% else %}
-    <a href="{% url 'dashboard' %}" class="btn btn-primary" style="padding:0.8rem 2rem;font-size:0.88rem;">Go to Dashboard →</a>
-    {% endif %}
-</div>
+</section>
 
 {% endblock %}

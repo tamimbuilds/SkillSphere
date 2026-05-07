@@ -1,113 +1,391 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}{{ profile.full_name }} | SkillSphere{% endblock %}
+{% block title %}{{ profile.full_name }} | Candidate Dossier{% endblock %}
+
+{% block extra_head %}
+<style>
+    .profile-header {
+        position: relative;
+        padding: 4rem 3rem;
+        display: flex;
+        align-items: center;
+        gap: 3.5rem;
+        margin-bottom: 3.5rem;
+        overflow: hidden;
+    }
+
+    .profile-header::before {
+        content: '';
+        position: absolute;
+        top: -20%;
+        right: -10%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(201, 169, 110, 0.08) 0%, transparent 70%);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .avatar-container {
+        position: relative;
+        flex-shrink: 0;
+        z-index: 1;
+    }
+
+    .avatar-large {
+        width: 160px;
+        height: 160px;
+        border-radius: var(--radius-xl);
+        background: var(--accent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 4rem;
+        font-family: var(--font-display);
+        font-weight: 700;
+        box-shadow: var(--shadow-lg);
+        border: 4px solid var(--surface);
+        object-fit: cover;
+    }
+
+    .profile-info {
+        z-index: 1;
+        flex-grow: 1;
+    }
+
+    .profile-info h1 {
+        font-size: clamp(2.5rem, 5vw, 3.5rem);
+        margin-bottom: 0.25rem;
+        letter-spacing: -0.04em;
+    }
+
+    .info-tags {
+        display: flex;
+        gap: 1.25rem;
+        flex-wrap: wrap;
+        margin-top: 1.25rem;
+    }
+
+    .info-tag {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        font-weight: 500;
+        font-family: var(--font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .info-tag i {
+        color: var(--accent-2);
+    }
+
+    .dossier-layout {
+        display: grid;
+        grid-template-columns: 2.4fr 1fr;
+        gap: 3.5rem;
+        align-items: start;
+    }
+
+    .dossier-section {
+        margin-bottom: 4.5rem;
+    }
+
+    .section-label {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        color: var(--accent-2);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-weight: 700;
+    }
+
+    .section-label::after {
+        content: '';
+        height: 1px;
+        flex-grow: 1;
+        background: linear-gradient(90deg, var(--border), transparent);
+    }
+
+    /* Skill Cards */
+    .skill-card {
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.75rem;
+        transition: all var(--transition-slow);
+    }
+
+    .skill-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--accent-2);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .assessment-box {
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 1.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .assessment-score {
+        text-align: right;
+    }
+
+    .score-num {
+        font-family: var(--font-display);
+        font-size: 1.75rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    /* Certifications */
+    .cert-pill {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        padding: 1.25rem;
+        transition: all var(--transition);
+    }
+
+    .cert-pill:hover {
+        background: var(--surface);
+        border-color: var(--accent-2);
+        transform: scale(1.02);
+    }
+
+    /* Sidebar Widget */
+    .sidebar-widget {
+        padding: 2.5rem;
+        position: sticky;
+        top: 6rem;
+    }
+
+    .analytic-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--surface-3);
+    }
+
+    .analytic-row:last-child {
+        border-bottom: none;
+    }
+
+    @media (max-width: 1024px) {
+        .dossier-layout { grid-template-columns: 1fr; }
+        .sidebar-widget { position: static; margin-top: 2rem; }
+        .profile-header { flex-direction: column; text-align: center; padding: 3rem 1.5rem; }
+        .info-tags { justify-content: center; }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="animate-fade-in">
-    <!-- Header Section -->
-    <div style="margin-bottom: 2rem;">
-        <a href="javascript:history.back()" style="display: flex; align-items: center; gap: 0.5rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); text-decoration: none; margin-bottom: 1.5rem;">
-            <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> Back to Applicants
+    <!-- Navigation -->
+    <div style="margin-bottom: 2.5rem;">
+        <a href="{% url 'job_applicants' applications.first.job.pk %}" class="btn-ghost" style="padding-left: 0; font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em;">
+            <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> BACK TO APPLICANTS
         </a>
+    </div>
+
+    <!-- Header Dossier Card -->
+    <div class="glass profile-header">
+        <div class="avatar-container">
+            {% if profile.user.profile_image %}
+                <img src="{{ profile.user.profile_image.url }}" alt="{{ profile.full_name }}" class="avatar-large">
+            {% else %}
+                <div class="avatar-large">{{ profile.full_name|slice:":1" }}</div>
+            {% endif %}
+        </div>
         
-        <div class="card glass" style="padding: 2rem; border-radius: 20px; display: flex; align-items: center; gap: 2rem;">
-            <div style="width: 100px; height: 100px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; color: white; font-size: 2.5rem; font-family: var(--font-display); font-weight: 700;">
-                {{ profile.full_name|slice:":1" }}
-            </div>
-            <div>
-                <h1 style="font-family: var(--font-display); font-size: 2.2rem; font-weight: 700; margin-bottom: 0.5rem;">{{ profile.full_name }}</h1>
-                <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
-                    <span style="display:inline-flex;align-items:center;gap:0.5rem;color:var(--text-muted);font-size:0.9rem;">
-                        <i data-lucide="graduation-cap" style="width:16px;height:16px;"></i> {{ profile.university }}
-                    </span>
-                    <span style="display:inline-flex;align-items:center;gap:0.5rem;color:var(--text-muted);font-size:0.9rem;">
-                        <i data-lucide="award" style="width:16px;height:16px;"></i> CGPA: {{ profile.cgpa }}
-                    </span>
-                    <span style="display:inline-flex;align-items:center;gap:0.5rem;color:var(--text-muted);font-size:0.9rem;">
-                        <i data-lucide="mail" style="width:16px;height:16px;"></i> {{ profile.user.email }}
-                    </span>
+        <div class="profile-info">
+            <span class="overline">Professional Talent Dossier</span>
+            <h1>{{ profile.full_name }}</h1>
+            <p style="color: var(--accent-2); font-weight: 600; font-size: 1.2rem; font-family: var(--font-display); font-style: italic;">
+                {{ profile.get_specialized_sector_display }}
+            </p>
+            
+            <div class="info-tags">
+                <div class="info-tag">
+                    <i data-lucide="graduation-cap" style="width:16px;height:16px;"></i>
+                    {{ profile.university }}
                 </div>
+                <div class="info-tag">
+                    <i data-lucide="map-pin" style="width:16px;height:16px;"></i>
+                    {{ profile.department }}
+                </div>
+                <div class="info-tag">
+                    <i data-lucide="mail" style="width:16px;height:16px;"></i>
+                    {{ profile.user.email }}
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 0.75rem; z-index: 1;">
+            {% if profile.resume_file %}
+            <a href="{{ profile.resume_file.url }}" target="_blank" class="btn btn-navy" style="padding: 0.8rem 1.5rem; border-radius: var(--radius-md);">
+                <i data-lucide="file-text" style="width:16px;height:16px;"></i> DOWNLOAD CV
+            </a>
+            {% endif %}
+            <div style="display: flex; gap: 0.5rem; justify-content: center;">
+                {% if profile.linkedin_url %}
+                <a href="{{ profile.linkedin_url }}" target="_blank" class="btn btn-outline" style="padding: 0.65rem; border-radius: 12px;"><i data-lucide="linkedin" style="width:16px;height:16px;"></i></a>
+                {% endif %}
+                {% if profile.github_url %}
+                <a href="{{ profile.github_url }}" target="_blank" class="btn btn-outline" style="padding: 0.65rem; border-radius: 12px;"><i data-lucide="github" style="width:16px;height:16px;"></i></a>
+                {% endif %}
             </div>
         </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
-        <!-- Left Column: Skills and Experience -->
-        <div>
-            <section style="margin-bottom: 2.5rem;">
-                <h2 style="font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.75rem;">
-                    <i data-lucide="Zap" style="color: var(--accent); width: 24px; height: 24px;"></i> Skills & Assessments
-                </h2>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+    <!-- Dossier Content -->
+    <div class="dossier-layout">
+        <div class="main-column">
+            
+            <!-- Bio/Summary -->
+            <div class="dossier-section">
+                <div class="section-label">
+                    <i data-lucide="user" style="width:14px;height:14px;"></i> Professional Narrative
+                </div>
+                <div class="glass" style="padding: 2.5rem; line-height: 1.8; color: var(--text); font-size: 1.05rem; border-radius: var(--radius-lg);">
+                    {{ profile.bio|default:"No professional narrative provided by candidate."|linebreaks }}
+                </div>
+            </div>
+
+            <!-- Skills & Assessments -->
+            <div class="dossier-section">
+                <div class="section-label">
+                    <i data-lucide="zap" style="width:14px;height:14px;"></i> Specialized Competencies
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;">
                     {% for skill in skills %}
-                    <div class="card glass" style="padding: 1.25rem; border-radius: 16px;">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
-                            <h4 style="font-weight: 600; font-size: 1.1rem;">{{ skill.skill.skill_name }}</h4>
-                            <span style="font-family: var(--font-mono); font-size: 0.7rem; padding: 0.2rem 0.5rem; background: rgba(255,255,255,0.05); border-radius: 4px; color: var(--text-muted);">
-                                {{ skill.years_of_experience }} yr{{ skill.years_of_experience|pluralize }}
-                            </span>
-                        </div>
-                        
-                        {% if skill.has_assessment %}
-                        <div style="background: rgba(34,197,94,0.05); border: 1px solid rgba(34,197,94,0.1); border-radius: 12px; padding: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
+                    <div class="glass skill-card">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                             <div>
-                                <div style="font-size: 0.65rem; color: var(--success); text-transform: uppercase; font-family: var(--font-mono);">Verified Score</div>
-                                <div style="font-size: 1.1rem; font-weight: 700; color: var(--success);">{{ skill.latest_score.score|floatformat:1 }}%</div>
+                                <h3 style="font-size: 1.35rem; font-weight: 700; margin-bottom: 0.25rem;">{{ skill.skill.skill_name }}</h3>
+                                <span class="badge badge-gold" style="font-size: 0.6rem;">{{ skill.proficiency_level }} &middot; {{ skill.years_of_experience }}Y EXP</span>
                             </div>
-                            <div style="text-align: right;">
-                                <div style="font-size: 0.65rem; color: var(--text-muted); font-family: var(--font-mono);">{{ skill.attempt_count }} Attempts</div>
-                                <div style="font-size: 0.7rem; color: var(--text-muted);">{{ skill.latest_score.completed_at|date:"M Y" }}</div>
+                            {% if skill.verified %}
+                            <i data-lucide="shield-check" style="width:24px;height:24px;color:var(--success);"></i>
+                            {% endif %}
+                        </div>
+
+                        {% if skill.has_assessment %}
+                        <div class="assessment-box">
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <div style="width: 44px; height: 44px; border-radius: 12px; background: {% if skill.latest_score.passed %}rgba(26,122,74,0.1){% else %}rgba(192,57,43,0.1){% endif %}; display: flex; align-items: center; justify-content: center;">
+                                    <i data-lucide="{% if skill.latest_score.passed %}award{% else %}alert-circle{% endif %}" 
+                                       style="width: 20px; height: 20px; color: {% if skill.latest_score.passed %}var(--success){% else %}var(--danger){% endif %};"></i>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.8rem; font-weight: 700; color: var(--text);">Verified Exam</div>
+                                    <div style="font-size: 0.65rem; color: var(--text-muted);">Level {{ skill.latest_score.question_set_number }}</div>
+                                </div>
+                            </div>
+                            <div class="assessment-score">
+                                <div class="score-num" style="color: {% if skill.latest_score.passed %}var(--success){% else %}var(--danger){% endif %};">
+                                    {{ skill.latest_score.score|floatformat:0 }}%
+                                </div>
+                                <div style="font-family: var(--font-mono); font-size: 0.55rem; letter-spacing: 0.1em; color: var(--text-muted);">
+                                    {% if skill.latest_score.passed %}CERTIFIED{% else %}UNCERTIFIED{% endif %}
+                                </div>
                             </div>
                         </div>
                         {% else %}
-                        <div style="padding: 0.75rem; border: 1px dashed var(--border); border-radius: 12px; text-align: center;">
-                            <span style="font-size: 0.8rem; color: var(--text-muted); font-style: italic;">No assessment taken</span>
+                        <div style="padding: 1.25rem; border: 1px dashed var(--border); border-radius: var(--radius-md); text-align: center; background: rgba(0,0,0,0.02);">
+                            <p style="font-size: 0.75rem; color: var(--text-muted); font-style: italic;">No assessment data recorded.</p>
                         </div>
                         {% endif %}
                     </div>
-                    {% empty %}
-                    <p style="color: var(--text-muted);">No skills listed.</p>
                     {% endfor %}
                 </div>
-            </section>
+            </div>
 
-            <section>
-                <h2 style="font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.75rem;">
-                    <i data-lucide="Briefcase" style="color: var(--accent); width: 24px; height: 24px;"></i> About & Summary
-                </h2>
-                <div class="card glass" style="padding: 1.5rem; border-radius: 16px; line-height: 1.6; color: var(--text-subtle);">
-                    {{ profile.bio|default:"No bio provided."|linebreaks }}
+            <!-- Credentials -->
+            <div class="dossier-section">
+                <div class="section-label">
+                    <i data-lucide="award" style="width:14px;height:14px;"></i> Verified Credentials
                 </div>
-            </section>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+                    {% for cert in certificates %}
+                    <div class="glass cert-pill">
+                        <div style="width: 48px; height: 48px; background: rgba(201, 169, 110, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--accent-2); flex-shrink: 0;">
+                            <i data-lucide="file-badge" style="width: 24px; height: 24px;"></i>
+                        </div>
+                        <div style="flex-grow: 1;">
+                            <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.1rem;">{{ cert.title }}</h4>
+                            <p style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono);">
+                                {{ cert.issued_by }} &middot; {{ cert.issue_date|date:"Y" }}
+                            </p>
+                        </div>
+                        <a href="{{ cert.certificate_file.url }}" target="_blank" class="btn-ghost" style="padding: 0.5rem;">
+                            <i data-lucide="external-link" style="width: 14px; height: 14px;"></i>
+                        </a>
+                    </div>
+                    {% empty %}
+                    <div style="grid-column: 1/-1; padding: 2.5rem; text-align: center; border: 1px dashed var(--border); border-radius: var(--radius-lg); color: var(--text-muted); font-size: 0.9rem;">
+                        No external certifications provided.
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
 
-        <!-- Right Column: Stats & Actions -->
-        <div>
-            <div class="card glass" style="padding: 1.5rem; border-radius: 20px; position: sticky; top: 2rem;">
-                <h3 style="font-weight: 600; margin-bottom: 1.25rem;">Candidate Stats</h3>
+        <!-- Sidebar Analytics & Actions -->
+        <div class="sidebar-column">
+            <div class="glass sidebar-widget">
+                <h3 style="margin-bottom: 1.75rem; font-family: var(--font-display); font-size: 1.4rem;">Talent Analytics</h3>
                 
-                <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 12px;">
-                        <span style="color: var(--text-muted); font-size: 0.9rem;">Total Applications</span>
-                        <span style="font-weight: 700; font-family: var(--font-mono);">{{ applications.count }}</span>
+                <div style="background: var(--surface-3); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 2rem; text-align: center;">
+                    <div class="overline" style="margin-bottom: 0.25rem; font-size: 0.6rem;">Match Propensity</div>
+                    <div style="font-size: 3rem; font-weight: 800; color: var(--accent); font-family: var(--font-display); line-height: 1;">
+                        {% if applications.first %}{{ applications.first.match_score|floatformat:1 }}{% else %}0.0{% endif %}
                     </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 12px;">
-                        <span style="color: var(--text-muted); font-size: 0.9rem;">Graduation Year</span>
-                        <span style="font-weight: 700; font-family: var(--font-mono);">{{ profile.graduation_year }}</span>
+                    <p style="font-size: 0.65rem; color: var(--text-muted); margin-top: 0.5rem; font-family: var(--font-mono);">SYNCED WITH REQUISITION</p>
+                </div>
+
+                <div style="margin-bottom: 2.5rem;">
+                    <div class="analytic-row">
+                        <span class="text-muted" style="font-size: 0.85rem;">Account Joined</span>
+                        <span style="font-weight: 700; font-family: var(--font-mono); font-size: 0.85rem;">{{ profile.user.date_joined|date:"M Y" }}</span>
+                    </div>
+                    <div class="analytic-row">
+                        <span class="text-muted" style="font-size: 0.85rem;">Academic CGPA</span>
+                        <span style="font-weight: 700; font-family: var(--font-mono); font-size: 0.85rem;">{{ profile.cgpa }}</span>
+                    </div>
+                    <div class="analytic-row">
+                        <span class="text-muted" style="font-size: 0.85rem;">Graduation</span>
+                        <span style="font-weight: 700; font-family: var(--font-mono); font-size: 0.85rem;">{{ profile.graduation_year }}</span>
                     </div>
                 </div>
 
-                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                    {% if profile.resume_file %}
-                    <a href="{{ profile.resume_file.url }}" target="_blank" class="btn btn-primary" style="width: 100%; justify-content: center; border-radius: 12px;">
-                        <i data-lucide="file-down" style="width:16px;height:16px;"></i> Download Resume
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <span class="overline" style="text-align: center; margin-bottom: 0;">Recruitment Actions</span>
+                    
+                    {% if applications.first %}
+                    <a href="{% url 'send_job_offer' applications.first.pk %}" class="btn btn-primary" style="padding: 1rem; border-radius: 12px; font-weight: 700;">
+                        <i data-lucide="send" style="width:16px;height:16px;"></i> ISSUE JOB OFFER
                     </a>
                     {% endif %}
-                    <a href="mailto:{{ profile.user.email }}" class="btn btn-outline" style="width: 100%; justify-content: center; border-radius: 12px;">
-                        <i data-lucide="mail" style="width:16px;height:16px;"></i> Send Email
+                    
+                    <a href="mailto:{{ profile.user.email }}" class="btn btn-outline" style="padding: 1rem; border-radius: 12px;">
+                        <i data-lucide="mail" style="width:16px;height:16px;"></i> CONTACT CANDIDATE
                     </a>
                 </div>
-
             </div>
         </div>
     </div>

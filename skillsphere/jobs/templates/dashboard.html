@@ -2,195 +2,562 @@
 
 {% block title %}Dashboard | SkillSphere{% endblock %}
 
+{% block extra_head %}
+<style>
+    /* Dashboard Premium Styling */
+    .dashboard-wrapper {
+        position: relative;
+        padding-top: 3rem;
+    }
+
+    .dashboard-bg-accent {
+        position: absolute;
+        top: -150px;
+        left: -150px;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(201,169,110,0.06) 0%, transparent 70%);
+        z-index: -1;
+        pointer-events: none;
+    }
+
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 3.5rem;
+        flex-wrap: wrap;
+        gap: 2rem;
+    }
+
+    .header-title-group .overline {
+        color: var(--accent-2);
+        font-weight: 700;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .header-title-group h1 {
+        font-size: 3.5rem;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+        margin-bottom: 0.75rem;
+    }
+
+    /* Stats Section */
+    .stats-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 4rem;
+    }
+
+    .stat-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+        padding: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        transition: all var(--transition-slow);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card:hover {
+        border-color: var(--accent-2);
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .stat-card::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: var(--accent-2);
+        opacity: 0;
+        transition: opacity var(--transition);
+    }
+
+    .stat-card:hover::after {
+        opacity: 0.4;
+    }
+
+    .stat-icon-box {
+        width: 64px;
+        height: 64px;
+        background: var(--surface-2);
+        border-radius: var(--radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--accent);
+        border: 1px solid var(--border);
+        transition: all var(--transition);
+    }
+
+    .stat-card:hover .stat-icon-box {
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent);
+    }
+
+    .stat-content .stat-value {
+        display: block;
+        font-family: var(--font-display);
+        font-size: 2.25rem;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 0.25rem;
+        color: var(--text);
+    }
+
+    .stat-content .stat-label {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-weight: 600;
+    }
+
+    /* Content Grid */
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .section-header h2 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+        gap: 2rem;
+    }
+
+    /* Dashboard Item Card (Jobs/Applications) */
+    .dash-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+        padding: 2rem;
+        transition: all var(--transition-slow);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        position: relative;
+    }
+
+    .dash-card:hover {
+        border-color: var(--accent-2);
+        box-shadow: var(--shadow-xl);
+        transform: translateY(-8px);
+    }
+
+    .dash-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1.5rem;
+    }
+
+    .dash-card-title {
+        font-family: var(--font-display);
+        font-size: 1.4rem;
+        font-weight: 700;
+        line-height: 1.3;
+        margin-bottom: 0.4rem;
+        color: var(--text);
+    }
+
+    .dash-card-subtitle {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--accent-2);
+        font-weight: 700;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .status-pill {
+        padding: 0.4rem 0.8rem;
+        border-radius: var(--radius-md);
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .status-pending { background: rgba(201,169,110,0.1); color: var(--accent-2); border: 1px solid rgba(201,169,110,0.2); }
+    .status-shortlisted { background: rgba(26,122,74,0.1); color: var(--success); border: 1px solid rgba(26,122,74,0.2); }
+    .status-rejected { background: rgba(220,53,69,0.1); color: var(--danger); border: 1px solid rgba(220,53,69,0.2); }
+    .status-open { background: rgba(26,26,46,0.08); color: var(--accent); border: 1px solid rgba(26,26,46,0.1); }
+
+    .dash-card-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding: 1.25rem 0;
+        border-top: 1px solid var(--border-subtle);
+        border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        font-weight: 500;
+    }
+
+    .dash-card-footer {
+        margin-top: auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .action-group {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    /* Score Visualization */
+    .score-metric {
+        text-align: right;
+    }
+
+    .score-metric .label {
+        font-family: var(--font-mono);
+        font-size: 0.6rem;
+        color: var(--text-subtle);
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 0.1rem;
+    }
+
+    .score-metric .value {
+        font-family: var(--font-display);
+        font-size: 1.25rem;
+        font-weight: 800;
+    }
+
+    /* Recruiter Specific Applicants Count */
+    .applicants-count-box {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: var(--surface-2);
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+    }
+
+    .count-unit {
+        text-align: center;
+    }
+
+    .count-unit .num {
+        display: block;
+        font-weight: 800;
+        font-size: 1rem;
+        color: var(--text);
+    }
+
+    .count-unit .txt {
+        display: block;
+        font-size: 0.6rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+    }
+
+    /* Empty State */
+    .premium-empty-state {
+        padding: 6rem 2rem;
+        text-align: center;
+        background: var(--surface);
+        border-radius: var(--radius-xl);
+        border: 1px dashed var(--border-hover);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .premium-empty-state i {
+        color: var(--accent-2);
+        margin-bottom: 1.5rem;
+        opacity: 0.5;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .header-title-group h1 {
+            font-size: 2.5rem;
+        }
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
+<div class="dashboard-wrapper animate-fade-in">
+    <div class="dashboard-bg-accent"></div>
 
-<!-- Page header -->
-<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3rem; flex-wrap: wrap; gap: 1rem;">
-    <div>
-        <span class="overline">
-            {% if role == 'candidate' %}Candidate{% elif role == 'recruiter' %}Recruiter{% endif %} Dashboard
-        </span>
-        <h1 style="font-family: var(--font-display); font-size: 2.4rem; font-weight: 700; letter-spacing: -0.02em; margin-top: 0.3rem;">
-            Dashboard
-        </h1>
-        <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 0.3rem; font-family: var(--font-sans);">
-            {% if role == 'candidate' %}Track your job applications and their current status.
-            {% elif role == 'recruiter' %}Manage your posted jobs and review applicants.{% endif %}
-        </p>
+    <!-- Header Section -->
+    <header class="dashboard-header">
+        <div class="header-title-group">
+            <span class="overline">
+                {% if role == 'candidate' %}Candidate{% elif role == 'recruiter' %}Executive{% endif %} Control Center
+            </span>
+            <h1>
+                {% if role == 'candidate' %}Welcome, {{ request.user.get_full_name|default:request.user.username }}{% else %}Recruitment Pulse{% endif %}
+            </h1>
+            <p class="text-muted" style="font-size: 1.1rem; max-width: 600px;">
+                {% if role == 'candidate' %}
+                    Track your career trajectory and manage active applications in real-time.
+                {% else %}
+                    Oversee your talent pipeline and manage active listings with precision.
+                {% endif %}
+            </p>
+        </div>
+
+        <div class="header-actions">
+            {% if role == 'recruiter' %}
+            <a href="{% url 'job_create' %}" class="btn btn-navy" style="padding: 1rem 2rem; border-radius: var(--radius-md);">
+                <i data-lucide="plus-circle" style="width:18px;height:18px;"></i>
+                New Position
+            </a>
+            {% elif role == 'candidate' %}
+            <a href="{% url 'job_list' %}" class="btn btn-primary" style="padding: 1rem 2rem; border-radius: var(--radius-md);">
+                <i data-lucide="compass" style="width:18px;height:18px;"></i>
+                Explore Roles
+            </a>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- Key Metrics -->
+    <div class="stats-container">
+        {% if role == 'candidate' %}
+        <div class="stat-card">
+            <div class="stat-icon-box"><i data-lucide="send" style="width:28px;height:28px;"></i></div>
+            <div class="stat-content">
+                <span class="stat-value">{{ applications.count }}</span>
+                <span class="stat-label">Applications</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon-box" style="color: var(--success);"><i data-lucide="check-circle" style="width:28px;height:28px;"></i></div>
+            <div class="stat-content">
+                <span class="stat-value">{{ shortlisted_count|default:"0" }}</span>
+                <span class="stat-label">Shortlisted</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon-box" style="color: var(--accent-2);"><i data-lucide="calendar" style="width:28px;height:28px;"></i></div>
+            <div class="stat-content">
+                <span class="stat-value">{{ interview_count|default:"0" }}</span>
+                <span class="stat-label">Interviews</span>
+            </div>
+        </div>
+        {% elif role == 'recruiter' %}
+        <div class="stat-card">
+            <div class="stat-icon-box"><i data-lucide="briefcase" style="width:28px;height:28px;"></i></div>
+            <div class="stat-content">
+                <span class="stat-value">{{ jobs.count }}</span>
+                <span class="stat-label">Active Listings</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon-box" style="color: var(--info);"><i data-lucide="users" style="width:28px;height:28px;"></i></div>
+            <div class="stat-content">
+                <span class="stat-value">{{ total_applicants|default:"0" }}</span>
+                <span class="stat-label">Total Applicants</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon-box" style="color: var(--success);"><i data-lucide="award" style="width:28px;height:28px;"></i></div>
+            <div class="stat-content">
+                <span class="stat-value">{{ qualified_count|default:"0" }}</span>
+                <span class="stat-label">Qualified Leads</span>
+            </div>
+        </div>
+        {% endif %}
     </div>
-    {% if role == 'recruiter' %}
-    <a href="{% url 'job_create' %}" class="btn btn-primary" style="font-size: 0.82rem; padding: 0.7rem 1.5rem;">
-        <i data-lucide="plus" style="width:14px;height:14px;"></i> Post a Job
-    </a>
-    {% elif role == 'candidate' %}
-    <a href="{% url 'job_list' %}" class="btn btn-outline" style="font-size: 0.82rem; padding: 0.7rem 1.5rem;">
-        Browse Jobs →
-    </a>
-    {% endif %}
-</div>
 
-<!-- ── Candidate View ──────────────────────────────────────── -->
-{% if role == 'candidate' %}
-
-{% if applications %}
-<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.5rem;">
-    {% for application in applications %}
-    <div class="card animate-fade-in" style="display: flex; flex-direction: column;">
-
-        <!-- Accent top stripe -->
-        <div style="height: 2px; background: linear-gradient(90deg, var(--accent-2), transparent); margin: -2rem -2rem 1.75rem; border-radius: var(--radius-lg) var(--radius-lg) 0 0;"></div>
-
-        <!-- Title & badge -->
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; margin-bottom: 1rem;">
-            <h3 style="font-family: var(--font-display); font-size: 1rem; font-weight: 700; line-height: 1.35;">
-                <a href="{% url 'job_detail' application.job.pk %}" style="text-decoration: none; color: inherit;">
-                    {{ application.job.title }}
-                </a>
-            </h3>
-            <span class="badge badge-{% if application.status == 'pending' %}warning{% elif application.status == 'shortlisted' %}success{% elif application.status == 'rejected' %}danger{% else %}primary{% endif %}" style="flex-shrink:0;">
-                {{ application.get_status_display }}
-            </span>
+    <!-- Main Section Grid -->
+    <section class="animate-fade-in delay-2">
+        <div class="section-header">
+            <h2>
+                {% if role == 'candidate' %}Active Engagements{% else %}Current Listings{% endif %}
+            </h2>
+            {% if role == 'candidate' %}
+            <a href="{% url 'my_applications' %}" class="btn btn-ghost" style="font-size: 0.85rem; font-weight: 700;">
+                View History <i data-lucide="chevron-right" style="width:14px;height:14px;"></i>
+            </a>
+            {% endif %}
         </div>
 
-        <!-- Meta -->
-        <div style="display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem;">
-            <span style="display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);">
-                <i data-lucide="building-2" style="width:11px;height:11px;"></i>
-                {{ application.job.recruiter.company_name }}
-            </span>
-            <span style="display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);">
-                <i data-lucide="map-pin" style="width:11px;height:11px;"></i>
-                {{ application.job.location }}
-            </span>
-        </div>
+        {% if role == 'candidate' %}
+            {% if applications %}
+            <div class="dashboard-grid">
+                {% for application in applications %}
+                <div class="dash-card animate-fade-in delay-{{ forloop.counter|add:2 }}">
+                    <div class="dash-card-header">
+                        <div>
+                            <h3 class="dash-card-title">
+                                <a href="{% url 'job_detail' application.job.pk %}" style="text-decoration: none; color: inherit;">{{ application.job.title }}</a>
+                            </h3>
+                            <div class="dash-card-subtitle">
+                                <i data-lucide="building-2" style="width:14px;height:14px;"></i>
+                                {{ application.job.recruiter.company_name }}
+                            </div>
+                        </div>
+                        <span class="status-pill status-{{ application.status }}">
+                            {{ application.get_status_display }}
+                        </span>
+                    </div>
 
-        <!-- Footer -->
-        <div style="margin-top: auto; padding-top: 1.25rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-subtle);">
-                Applied {{ application.applied_at|timesince }} ago
-            </span>
-            <a href="{% url 'job_analysis' application.job.pk %}" style="text-decoration: none;">
-                <div style="text-align: right;">
-                    <div style="font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.1rem;">Match Score</div>
-                    <div style="font-family: var(--font-display); font-size: 0.9rem; font-weight: 700; color: {% if application.match_score >= 8 %}var(--success){% elif application.match_score >= 5 %}var(--accent){% elif application.match_score == 0 %}var(--text-muted){% else %}var(--danger){% endif %};">
-                        {% if application.match_score == 0.0 %}N/A{% else %}{{ application.match_score|floatformat:1 }} / 10{% endif %}
+                    <div class="dash-card-meta">
+                        <div class="meta-item">
+                            <i data-lucide="map-pin" style="width:14px;height:14px;"></i>
+                            {{ application.job.location }}
+                        </div>
+                        <div class="meta-item">
+                            <i data-lucide="clock" style="width:14px;height:14px;"></i>
+                            Applied {{ application.applied_at|timesince }} ago
+                        </div>
+                    </div>
+
+                    <div class="dash-card-footer">
+                        <div class="action-group">
+                            <a href="{% url 'job_analysis' application.job.pk %}" class="btn btn-outline" style="padding: 0.6rem 1.25rem; font-size: 0.8rem; font-weight: 700; border-radius: var(--radius-md);">
+                                Match Details
+                            </a>
+                        </div>
+                        <div class="score-metric">
+                            <span class="label">Match Score</span>
+                            <span class="value" style="color: {% if application.match_score >= 8 %}var(--success){% elif application.match_score >= 5 %}var(--accent-2){% elif application.match_score == 0 %}var(--text-muted){% else %}var(--danger){% endif %};">
+                                {% if application.match_score == 0.0 %}N/A{% else %}{{ application.match_score|floatformat:1 }}<span style="font-size: 0.75rem; font-weight: 400; color: var(--text-subtle);">/10</span>{% endif %}
+                            </span>
+                        </div>
                     </div>
                 </div>
-            </a>
-        </div>
-    </div>
-    {% endfor %}
-</div>
-
-{% else %}
-<!-- Empty state -->
-<div class="card" style="text-align: center; padding: 5rem 2rem;">
-    <div style="width:56px;height:56px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;color:var(--text-subtle);">
-        <i data-lucide="file-x" style="width:24px;height:24px;"></i>
-    </div>
-    <h3 style="font-family:var(--font-display);font-size:1.2rem;font-weight:700;margin-bottom:0.5rem;">No applications yet</h3>
-    <p style="color:var(--text-muted);font-size:0.9rem;font-family:var(--font-sans);margin-bottom:1.75rem;">
-        You haven't applied to any jobs. Start exploring opportunities.
-    </p>
-    <a href="{% url 'job_list' %}" class="btn btn-primary" style="font-size:0.85rem;padding:0.75rem 1.75rem;">
-        Browse Jobs →
-    </a>
-</div>
-{% endif %}
-
-<!-- ── Recruiter View ──────────────────────────────────────── -->
-{% elif role == 'recruiter' %}
-
-{% if jobs %}
-<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.5rem;">
-    {% for job in jobs %}
-    <div class="card animate-fade-in" style="display: flex; flex-direction: column;">
-
-        <!-- Accent top stripe -->
-        <div style="height: 2px; background: linear-gradient(90deg, var(--accent-2), transparent); margin: -2rem -2rem 1.75rem; border-radius: var(--radius-lg) var(--radius-lg) 0 0;"></div>
-
-        <!-- Title & badge -->
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; margin-bottom: 1rem;">
-            <h3 style="font-family: var(--font-display); font-size: 1rem; font-weight: 700; line-height: 1.35;">
-                <a href="{% url 'job_detail' job.pk %}" style="text-decoration: none; color: inherit;">
-                    {{ job.title }}
-                </a>
-            </h3>
-            <span class="badge badge-{% if job.status == 'open' %}success{% else %}neutral{% endif %}" style="flex-shrink:0;">
-                {{ job.get_status_display }}
-            </span>
-        </div>
-
-        <!-- Meta -->
-        <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem;">
-            <span style="display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);">
-                <i data-lucide="map-pin" style="width:11px;height:11px;"></i> {{ job.location }}
-            </span>
-            <span style="display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);">
-                <i data-lucide="banknote" style="width:11px;height:11px;"></i> {{ job.salary_range }}
-            </span>
-        </div>
-
-        <!-- Applicant count + actions -->
-        <div style="margin-top: auto; padding-top: 1.25rem; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 0.75rem;">
-            {% if job.skill_requirements.count == 0 %}
-            <div style="display: flex; align-items: center; gap: 0.5rem; font-family: var(--font-mono); font-size: 0.7rem; color: #f59e0b; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); border-radius: 8px; padding: 0.4rem 0.75rem;">
-                <i data-lucide="alert-triangle" style="width:12px;height:12px;"></i> No skills set — scores will be 0.0
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="premium-empty-state">
+                <i data-lucide="inbox" style="width:64px;height:64px;"></i>
+                <h3>No Active Applications</h3>
+                <p class="text-muted" style="max-width: 400px; margin: 0 auto 2rem;">
+                    You haven't initiated any applications yet. Discover roles that align with your unique skill set.
+                </p>
+                <a href="{% url 'job_list' %}" class="btn btn-primary">Discover Jobs</a>
             </div>
             {% endif %}
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <a href="{% url 'job_applicants' job.pk %}" style="text-decoration: none;">
-                    <span style="
-                        display: inline-flex; align-items: center; gap: 0.5rem;
-                        font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-muted);
-                        padding: 0.2rem 0.5rem; background: rgba(255,255,255,0.03); border-radius: 4px;
-                    ">
-                        <i data-lucide="users" style="width:13px;height:13px;"></i>
-                        {{ job.application_set.count }} Total
-                    </span>
-                    {% if job.qualified_applicants_count > 0 %}
-                    <span style="
-                        display: inline-flex; align-items: center; gap: 0.5rem;
-                        font-family: var(--font-mono); font-size: 0.78rem; color: var(--success);
-                        padding: 0.2rem 0.5rem; background: rgba(34,197,94,0.1); border-radius: 4px;
-                    ">
-                        <i data-lucide="award" style="width:13px;height:13px;"></i>
-                        {{ job.qualified_applicants_count }} Qualified
-                    </span>
+
+        {% elif role == 'recruiter' %}
+            {% if jobs %}
+            <div class="dashboard-grid">
+                {% for job in jobs %}
+                <div class="dash-card animate-fade-in delay-{{ forloop.counter|add:2 }}">
+                    <div class="dash-card-header">
+                        <div style="max-width: 70%;">
+                            <h3 class="dash-card-title">
+                                <a href="{% url 'job_detail' job.pk %}" style="text-decoration: none; color: inherit;">{{ job.title }}</a>
+                            </h3>
+                            <div class="dash-card-subtitle">
+                                <i data-lucide="calendar" style="width:14px;height:14px;"></i>
+                                Posted {{ job.created_at|date:"M d, Y" }}
+                            </div>
+                        </div>
+                        <span class="status-pill status-open">
+                            {{ job.get_status_display }}
+                        </span>
+                    </div>
+
+                    <div class="dash-card-meta">
+                        <div class="meta-item">
+                            <i data-lucide="map-pin" style="width:14px;height:14px;"></i>
+                            {{ job.location }}
+                        </div>
+                        <div class="meta-item">
+                            <i data-lucide="banknote" style="width:14px;height:14px;"></i>
+                            {{ job.salary_range }}
+                        </div>
+                    </div>
+
+                    <div class="dash-card-footer">
+                        <div class="applicants-count-box">
+                            <div class="count-unit">
+                                <span class="num">{{ job.application_set.count }}</span>
+                                <span class="txt">Total</span>
+                            </div>
+                            <div style="width:1px; height:20px; background:var(--border);"></div>
+                            <div class="count-unit">
+                                <span class="num" style="color: var(--success);">{{ job.qualified_applicants_count|default:"0" }}</span>
+                                <span class="txt" style="color: var(--success);">Qualified</span>
+                            </div>
+                        </div>
+                        <div class="action-group">
+                            <a href="{% url 'job_edit' job.pk %}" class="btn btn-ghost" style="padding: 0.5rem; min-width: auto; border-radius: var(--radius-md);" title="Edit Listing">
+                                <i data-lucide="edit-3" style="width:18px;height:18px;"></i>
+                            </a>
+                            <a href="{% url 'job_applicants' job.pk %}" class="btn btn-navy" style="padding: 0.75rem 1.5rem; font-size: 0.8rem; font-weight: 700; border-radius: var(--radius-md);">
+                                Review Hub <i data-lucide="arrow-right" style="width:14px;height:14px; margin-left: 0.3rem;"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    {% if job.skill_requirements.count == 0 %}
+                    <div style="margin-top: 1.25rem; display: flex; align-items: center; gap: 0.5rem; font-family: var(--font-mono); font-size: 0.65rem; color: var(--warning); background: rgba(184,134,11,0.05); padding: 0.5rem 1rem; border-radius: var(--radius-md); border: 1px solid rgba(184,134,11,0.1);">
+                        <i data-lucide="alert-circle" style="width:14px;height:14px;"></i>
+                        Strategic Intelligence: Define skill criteria to enable AI matching.
+                    </div>
                     {% endif %}
-                </a>
-                <div style="display: flex; gap: 0.5rem;">
-                    <a href="{% url 'job_skill_manage' job.pk %}" class="btn btn-outline" style="padding: 0.38rem 0.8rem; font-size: 0.74rem; color: var(--accent); border-color: var(--accent);">
-                        <i data-lucide="list-checks" style="width:12px;height:12px;"></i> Skills
-                    </a>
-                    <a href="{% url 'job_edit' job.pk %}" class="btn btn-outline" style="padding: 0.38rem 0.8rem; font-size: 0.74rem;">
-                        Edit
-                    </a>
-                    <a href="{% url 'job_applicants' job.pk %}" class="btn btn-primary" style="padding: 0.38rem 1rem; font-size: 0.74rem;">
-                        Review →
-                    </a>
                 </div>
+                {% endfor %}
             </div>
-        </div>
-    </div>
-    {% endfor %}
+            {% else %}
+            <div class="premium-empty-state">
+                <i data-lucide="briefcase" style="width:64px;height:64px;"></i>
+                <h3>No Active Listings</h3>
+                <p class="text-muted" style="max-width: 400px; margin: 0 auto 2rem;">
+                    Your workspace is currently quiet. Initiate a new search to discover exceptional talent.
+                </p>
+                <a href="{% url 'job_create' %}" class="btn btn-navy">Publish First Position</a>
+            </div>
+            {% endif %}
+        {% endif %}
+    </section>
 </div>
 
-{% else %}
-<!-- Empty state -->
-<div class="card" style="text-align: center; padding: 5rem 2rem;">
-    <div style="width:56px;height:56px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;color:var(--text-subtle);">
-        <i data-lucide="briefcase" style="width:24px;height:24px;"></i>
-    </div>
-    <h3 style="font-family:var(--font-display);font-size:1.2rem;font-weight:700;margin-bottom:0.5rem;">No jobs posted yet</h3>
-    <p style="color:var(--text-muted);font-size:0.9rem;font-family:var(--font-sans);margin-bottom:1.75rem;">
-        Create your first job listing to start receiving applications.
-    </p>
-    <a href="{% url 'job_create' %}" class="btn btn-primary" style="font-size:0.85rem;padding:0.75rem 1.75rem;">
-        Post a Job →
-    </a>
-</div>
-{% endif %}
-
-{% endif %}
 {% endblock %}
+
+{% block extra_js %}
+<script>
+    lucide.createIcons();
+</script>
+{% endblock %}
+

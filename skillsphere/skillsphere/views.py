@@ -1,8 +1,39 @@
+from django.db import DEFAULT_DB_ALIAS, connections
+from django.db.migrations.executor import MigrationExecutor
+from django.db.utils import DatabaseError
+from django.http import HttpResponse
 from django.shortcuts import render
 from accounts.models import CandidateProfile
 from jobs.models import JobPost, Application
 from skills.models import CandidateSkill, Score, Skill
 from interviews.models import Interview
+
+ESSENTIAL_TABLES = {'django_migrations', 'accounts_user'}
+
+
+def health(request):
+    try:
+        connection = connections[DEFAULT_DB_ALIAS]
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT 1')
+            cursor.fetchone()
+
+        existing_tables = set(connection.introspection.table_names())
+        if missing_tables := sorted(ESSENTIAL_TABLES - existing_tables):
+            return HttpResponse(
+                f"database not migrated: missing {', '.join(missing_tables)}",
+                content_type='text/plain',
+                status=503,
+            )
+
+        executor = MigrationExecutor(connection)
+        targets = executor.loader.graph.leaf_nodes()
+        if executor.migration_plan(targets):
+            return HttpResponse('pending migrations', content_type='text/plain', status=503)
+    except DatabaseError:
+        return HttpResponse('database unavailable', content_type='text/plain', status=503)
+
+    return HttpResponse('ok', content_type='text/plain')
 
 
 def home(request):

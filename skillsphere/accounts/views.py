@@ -86,11 +86,22 @@ def profile_view(request):
         total_jobs = JobPost.objects.filter(recruiter=profile).count()
         total_interviews = Interview.objects.filter(job__recruiter=profile).count()
 
+    # Fetch Certificates and Offers if candidate
+    certificates = []
+    job_offers = []
+    if user.role == 'candidate':
+        from skills.models import Certificate
+        from jobs.models import JobOffer
+        certificates = Certificate.objects.filter(candidate_skill__candidate=profile)
+        job_offers = JobOffer.objects.filter(candidate=profile).select_related('job', 'job__recruiter')
+
     context = {
         'user_form': user_form,
         'profile_form': profile_form,
         'role': user.role,
         'skills': skills,
+        'certificates': certificates,
+        'job_offers': job_offers,
         'total_jobs': total_jobs,
         'total_interviews': total_interviews,
     }
@@ -128,9 +139,17 @@ def candidate_detail(request, pk):
 
     applications = Application.objects.filter(candidate=profile).select_related('job', 'job__recruiter')
     
+    # Fetch Certificates and Offers
+    from skills.models import Certificate
+    from jobs.models import JobOffer
+    certificates = Certificate.objects.filter(candidate_skill__candidate=profile)
+    job_offers = JobOffer.objects.filter(candidate=profile).select_related('job', 'job__recruiter')
+
     context = {
         'profile': profile,
         'skills': skills,
+        'certificates': certificates,
+        'job_offers': job_offers,
         'applications': applications,
     }
     return render(request, 'candidate_detail.html', context)
