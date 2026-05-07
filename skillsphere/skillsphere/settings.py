@@ -165,6 +165,34 @@ DATABASES = {
 }
 
 if DATABASES['default'] is None:
+    database_env_names = (
+        'DATABASE_URL',
+        'DATABASE_PRIVATE_URL',
+        'POSTGRES_URL',
+        'POSTGRESQL_URL',
+        'PGDATABASE',
+        'PGUSER',
+        'PGPASSWORD',
+        'PGHOST',
+        'PGPORT',
+        'POSTGRES_DB',
+        'POSTGRES_USER',
+        'POSTGRES_PASSWORD',
+        'POSTGRES_HOST',
+        'POSTGRES_PORT',
+    )
+    railway_env_names = (
+        'RAILWAY_ENVIRONMENT_ID',
+        'RAILWAY_ENVIRONMENT_NAME',
+        'RAILWAY_PROJECT_ID',
+        'RAILWAY_SERVICE_ID',
+        'RAILWAY_SERVICE_NAME',
+        'RAILWAY_DEPLOYMENT_ID',
+    )
+    present_database_env = ', '.join(name for name in database_env_names if os.getenv(name)) or 'none'
+    present_railway_env = ', '.join(name for name in railway_env_names if os.getenv(name)) or 'none'
+    print(f'Database env vars present: {present_database_env}')
+    print(f'Railway env vars present: {present_railway_env}')
     raise ImproperlyConfigured(
         'Database configuration is missing. Set DATABASE_URL on this app service. '
         'On Railway, add DATABASE_URL=${{ Postgres.DATABASE_URL }} to the Django service '
