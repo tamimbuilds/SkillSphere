@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Open+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+=======
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+>>>>>>> 4b61ede (static-ignore)
 
 /* ============================================================
    DESIGN TOKENS — Premium White Theme
@@ -27,7 +31,10 @@
 
     /* Typography */
     --text:           #0f0f14;       /* near-black ink */
+<<<<<<< HEAD
     --text-main:      #0f0f14;       /* Alias for primary text */
+=======
+>>>>>>> 4b61ede (static-ignore)
     --text-muted:     rgba(15, 15, 20, 0.50);
     --text-subtle:    rgba(15, 15, 20, 0.30);
 
@@ -40,8 +47,11 @@
     --radius-md:      12px;
     --radius-lg:      18px;
     --radius-xl:      28px;
+<<<<<<< HEAD
     --radius-2xl:     40px;
     --radius-3xl:     60px;
+=======
+>>>>>>> 4b61ede (static-ignore)
     --radius-full:    9999px;
 
     /* Shadows — crisp, refined */
@@ -53,7 +63,11 @@
 
     /* Fonts */
     --font-display:   'Playfair Display', Georgia, 'Times New Roman', serif;
+<<<<<<< HEAD
     --font-sans:      'Open Sans', system-ui, -apple-system, sans-serif;
+=======
+    --font-sans:      'Inter', system-ui, -apple-system, sans-serif;
+>>>>>>> 4b61ede (static-ignore)
     --font-mono:      'Space Mono', 'Courier New', monospace;
 
     /* Transitions */
@@ -586,6 +600,7 @@ footer {
 
 .uppercase { text-transform: uppercase; letter-spacing: 0.08em; }
 .mono-sm   { font-family: var(--font-mono); font-size: 0.72rem; }
+<<<<<<< HEAD
 .italic    { font-style: italic; }
 
 .text-gradient {
@@ -594,6 +609,8 @@ footer {
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
+=======
+>>>>>>> 4b61ede (static-ignore)
 
 .divider {
     width: 40px;
