@@ -42,9 +42,9 @@
                     {% for skill in skills %}
                     <div class="card glass" style="padding: 1.25rem; border-radius: 16px;">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
-                            <h4 style="font-weight: 600; font-size: 1.1rem;">{{ skill.skill.name }}</h4>
+                            <h4 style="font-weight: 600; font-size: 1.1rem;">{{ skill.skill.skill_name }}</h4>
                             <span style="font-family: var(--font-mono); font-size: 0.7rem; padding: 0.2rem 0.5rem; background: rgba(255,255,255,0.05); border-radius: 4px; color: var(--text-muted);">
-                                {{ skill.experience_level|capfirst }}
+                                {{ skill.years_of_experience }} yr{{ skill.years_of_experience|pluralize }}
                             </span>
                         </div>
                         
@@ -98,10 +98,16 @@
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    {% if profile.resume_file %}
+                    <a href="{{ profile.resume_file.url }}" target="_blank" class="btn btn-primary" style="width: 100%; justify-content: center; border-radius: 12px;">
+                        <i data-lucide="file-down" style="width:16px;height:16px;"></i> Download Resume
+                    </a>
+                    {% endif %}
                     <a href="mailto:{{ profile.user.email }}" class="btn btn-outline" style="width: 100%; justify-content: center; border-radius: 12px;">
                         <i data-lucide="mail" style="width:16px;height:16px;"></i> Send Email
                     </a>
                 </div>
+
             </div>
         </div>
     </div>

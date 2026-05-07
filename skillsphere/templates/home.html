@@ -3,150 +3,349 @@
 
 {% block title %}SkillSphere | Empowering Your Professional Journey{% endblock %}
 
+{% block extra_head %}
+<style>
+/* ── Hero ──────────────────────────────────────────────── */
+.hero { padding: 7rem 0 5rem; text-align: center; position: relative; }
+.hero-bg {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image: radial-gradient(circle, rgba(26,26,46,0.06) 1px, transparent 1px);
+    background-size: 30px 30px;
+    mask-image: radial-gradient(ellipse 80% 70% at 50% 0%, black 20%, transparent 80%);
+    -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 0%, black 20%, transparent 80%);
+}
+.hero-badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-family: var(--font-mono); font-size: 0.68rem;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-2);
+    background: rgba(201,169,110,0.09); border: 1px solid rgba(201,169,110,0.28);
+    padding: 0.3rem 1rem; border-radius: var(--radius-full); margin-bottom: 2.5rem;
+}
+.hero-badge span { width:5px;height:5px;border-radius:50%;background:var(--accent-2);display:inline-block; animation: pulse-dot 2.5s ease-in-out infinite; }
+.hero h1 {
+    font-family: var(--font-display); font-size: clamp(2.6rem, 6.5vw, 4.8rem);
+    font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 1.5rem; color: var(--text);
+}
+.hero h1 em { color: var(--text-muted); font-weight: 400; font-style: italic; }
+.hero p { font-size: 1.05rem; color: var(--text-muted); max-width: 520px; margin: 0 auto 2.5rem; line-height: 1.85; }
+
+/* ── Stat Bar ─────────────────────────────────────────── */
+.stat-bar {
+    display: inline-flex; gap: 3.5rem; flex-wrap: wrap; justify-content: center;
+    margin-top: 4rem; padding: 1.6rem 3rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-xl); box-shadow: var(--shadow-md);
+}
+.stat-bar-item { text-align: center; }
+.stat-bar-item .val { font-family: var(--font-display); font-size: 2rem; font-weight: 700; color: var(--text); }
+.stat-bar-item .lbl { font-family: var(--font-mono); font-size: 0.63rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.2rem; }
+
+/* ── Section label ────────────────────────────────────── */
+.section-label {
+    font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--accent-2); margin-bottom: 0.6rem; display: block;
+}
+.section-heading { font-family: var(--font-display); font-size: clamp(1.6rem,3.5vw,2.4rem); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 1rem; }
+.section-sub { color: var(--text-muted); font-size: 0.95rem; max-width: 480px; line-height: 1.75; }
+
+/* ── Feature Cards ────────────────────────────────────── */
+.feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap: 1.5rem; margin-top: 3rem; }
+.feature-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 2rem; box-shadow: var(--shadow-sm); position: relative; overflow: hidden;
+    transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+}
+.feature-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(201,169,110,0.4), transparent);
+}
+.feature-card:hover { border-color: var(--border-hover); transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.feature-icon {
+    width: 42px; height: 42px; border-radius: var(--radius-sm);
+    background: var(--surface-3); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1.25rem; color: var(--accent-2);
+}
+.feature-card h3 { font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem; }
+.feature-card p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 1.25rem; }
+.feature-card a { font-family: var(--font-mono); font-size: 0.72rem; color: var(--accent-2); text-decoration: none; letter-spacing: 0.05em; }
+.feature-card a:hover { color: var(--accent); }
+
+/* ── Candidate Cards ──────────────────────────────────── */
+.candidates-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px,1fr)); gap: 1.5rem; margin-top: 3rem; }
+.candidate-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 1.75rem; box-shadow: var(--shadow-sm); overflow: hidden; position: relative;
+    transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+}
+.candidate-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent-2), transparent);
+}
+.candidate-card:hover { border-color: var(--border-hover); transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.candidate-avatar {
+    width: 52px; height: 52px; border-radius: var(--radius-md);
+    background: var(--accent); color: #fff; font-family: var(--font-display);
+    font-size: 1.4rem; font-weight: 700; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.candidate-meta { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); margin-top: 0.25rem; }
+.skill-pill {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    padding: 0.25rem 0.65rem; border-radius: var(--radius-full);
+    font-family: var(--font-mono); font-size: 0.65rem; font-weight: 700;
+    letter-spacing: 0.04em; border: 1px solid var(--border);
+    background: var(--surface-2); color: var(--text-muted);
+    transition: all var(--transition);
+}
+.skill-pill.verified { background: rgba(26,122,74,0.07); border-color: rgba(26,122,74,0.25); color: var(--success); }
+.skill-pill.pending  { background: rgba(184,134,11,0.07); border-color: rgba(184,134,11,0.22); color: var(--warning); }
+.skill-score { font-weight: 700; }
+
+/* ── Skill Bars ───────────────────────────────────────── */
+.skill-bar-row { margin-bottom: 1rem; }
+.skill-bar-top { display: flex; justify-content: space-between; margin-bottom: 0.4rem; font-size: 0.85rem; }
+.skill-bar-track { height: 6px; background: var(--surface-3); border-radius: 99px; overflow: hidden; }
+.skill-bar-fill { height: 100%; border-radius: 99px; transition: width 1s cubic-bezier(0.4,0,0.2,1); }
+
+/* ── CTA ──────────────────────────────────────────────── */
+.cta-section {
+    margin-top: 8rem; text-align: center;
+    padding: 5rem 2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
+    position: relative; overflow: hidden;
+}
+.cta-section::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(201,169,110,0.07), transparent);
+    pointer-events: none;
+}
+.cta-section h2 { font-family: var(--font-display); font-size: clamp(2rem,4vw,3rem); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 1rem; }
+.cta-section p { color: var(--text-muted); font-size: 1rem; max-width: 420px; margin: 0 auto 2.5rem; line-height: 1.8; }
+
+/* divider */
+.home-divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); margin: 6rem 0 0; }
+
+@media (max-width: 768px) {
+    .stat-bar { gap: 2rem; padding: 1.25rem 1.75rem; }
+    .candidates-grid { grid-template-columns: 1fr; }
+}
+</style>
+{% endblock %}
+
 {% block content %}
 
-<!-- ── Hero ─────────────────────────────────────────────────── -->
-<section style="padding: 6rem 0 5rem; text-align: center; position: relative;">
+<!-- ── Hero ─────────────────────────────────────────────── -->
+<section class="hero">
+    <div class="hero-bg" aria-hidden="true"></div>
 
-    <div aria-hidden="true" style="
-        position: absolute; inset: 0;
-        background-image: radial-gradient(circle, rgba(26,26,46,0.07) 1px, transparent 1px);
-        background-size: 32px 32px;
-        mask-image: radial-gradient(ellipse 80% 70% at 50% 0%, black 30%, transparent 85%);
-        pointer-events: none;
-    "></div>
-
-    <span style="
-        display: inline-flex; align-items: center; gap: 0.5rem;
-        font-family: var(--font-mono); font-size: 0.68rem;
-        letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-2);
-        background: rgba(201,169,110,0.08); border: 1px solid rgba(201,169,110,0.25);
-        padding: 0.3rem 1rem; border-radius: var(--radius-full); margin-bottom: 2.5rem;
-    ">
-        <span style="width:5px;height:5px;border-radius:50%;background:var(--accent-2);display:inline-block;"></span>
-        Now in Beta — Join Free
-    </span>
-
-    <h1 style="
-        font-family: var(--font-display);
-        font-size: clamp(2.8rem, 7vw, 5rem);
-        font-weight: 800;
-        letter-spacing: -0.03em;
-        line-height: 1.08;
-        margin-bottom: 1.75rem;
-        color: var(--text);
-    ">
-        Elevate your career<br>
-        <em style="color: var(--text-muted); font-weight: 400; font-style: italic;">with SkillSphere.</em>
-    </h1>
-
-    <p style="
-        font-size: 1.05rem; color: var(--text-muted);
-        max-width: 540px; margin: 0 auto 3rem;
-        line-height: 1.85; font-family: var(--font-sans); font-weight: 400;
-    ">
-        The all-in-one platform to verify skills, find dream jobs, and ace your interviews.
-    </p>
-
-    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-        <a href="{% url 'job_list' %}" class="btn btn-primary">Explore Jobs →</a>
-        <a href="{% url 'skill_list' %}" class="btn btn-outline">Browse Skills</a>
+    <div class="hero-badge">
+        <span></span> Now in Beta &mdash; Join Free
     </div>
 
-    <!-- Stats -->
-    <div style="
-        display: inline-flex; gap: 4rem; flex-wrap: wrap; justify-content: center;
-        margin-top: 4.5rem; padding: 1.75rem 3.5rem;
-        background: var(--surface); border: 1px solid var(--border);
-        border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
-    ">
+    <h1>
+        Elevate your career<br>
+        <em>with SkillSphere.</em>
+    </h1>
+
+    <p>The all-in-one platform to verify skills, discover top talent, and ace your interviews — all in one place.</p>
+
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+        <a href="{% url 'job_list' %}" class="btn btn-primary" style="padding:0.75rem 1.8rem;font-size:0.88rem;">Explore Jobs →</a>
+        <a href="{% url 'skill_list' %}" class="btn btn-outline" style="padding:0.75rem 1.8rem;font-size:0.88rem;">Browse Skills</a>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stat-bar">
         {% if hero_stats %}
             {% for label, value in hero_stats.items %}
-            <div>
-                <div style="font-size:1.9rem;font-weight:700;">{{ value }}</div>
-                <div style="font-size:0.65rem;color:var(--text-muted);">{{ label }}</div>
+            <div class="stat-bar-item">
+                <div class="val">{{ value }}</div>
+                <div class="lbl">{{ label }}</div>
             </div>
             {% endfor %}
         {% else %}
-            <div><div>10k+</div><div>Candidates</div></div>
-            <div><div>2k+</div><div>Jobs</div></div>
-            <div><div>95%</div><div>Placement</div></div>
+            <div class="stat-bar-item"><div class="val">10k+</div><div class="lbl">Candidates</div></div>
+            <div class="stat-bar-item"><div class="val">2k+</div><div class="lbl">Active Jobs</div></div>
+            <div class="stat-bar-item"><div class="val">95%</div><div class="lbl">Placement</div></div>
         {% endif %}
     </div>
 </section>
 
-<!-- ── Cards ───────────────────────────────────────────────── -->
-<section style="margin-top: 5rem;">
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;">
-
-        <div class="card">
+<!-- ── Feature Cards ─────────────────────────────────────── -->
+<section style="margin-top:6rem;">
+    <div style="text-align:center;">
+        <span class="section-label">Platform Features</span>
+        <h2 class="section-heading">Everything you need to succeed</h2>
+        <p class="section-sub" style="margin:0 auto;">From verified skill badges to smart job matching — SkillSphere has you covered at every step of your career.</p>
+    </div>
+    <div class="feature-grid">
+        <div class="feature-card">
+            <div class="feature-icon"><i data-lucide="briefcase" style="width:18px;height:18px;"></i></div>
             <h3>Job Matching</h3>
-            <p>Find jobs based on your verified skills.</p>
-            <a href="{% url 'job_list' %}">Browse Jobs →</a>
+            <p>Discover roles tailored to your verified skill set. Apply with confidence knowing your profile stands out.</p>
+            <a href="{% url 'job_list' %}">Browse all jobs →</a>
         </div>
-
-        <div class="card">
+        <div class="feature-card">
+            <div class="feature-icon"><i data-lucide="award" style="width:18px;height:18px;"></i></div>
             <h3>Skill Assessments</h3>
-            <p>Get certified and prove your expertise.</p>
-            <a href="{% url 'skill_list' %}">Explore Skills →</a>
+            <p>Take rigorous assessments and earn verified certificates that recruiters actually trust.</p>
+            <a href="{% url 'skill_list' %}">Explore skills →</a>
         </div>
-
-        <div class="card">
+        <div class="feature-card">
+            <div class="feature-icon"><i data-lucide="calendar-check" style="width:18px;height:18px;"></i></div>
             <h3>Interview Hub</h3>
-            <p>Track and manage your interviews.</p>
-            <a href="{% url 'dashboard' %}">Dashboard →</a>
+            <p>Manage interview schedules, track statuses, and get notified instantly — all from your dashboard.</p>
+            <a href="{% url 'dashboard' %}">Go to dashboard →</a>
         </div>
-
     </div>
 </section>
 
-<!-- ── Why Section ─────────────────────────────────────────── -->
-<section style="margin-top: 8rem;">
-
-    <h2>Why SkillSphere?</h2>
-
-    <div class="card" style="padding:2rem;">
-
-        <!-- Skills Progress -->
+<!-- ── Candidate Showcase ─────────────────────────────────── -->
+{% if featured_candidates %}
+<div class="home-divider"></div>
+<section style="margin-top:6rem;">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
         <div>
+            <span class="section-label">Talent Pool</span>
+            <h2 class="section-heading" style="margin-bottom:0.25rem;">Top Verified Candidates</h2>
+            <p class="section-sub">Skilled professionals with verified assessments, ready to be hired.</p>
+        </div>
+        {% if user.is_authenticated and user.role == 'recruiter' %}
+        <a href="{% url 'job_list' %}" class="btn btn-outline" style="font-size:0.78rem;">View All Talent →</a>
+        {% endif %}
+    </div>
 
-            {% if featured_skills %}
-                {% for item in featured_skills %}
-                <div style="margin-bottom:1rem;">
-                    <div style="display:flex;justify-content:space-between;">
-                        <span>{{ item.0 }}</span>
-                        <span>{{ item.1 }}%</span>
+    <div class="candidates-grid">
+        {% for item in featured_candidates %}
+        {% with profile=item.profile skills=item.skills %}
+        <div class="candidate-card">
+
+            <!-- Candidate header -->
+            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;">
+                {% if profile.user.profile_image %}
+                    <img src="{{ profile.user.profile_image.url }}" alt="{{ profile.full_name }}"
+                         style="width:52px;height:52px;border-radius:var(--radius-md);object-fit:cover;border:1px solid var(--border);">
+                {% else %}
+                    <div class="candidate-avatar">{{ profile.full_name|slice:":1" }}</div>
+                {% endif %}
+                <div>
+                    <div style="font-family:var(--font-display);font-size:1.05rem;font-weight:700;">{{ profile.full_name }}</div>
+                    <div class="candidate-meta">
+                        {{ profile.get_specialized_sector_display }} &middot; CGPA {{ profile.cgpa }}
                     </div>
-                    <div style="height:5px;background:#eee;border-radius:3px;overflow:hidden;">
-                        <div style="width:{{ item.1 }}%;background:{{ item.2 }};height:100%;border-radius:3px;" aria-hidden="true">&nbsp;</div>
+                </div>
+            </div>
+
+            <!-- Skills -->
+            <div style="font-family:var(--font-mono);font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:0.75rem;">
+                Skills &amp; Assessments
+            </div>
+            <div style="display:flex;flex-direction:column;gap:0.55rem;">
+                {% for s in skills %}
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:0.6rem 0.85rem;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);">
+                    <div>
+                        <span style="font-family:var(--font-sans);font-size:0.85rem;font-weight:600;">{{ s.skill.skill_name }}</span>
+                        <span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--text-muted);margin-left:0.5rem;">{{ s.proficiency_level }}</span>
+                    </div>
+                    {% if s.has_assessment %}
+                        <span class="skill-pill verified">
+                            <i data-lucide="check-circle" style="width:10px;height:10px;"></i>
+                            <span class="skill-score">{{ s.latest_score.score|floatformat:0 }}%</span>
+                        </span>
+                    {% else %}
+                        <span class="skill-pill pending">
+                            <i data-lucide="clock" style="width:10px;height:10px;"></i> Pending
+                        </span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Footer -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border);">
+                <span style="font-family:var(--font-mono);font-size:0.68rem;color:var(--text-muted);">{{ profile.university|truncatechars:28 }}</span>
+                {% if user.is_authenticated and user.role == 'recruiter' %}
+                <a href="{% url 'candidate_detail' profile.pk %}" class="btn btn-outline" style="padding:0.3rem 0.85rem;font-size:0.72rem;">View Profile →</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endwith %}
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<!-- ── Why SkillSphere ────────────────────────────────────── -->
+<div class="home-divider"></div>
+<section style="margin-top:6rem;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;">
+
+        <!-- Left: copy -->
+        <div>
+            <span class="section-label">Why SkillSphere?</span>
+            <h2 class="section-heading">Skills that speak for themselves</h2>
+            <p class="section-sub">Traditional resumes don't tell the full story. SkillSphere lets you prove your expertise through verified assessments — so employers can see exactly what you're capable of.</p>
+
+            <div style="display:flex;flex-direction:column;gap:1rem;margin-top:2rem;">
+                {% for label in "Verified Skill Badges,Smart Job Matching,Interview Management,Real-time Notifications" %}
+                <div style="display:flex;align-items:center;gap:0.85rem;">
+                    <div style="width:28px;height:28px;border-radius:50%;background:rgba(26,122,74,0.1);border:1px solid rgba(26,122,74,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i data-lucide="check" style="width:13px;height:13px;color:var(--success);"></i>
+                    </div>
+                    <span style="font-size:0.9rem;font-weight:500;">{{ label }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Right: skill popularity bars -->
+        <div class="card" style="padding:2rem;">
+            <div style="font-family:var(--font-mono);font-size:0.65rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-muted);margin-bottom:1.5rem;">
+                Most In-Demand Skills
+            </div>
+            {% if featured_skills %}
+                {% for skill_name, pct, color in featured_skills %}
+                <div class="skill-bar-row">
+                    <div class="skill-bar-top">
+                        <span style="font-weight:500;font-size:0.88rem;">{{ skill_name }}</span>
+                        <span style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);">{{ pct }}%</span>
+                    </div>
+                    <div class="skill-bar-track">
+                        <div class="skill-bar-fill" style="width:{{ pct }}%;background:{{ color }};"></div>
                     </div>
                 </div>
                 {% endfor %}
-
             {% else %}
-                <!-- fallback -->
-                <div>Python 82%</div>
-                <div>React 74%</div>
-                <div>System Design 60%</div>
-                <div>DevOps 48%</div>
+                {% for item in "Python,80|React,72|System Design,61|DevOps,49|UI/UX,44" %}
+                <div class="skill-bar-row">
+                    <div class="skill-bar-top">
+                        <span style="font-weight:500;font-size:0.88rem;">{{ item|cut:"|" }}</span>
+                    </div>
+                    <div class="skill-bar-track"><div class="skill-bar-fill" style="width:70%;background:var(--accent-2);"></div></div>
+                </div>
+                {% endfor %}
             {% endif %}
-
         </div>
-
     </div>
 </section>
 
-<!-- ── CTA ────────────────────────────────────────────────── -->
-<section style="margin-top: 8rem; text-align:center;">
-
-    <h2>Ready to get started?</h2>
-
+<!-- ── CTA ───────────────────────────────────────────────── -->
+<div class="cta-section">
+    <span class="section-label">Get Started Today</span>
+    <h2>Ready to elevate your career?</h2>
+    <p>Join thousands of candidates and recruiters already using SkillSphere to connect talent with opportunity.</p>
     {% if not user.is_authenticated %}
-        <a href="{% url 'register' %}" class="btn btn-primary">Create Account</a>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+        <a href="{% url 'register' %}" class="btn btn-primary" style="padding:0.8rem 2rem;font-size:0.88rem;">Create Free Account →</a>
+        <a href="{% url 'login' %}" class="btn btn-outline" style="padding:0.8rem 2rem;font-size:0.88rem;">Sign In</a>
+    </div>
     {% else %}
-        <a href="{% url 'dashboard' %}" class="btn btn-primary">Go to Dashboard</a>
+    <a href="{% url 'dashboard' %}" class="btn btn-primary" style="padding:0.8rem 2rem;font-size:0.88rem;">Go to Dashboard →</a>
     {% endif %}
-
-</section>
+</div>
 
 {% endblock %}

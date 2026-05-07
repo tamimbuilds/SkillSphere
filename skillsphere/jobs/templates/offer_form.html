@@ -1,38 +1,47 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Create Job Offer</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 0; }
-        .container { width: 60%; margin: 40px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        h4 { color: #333; margin-bottom: 20px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
-        input, textarea, select { width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 14px; }
-        .error { color: red; font-size: 12px; }
-        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; margin-right: 8px; }
-        .btn-primary { background: #007bff; color: white; }
-        .btn-primary:hover { background: #0056b3; }
-        .btn-secondary { background: #6c757d; color: white; }
-        .btn-secondary:hover { background: #545b62; }
-    </style>
-</head>
-<body>
-<div class="container">
-    <h4>Create Job Offer</h4>
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        {% for field in form %}
-        <div>
-            <label>{{ field.label }}</label>
-            {{ field }}
-            {% if field.errors %}
-                <div class="error">{{ field.errors }}</div>
-            {% endif %}
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}SkillSphere | Send Job Offer{% endblock %}
+
+{% block content %}
+<section class="section-header">
+    <span class="badge">Recruitment</span>
+    <h1>Send Job Offer</h1>
+    <p class="section-desc">Formalize the recruitment process by sending an official job offer to the candidate.</p>
+</section>
+
+<div class="row" style="justify-content: center;">
+    <div class="col-8">
+        <div class="card glass">
+            <div class="card-header">
+                <h3 class="card-title">Offer Details</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data" class="form-grid">
+                    {% csrf_token %}
+                    
+                    {% for field in form %}
+                    <div class="form-group {% if field.errors %}error{% endif %}">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <small class="help-text">{{ field.help_text }}</small>
+                        {% endif %}
+                        {% for error in field.errors %}
+                            <p class="error-text">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+
+                    <div class="form-actions" style="margin-top: 2rem; display: flex; gap: 1rem;">
+                        <button type="submit" class="btn btn-primary">
+                            <i data-lucide="send"></i> Send Job Offer
+                        </button>
+                        <a href="javascript:history.back()" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
         </div>
-        {% endfor %}
-        <button type="submit" class="btn btn-primary">Send Offer</button>
-        <a href="{% url 'offer_list' %}" class="btn btn-secondary">Cancel</a>
-    </form>
+    </div>
 </div>
-</body>
-</html>
+{% endblock %}
