@@ -1,12 +1,11 @@
+from accounts.models import CandidateProfile
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.db.migrations.executor import MigrationExecutor
 from django.db.utils import DatabaseError
 from django.http import HttpResponse
 from django.shortcuts import render
-from accounts.models import CandidateProfile
-from jobs.models import JobPost, Application
+from jobs.models import JobPost
 from skills.models import CandidateSkill, Score, Skill
-from interviews.models import Interview
 
 ESSENTIAL_TABLES = {'django_migrations', 'accounts_user'}
 
@@ -36,37 +35,49 @@ def health(request):
     return HttpResponse('ok', content_type='text/plain')
 
 
-def home(request):
-    # ── Platform Stats ──────────────────────────────────────────
+def _build_home_context():
+    context = {
+        'hero_stats': {
+            'Candidates': '0+',
+            'Active Jobs': '0+',
+            'Skills Certified': '0+',
+        },
+        'featured_candidates': [],
+        'featured_skills': [],
+    }
+
     total_candidates = CandidateProfile.objects.count()
     total_jobs = JobPost.objects.count()
     total_skills = Skill.objects.count()
 
-    hero_stats = {
+    context['hero_stats'] = {
         'Candidates': f"{total_candidates:,}+",
         'Active Jobs': f"{total_jobs:,}+",
         'Skills Certified': f"{total_skills:,}+",
     }
 
-    # ── Featured Candidates (up to 6, those who have skills) ────
     candidate_profiles = CandidateProfile.objects.select_related('user').order_by('-id')[:20]
     featured_candidates = []
     for profile in candidate_profiles:
-        skills = CandidateSkill.objects.filter(candidate=profile).select_related('skill')[:3]
-        if not skills:
+        candidate_skills = CandidateSkill.objects.filter(candidate=profile).select_related('skill')[:3]
+        if not candidate_skills:
             continue
-        for s in skills:
-            score_qs = Score.objects.filter(
-                user=profile.user, candidate_skill=s
-            ).order_by('-attempt_number', '-completed_at')
-            s.latest_score = score_qs.first()
-            s.has_assessment = s.latest_score is not None
-        featured_candidates.append({'profile': profile, 'skills': skills})
+
+        for candidate_skill in candidate_skills:
+            latest_score = (
+                Score.objects.filter(user=profile.user, candidate_skill=candidate_skill)
+                .order_by('-attempt_number', '-completed_at')
+                .first()
+            )
+            candidate_skill.latest_score = latest_score
+            candidate_skill.has_assessment = latest_score is not None
+
+        featured_candidates.append({'profile': profile, 'skills': candidate_skills})
         if len(featured_candidates) >= 6:
             break
 
-    # ── Featured Skills (most popular) ──────────────────────────
     from django.db.models import Count
+
     skill_counts = (
         CandidateSkill.objects
         .values('skill__skill_name')
@@ -74,14 +85,27 @@ def home(request):
         .order_by('-count')[:5]
     )
     palette = ['#c9a96e', '#1a1a2e', '#1a7a4a', '#1a4f8c', '#b8860b']
-    featured_skills = [
+
+    context['featured_candidates'] = featured_candidates
+    context['featured_skills'] = [
         (item['skill__skill_name'], min(100, item['count'] * 12 + 30), palette[i])
         for i, item in enumerate(skill_counts)
     ]
+    return context
 
-    context = {
-        'hero_stats': hero_stats,
-        'featured_candidates': featured_candidates,
-        'featured_skills': featured_skills,
-    }
+
+def home(request):
+    try:
+        context = _build_home_context()
+    except DatabaseError:
+        context = {
+            'hero_stats': {
+                'Candidates': '0+',
+                'Active Jobs': '0+',
+                'Skills Certified': '0+',
+            },
+            'featured_candidates': [],
+            'featured_skills': [],
+        }
+
     return render(request, 'home.html', context)
