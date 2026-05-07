@@ -124,10 +124,13 @@ def _build_postgres_url():
 
 
 database_url = os.getenv('DATABASE_URL') or _build_postgres_url()
-is_platform_runtime = any(
-    os.getenv(var)
-    for var in ('RAILWAY_ENVIRONMENT', 'RAILWAY_ENVIRONMENT_NAME', 'RAILWAY_PUBLIC_DOMAIN', 'PORT')
-)
+
+
+def _is_collectstatic_command():
+    return any(arg == 'collectstatic' for arg in os.sys.argv)
+
+
+allow_sqlite_fallback = DEBUG or _is_collectstatic_command()
 
 DATABASES = {
     'default': dj_database_url.parse(database_url, conn_max_age=600) if database_url else (
@@ -135,7 +138,7 @@ DATABASES = {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
         }
-        if DEBUG or not is_platform_runtime
+        if allow_sqlite_fallback
         else None
     )
 }
