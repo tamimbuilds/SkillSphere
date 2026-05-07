@@ -53,7 +53,7 @@ def update_candidate_match_scores(candidate_profile):
     """
     Recalculates and updates match scores for all job applications of a candidate.
     """
-    from .models import Application
+    from jobs.models import Application
     applications = Application.objects.filter(candidate=candidate_profile)
     for app in applications:
         app.match_score = calculate_match_score(candidate_profile, app.job)

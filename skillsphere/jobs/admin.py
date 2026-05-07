@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import JobPost, Application, HiringInvitation, JobOffer
+from jobs.models import JobPost, Application, HiringInvitation, JobOffer
 
 admin.site.register(JobPost)
 admin.site.register(Application)
