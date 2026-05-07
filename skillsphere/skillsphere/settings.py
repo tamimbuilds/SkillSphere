@@ -109,11 +109,11 @@ WSGI_APPLICATION = 'skillsphere.wsgi.application'
 
 
 def _build_postgres_url():
-    pg_name = os.getenv('PGDATABASE')
-    pg_user = os.getenv('PGUSER')
-    pg_password = os.getenv('PGPASSWORD')
-    pg_host = os.getenv('PGHOST')
-    pg_port = os.getenv('PGPORT', '5432')
+    pg_name = os.getenv('PGDATABASE') or os.getenv('POSTGRES_DB')
+    pg_user = os.getenv('PGUSER') or os.getenv('POSTGRES_USER')
+    pg_password = os.getenv('PGPASSWORD') or os.getenv('POSTGRES_PASSWORD')
+    pg_host = os.getenv('PGHOST') or os.getenv('POSTGRES_HOST')
+    pg_port = os.getenv('PGPORT') or os.getenv('POSTGRES_PORT') or '5432'
 
     if all([pg_name, pg_user, pg_password, pg_host]):
         return (
@@ -123,14 +123,35 @@ def _build_postgres_url():
     return None
 
 
-database_url = os.getenv('DATABASE_URL') or _build_postgres_url()
+def _first_env(*names):
+    for name in names:
+        value = os.getenv(name)
+        if value:
+            return value
+    return None
+
+
+database_url = _first_env('DATABASE_URL', 'DATABASE_PRIVATE_URL', 'POSTGRES_URL', 'POSTGRESQL_URL') or _build_postgres_url()
 
 
 def _is_collectstatic_command():
     return any(arg == 'collectstatic' for arg in os.sys.argv)
 
 
-allow_sqlite_fallback = DEBUG or _is_collectstatic_command()
+def _is_railway_environment():
+    return any(
+        os.getenv(name)
+        for name in (
+            'RAILWAY_ENVIRONMENT_ID',
+            'RAILWAY_ENVIRONMENT_NAME',
+            'RAILWAY_PROJECT_ID',
+            'RAILWAY_SERVICE_ID',
+            'RAILWAY_DEPLOYMENT_ID',
+        )
+    )
+
+
+allow_sqlite_fallback = DEBUG or _is_collectstatic_command() or not _is_railway_environment()
 
 DATABASES = {
     'default': dj_database_url.parse(database_url, conn_max_age=600) if database_url else (
@@ -145,7 +166,10 @@ DATABASES = {
 
 if DATABASES['default'] is None:
     raise ImproperlyConfigured(
-        'DATABASE_URL (or PGDATABASE/PGUSER/PGPASSWORD/PGHOST) must be set for deployed environments.'
+        'Database configuration is missing. Set DATABASE_URL on this app service. '
+        'On Railway, add DATABASE_URL=${{ Postgres.DATABASE_URL }} to the Django service '
+        'Variables tab, replacing "Postgres" with the exact name of your PostgreSQL service. '
+        'Alternatively set PGDATABASE, PGUSER, PGPASSWORD, PGHOST, and optionally PGPORT.'
     )
 
 
