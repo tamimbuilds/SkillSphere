@@ -1,5 +1,6 @@
 from unittest.mock import patch
 
+from django.db.utils import DatabaseError
 from django.test import TestCase
 
 
@@ -20,3 +21,13 @@ class HealthViewTests(TestCase):
 
         self.assertEqual(response.status_code, 503)
         self.assertEqual(response.content, b'pending migrations')
+
+
+class HomeViewTests(TestCase):
+    @patch('skillsphere.views._build_home_context', side_effect=DatabaseError('database unavailable'))
+    def test_home_renders_when_database_is_unavailable(self, _build_home_context):
+        response = self.client.get('/', HTTP_HOST='localhost')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Where Global Talent')
+        self.assertContains(response, '0+')
