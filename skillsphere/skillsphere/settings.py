@@ -3,6 +3,7 @@ from pathlib import Path
 from urllib.parse import quote, urlparse
 
 import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -123,13 +124,26 @@ def _build_postgres_url():
 
 
 database_url = os.getenv('DATABASE_URL') or _build_postgres_url()
+is_platform_runtime = any(
+    os.getenv(var)
+    for var in ('RAILWAY_ENVIRONMENT', 'RAILWAY_ENVIRONMENT_NAME', 'RAILWAY_PUBLIC_DOMAIN', 'PORT')
+)
 
 DATABASES = {
-    'default': dj_database_url.parse(database_url, conn_max_age=600) if database_url else {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.parse(database_url, conn_max_age=600) if database_url else (
+        {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+        if DEBUG or not is_platform_runtime
+        else None
+    )
 }
+
+if DATABASES['default'] is None:
+    raise ImproperlyConfigured(
+        'DATABASE_URL (or PGDATABASE/PGUSER/PGPASSWORD/PGHOST) must be set for deployed environments.'
+    )
 
 
 AUTH_PASSWORD_VALIDATORS = [

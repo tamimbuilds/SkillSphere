@@ -2,103 +2,228 @@
 
 {% block title %}Apply for {{ job.title }} | SkillSphere{% endblock %}
 
+{% block extra_head %}
+<style>
+    .application-header {
+        padding: 3rem 0;
+    }
+
+    .apply-grid {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 3rem;
+        align-items: start;
+    }
+
+    .application-form-card {
+        padding: 3.5rem;
+        border-radius: var(--radius-lg);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-md);
+    }
+
+    .form-group label {
+        display: block;
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+        color: var(--text);
+    }
+
+    .form-group .description {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        margin-bottom: 1.5rem;
+    }
+
+    textarea {
+        width: 100%;
+        min-height: 300px;
+        padding: 1.5rem;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        color: var(--text);
+        font-family: var(--font-sans);
+        font-size: 1rem;
+        line-height: 1.6;
+        transition: all var(--transition);
+        resize: vertical;
+    }
+
+    textarea:focus {
+        outline: none;
+        border-color: var(--accent-2);
+        background: var(--surface);
+        box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+    }
+
+    .sidebar-info {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .match-preview-card {
+        padding: 2rem;
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .match-preview-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--accent);
+    }
+
+    .match-circle {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 1.5rem;
+    }
+
+    .match-circle svg {
+        transform: rotate(-90deg);
+    }
+
+    .match-circle .score-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .match-circle .score-value {
+        font-family: var(--font-display);
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: var(--text);
+        display: block;
+        line-height: 1;
+    }
+
+    .match-circle .score-total {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        color: var(--text-subtle);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    .note-box {
+        padding: 1.25rem;
+        background: var(--surface-2);
+        border-left: 3px solid var(--accent-2);
+        border-radius: var(--radius-sm);
+    }
+
+    @media (max-width: 968px) {
+        .apply-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="animate-fade-in" style="max-width: 800px; margin: 0 auto;">
+<div class="animate-fade-in">
     <!-- Breadcrumbs -->
-    <div style="margin-bottom: 2rem;">
-        <a href="{% url 'job_detail' job.pk %}" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); text-decoration: none;">
-            <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> Back to Job Details
+    <nav style="margin-bottom: 2rem;">
+        <a href="{% url 'job_detail' job.pk %}" class="btn-ghost" style="font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; display: inline-flex; align-items: center; gap: 0.5rem;">
+            <i data-lucide="arrow-left" style="width:14px;height:14px;"></i>
+            Back to Job Details
         </a>
-    </div>
+    </nav>
 
-    <div style="display: grid; grid-template-columns: 1fr 280px; gap: 2rem; align-items: start;">
-        
+    <header class="application-header">
+        <span class="overline">Role Application</span>
+        <h1 style="font-size: 3rem; margin-top: 0.5rem;">Join the <span class="text-gold">{{ job.recruiter.company_name }}</span> Team.</h1>
+        <p class="text-muted" style="font-size: 1.1rem; margin-top: 0.5rem;">Applying for the position of <strong>{{ job.title }}</strong></p>
+    </header>
+
+    <div class="apply-grid">
         <!-- Application Form -->
-        <div class="card glass" style="padding: 2.5rem; border-radius: 24px;">
-            <div style="margin-bottom: 2rem;">
-                <h1 style="font-family: var(--font-display); font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.5rem;">Submit Application</h1>
-                <p style="color: var(--text-muted); font-size: 0.95rem;">Applying for <strong>{{ job.title }}</strong> at <strong>{{ job.recruiter.company_name }}</strong></p>
+        <main>
+            <div class="application-form-card">
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="{{ form.cover_letter.id_for_label }}">Professional Cover Letter</label>
+                        <div class="description">
+                            Articulate your unique value proposition and how your expertise aligns with the requirements of this role.
+                        </div>
+                        {{ form.cover_letter }}
+                        {% if form.cover_letter.errors %}
+                            <div style="color: var(--danger); font-size: 0.85rem; margin-top: 0.75rem; font-weight: 500;">
+                                <i data-lucide="alert-circle" style="width:14px;height:14px; display: inline-block; vertical-align: middle;"></i>
+                                {{ form.cover_letter.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div style="display: flex; gap: 1.5rem; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border);">
+                        <button type="submit" class="btn btn-navy" style="padding: 1rem 2.5rem; font-size: 0.95rem;">
+                            Submit Application
+                            <i data-lucide="send" style="width:18px;height:18px;"></i>
+                        </button>
+                        <a href="{% url 'job_detail' job.pk %}" class="btn btn-outline" style="padding: 1rem 2rem;">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
             </div>
+        </main>
 
-            <form method="POST">
-                {% csrf_token %}
+        <!-- Sidebar -->
+        <aside class="sidebar-info">
+            <div class="match-preview-card">
+                <span class="overline" style="font-size: 0.65rem; margin-bottom: 1.5rem; display: block;">Projected Alignment</span>
                 
-                <div style="margin-bottom: 2rem;">
-                    <label style="display: block; font-family: var(--font-display); font-weight: 600; font-size: 1.1rem; margin-bottom: 0.75rem;">Cover Letter</label>
-                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">Briefly explain why you are a good fit for this role.</p>
-                    {{ form.cover_letter }}
-                    {% if form.cover_letter.errors %}
-                        <div style="color: var(--danger); font-size: 0.8rem; margin-top: 0.5rem;">{{ form.cover_letter.errors }}</div>
-                    {% endif %}
-                </div>
-
-                <div style="display: flex; gap: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
-                    <button type="submit" class="btn btn-primary" style="padding: 0.8rem 2rem; border-radius: 12px; flex-grow: 1;">
-                        <i data-lucide="send" style="width:16px;height:16px;"></i> Confirm & Submit
-                    </button>
-                    <a href="{% url 'job_detail' job.pk %}" class="btn btn-outline" style="padding: 0.8rem 1.5rem; border-radius: 12px;">
-                        Cancel
-                    </a>
-                </div>
-            </form>
-        </div>
-
-        <!-- Projected Score Sidebar -->
-        <aside style="display: flex; flex-direction: column; gap: 1.5rem;">
-            <div class="card glass" style="padding: 1.5rem; border-radius: 20px; text-align: center; background: rgba(165,243,252,0.03);">
-                <div style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 1.25rem;">Projected Match</div>
-                
-                <div style="position: relative; width: 100px; height: 100px; margin: 0 auto 1.5rem;">
-                    <svg viewBox="0 0 36 36" style="width: 100%; height: 100%; transform: rotate(-90deg);">
-                        <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="3" />
-                        <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="{% if match_score >= 8 %}var(--success){% elif match_score >= 5 %}var(--accent){% else %}var(--danger){% endif %}" stroke-width="3" stroke-dasharray="{{ match_score|floatformat:1 }}0, 100" stroke-linecap="round" />
+                <div class="match-circle">
+                    <svg viewBox="0 0 36 36" style="width: 100%; height: 100%;">
+                        <circle cx="18" cy="18" r="16" fill="none" stroke="var(--border)" stroke-width="2"></circle>
+                        <circle cx="18" cy="18" r="16" fill="none" stroke="var(--accent)" stroke-width="2" 
+                                stroke-dasharray="{{ match_score|default:0|floatformat:1 }}0, 100" stroke-linecap="round"></circle>
                     </svg>
-                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
-                        <div style="font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; color: var(--text);">{{ match_score|floatformat:1 }} / 10</div>
+                    <div class="score-text">
+                        <span class="score-value">{{ match_score|default:0|floatformat:1 }}</span>
+                        <span class="score-total">out of 10</span>
                     </div>
                 </div>
 
-                <p style="font-size: 0.75rem; color: var(--text-subtle); line-height: 1.5;">
+                <div style="font-size: 0.9rem; line-height: 1.6; color: var(--text-muted);">
                     {% if match_score >= 8 %}
-                        Your skills and assessment performance make you a **highly qualified** candidate for this role.
+                        <p>Your profile demonstrates <strong style="color: var(--success);">exceptional alignment</strong> with this role's requirements.</p>
                     {% elif match_score >= 5 %}
-                        You meet several requirements, but improving your assessment scores could help.
+                        <p>You have a <strong style="color: var(--accent-2);">solid foundation</strong>, though some specific skill requirements may need address.</p>
                     {% else %}
-                        Your current profile has a low match with this job's requirements.
+                        <p>Your current expertise shows <strong style="color: var(--danger);">limited overlap</strong> with the primary requirements.</p>
                     {% endif %}
-                </p>
+                </div>
             </div>
 
-            <div style="padding: 1rem; background: rgba(255,167,38,0.05); border: 1px dashed rgba(255,167,38,0.2); border-radius: 12px;">
-                <h5 style="font-size: 0.8rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--warning);">Note:</h5>
-                <p style="font-size: 0.7rem; color: var(--text-muted); line-height: 1.4;">
-                    Recruiters typically only interview candidates with a match score of **8.0 or higher**.
+            <div class="note-box">
+                <h5 style="font-family: var(--font-display); font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="info" style="width:16px;height:16px; color: var(--accent-2);"></i>
+                    Strategic Note
+                </h5>
+                <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.5;">
+                    Organizations on SkillSphere typically prioritize candidates with a match score exceeding <strong>8.0</strong> for initial screenings.
                 </p>
             </div>
         </aside>
     </div>
 </div>
-
-<style>
-    textarea {
-        width: 100%;
-        min-height: 250px;
-        padding: 1.25rem;
-        background: rgba(255,255,255,0.02);
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        color: var(--text);
-        font-family: var(--font-sans);
-        font-size: 0.95rem;
-        line-height: 1.6;
-        transition: all 0.3s ease;
-        resize: vertical;
-    }
-    textarea:focus {
-        outline: none;
-        border-color: var(--accent);
-        background: rgba(255,255,255,0.05);
-        box-shadow: 0 0 0 4px rgba(165,243,252,0.1);
-    }
-</style>
 {% endblock %}
