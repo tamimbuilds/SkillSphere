@@ -15,16 +15,33 @@ class ShortlistForm(forms.ModelForm):
 
 
 class InterviewForm(forms.ModelForm):
+    scheduled_date = forms.DateField(
+        input_formats=['%Y-%m-%d'],
+        widget=forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date'})
+    )
+    scheduled_time = forms.TimeField(
+        input_formats=['%H:%M', '%H:%M:%S'],
+        widget=forms.TimeInput(format='%H:%M', attrs={'type': 'time', 'step': '60'})
+    )
+
     class Meta:
         model = Interview
         fields = '__all__'
+        widgets = {
+            'welcome_message': forms.Textarea(attrs={'rows': 4}),
+            'feedback': forms.Textarea(attrs={'rows': 4}),
+            'contact_details': forms.Textarea(attrs={'rows': 3}),
+        }
 
 
 class RecruiterInterviewInviteForm(forms.ModelForm):
-    scheduled_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    scheduled_date = forms.DateField(
+        input_formats=['%Y-%m-%d'],
+        widget=forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date'})
+    )
     scheduled_time = forms.TimeField(
-        input_formats=['%H:%M', '%I:%M', '%H:%M:%S'],
-        widget=forms.TimeInput(attrs={'type': 'time'})
+        input_formats=['%H:%M', '%H:%M:%S'],
+        widget=forms.TimeInput(format='%H:%M', attrs={'type': 'time', 'step': '60'})
     )
 
     class Meta:

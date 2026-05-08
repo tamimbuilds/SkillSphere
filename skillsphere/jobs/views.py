@@ -571,6 +571,7 @@ def send_job_offer(request, application_pk):
 
             Notification.objects.create(
                 user=application.candidate.user,
+                job_offer=offer,
                 title="New Job Offer",
                 message=(
                     f"Congratulations! You have received a job offer for {application.job.title} "
@@ -635,6 +636,7 @@ def respond_to_offer(request, offer_pk):
         
         Notification.objects.create(
             user=offer.job.recruiter.user,
+            job_offer=offer,
             title="Offer Accepted",
             message=f"{offer.candidate.full_name} has accepted the offer for {offer.job.title}."
         )
@@ -647,6 +649,7 @@ def respond_to_offer(request, offer_pk):
         
         Notification.objects.create(
             user=offer.job.recruiter.user,
+            job_offer=offer,
             title="Offer Rejected",
             message=f"{offer.candidate.full_name} has rejected the offer for {offer.job.title}."
         )

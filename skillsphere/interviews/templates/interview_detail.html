@@ -34,12 +34,12 @@
         </div>
 
         <div style="display:flex;flex-direction:column;gap:0;">
-            {% include "interviews/_detail_row.html" with icon="user" label="Candidate" value=interview.candidate %}
-            {% include "interviews/_detail_row.html" with icon="briefcase" label="Sent by" value=interview.job.recruiter.recruiter_name %}
-            {% include "interviews/_detail_row.html" with icon="building-2" label="Company" value=interview.job.recruiter.company_name %}
-            {% include "interviews/_detail_row.html" with icon="calendar" label="Interview on" value=interview.scheduled_date|date:"M d, Y" %}
-            {% include "interviews/_detail_row.html" with icon="clock-3" label="Interview time" value=interview.scheduled_time %}
-            {% include "interviews/_detail_row.html" with icon="send" label="Invitation sent" value=interview.created_at|date:"M d, Y H:i" %}
+            {% include "_detail_row.html" with icon="user" label="Candidate" value=interview.candidate %}
+            {% include "_detail_row.html" with icon="briefcase" label="Sent by" value=interview.job.recruiter.recruiter_name %}
+            {% include "_detail_row.html" with icon="building-2" label="Company" value=interview.job.recruiter.company_name %}
+            {% include "_detail_row.html" with icon="calendar" label="Interview on" value=interview.scheduled_date|date:"M d, Y" %}
+            {% include "_detail_row.html" with icon="clock-3" label="Interview time" value=interview.scheduled_time %}
+            {% include "_detail_row.html" with icon="send" label="Invitation sent" value=interview.created_at|date:"M d, Y H:i" %}
         </div>
 
         {% if interview.welcome_message %}

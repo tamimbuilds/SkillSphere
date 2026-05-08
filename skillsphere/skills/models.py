@@ -124,6 +124,10 @@ class CandidateSkill(models.Model):
     def __str__(self):
         return f"{self.candidate} - {self.skill}"
 
+    @property
+    def verified_certificates_count(self):
+        return self.certificate_set.filter(verification_status='verified').count()
+
 
 class CandidateSkillProgress(models.Model):
     """

@@ -4,7 +4,7 @@ buildCommand = "cd skillsphere && python manage.py collectstatic --noinput"
 
 [deploy]
 startCommand = "cd skillsphere && gunicorn skillsphere.wsgi:application --bind 0.0.0.0:$PORT"
-preDeployCommand = "cd skillsphere && python manage.py migrate"
+preDeployCommand = "cd skillsphere && python manage.py migrate && python manage.py seed_skills && python manage.py seed_assessment_questions"
 healthcheckPath = "/health/"
 healthcheckTimeout = 120
 restartPolicyType = "ON_FAILURE"

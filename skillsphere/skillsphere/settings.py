@@ -9,7 +9,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-only-key')
 
-DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+
+def _env_bool(name, default=False):
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.lower() in {'1', 'true', 'yes', 'on'}
+
+
+DEBUG = _env_bool('DEBUG')
 
 
 def _normalize_host(value):
@@ -172,6 +180,9 @@ STORAGES = {
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+# Railway does not serve Django media files by itself. This keeps uploaded
+# profile photos visible for this single service/container.
+SERVE_MEDIA = _env_bool('SERVE_MEDIA', default=bool(railway_public_domain))
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
