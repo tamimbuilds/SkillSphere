@@ -1,4 +1,4 @@
-from skills.models import JobSkillRequirement, CandidateSkill, Score
+from skills.models import JobSkillRequirement, CandidateSkill, CandidateSkillProgress, Score
 
 def calculate_match_score(candidate_profile, job_post):
     """
@@ -21,10 +21,19 @@ def calculate_match_score(candidate_profile, job_post):
     matched_count = 0
     assessment_percentages = []
 
+    total_penalty = 0.0
+
     for req in required_skills:
         cand_skill = candidate_skill_map.get(req.skill_id)
         if cand_skill:
             matched_count += 1
+            progress = CandidateSkillProgress.objects.filter(
+                candidate=candidate_profile,
+                skill=cand_skill.skill,
+            ).first()
+            if progress and progress.penalty_points > 0:
+                total_penalty += progress.penalty_points
+
             # Get best (highest) assessment score for this matched skill
             best_score = Score.objects.filter(
                 user=candidate_profile.user,
@@ -46,14 +55,14 @@ def calculate_match_score(candidate_profile, job_post):
     avg_percentage = sum(all_percentages) / total_required if total_required > 0 else 0.0
     assessment_score = (avg_percentage / 100.0) * 5.0
 
-    total_score = skill_score + assessment_score
+    total_score = skill_score + assessment_score - total_penalty
     return round(max(1.0, min(10.0, total_score)), 2)
 
 def update_candidate_match_scores(candidate_profile):
     """
     Recalculates and updates match scores for all job applications of a candidate.
     """
-    from .models import Application
+    from jobs.models import Application
     applications = Application.objects.filter(candidate=candidate_profile)
     for app in applications:
         app.match_score = calculate_match_score(candidate_profile, app.job)

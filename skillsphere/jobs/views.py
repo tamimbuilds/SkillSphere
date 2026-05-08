@@ -11,9 +11,9 @@ from interviews.forms import RecruiterInterviewInviteForm
 from interviews.models import Interview
 from skills.models import JobSkillRequirement, Skill
 
-from .forms import ApplicationForm, JobPostForm
-from .models import Application, JobPost
-from .utils import calculate_match_score
+from jobs.forms import ApplicationForm, JobOfferForm, JobPostForm
+from jobs.models import Application, JobOffer, JobPost
+from jobs.utils import calculate_match_score
 
 
 INTERVIEW_MATCH_THRESHOLD = 8.0
@@ -70,8 +70,40 @@ def _refresh_job_match_scores(job):
         application.save(update_fields=["match_score", "updated_at"])
 
 
+from django.db.models import Q
+
 def job_list(request):
-    jobs = list(JobPost.objects.filter(status="open").select_related("recruiter"))
+    query = request.GET.get('q', '')
+    location_filter = request.GET.get('location', '')
+    level_filter = request.GET.get('level', '')
+
+    jobs_queryset = JobPost.objects.filter(status="open").select_related("recruiter")
+
+    if query:
+        jobs_queryset = jobs_queryset.filter(
+            Q(title__icontains=query) |
+            Q(description__icontains=query) |
+            Q(recruiter__company_name__icontains=query)
+        )
+
+    if location_filter:
+        jobs_queryset = jobs_queryset.filter(location__icontains=location_filter)
+
+    if level_filter:
+        if level_filter == 'junior':
+            jobs_queryset = jobs_queryset.filter(required_experience__lte=2)
+        elif level_filter == 'mid':
+            jobs_queryset = jobs_queryset.filter(required_experience__gte=3, required_experience__lte=5)
+        elif level_filter == 'senior':
+            jobs_queryset = jobs_queryset.filter(required_experience__gte=6, required_experience__lte=9)
+        elif level_filter == 'lead':
+            jobs_queryset = jobs_queryset.filter(required_experience__gte=10)
+
+    jobs = list(jobs_queryset)
+    
+    # Get unique locations for the filter
+    locations = JobPost.objects.filter(status="open").values_list('location', flat=True).distinct()
+    
     candidate_profile = None
 
     if request.user.is_authenticated and request.user.role == "candidate":
@@ -92,6 +124,7 @@ def job_list(request):
         {
             "jobs": jobs,
             "candidate_profile": candidate_profile,
+            "locations": locations,
         },
     )
 
@@ -170,21 +203,8 @@ def my_applications(request):
         .select_related("job", "job__recruiter")
         .order_by("-applied_at")
     )
-    
-    # Fetch associated interviews and offers for these applications
-    from interviews.models import Interview
-    from jobs.models import JobOffer
-    
-    interviews = Interview.objects.filter(candidate=candidate_profile, job__in=[app.job for app in applications])
-    offers = JobOffer.objects.filter(candidate=candidate_profile, job__in=[app.job for app in applications])
-    
-    interview_map = {intv.job_id: intv for intv in interviews}
-    offer_map = {offer.job_id: offer for offer in offers}
-
     for app in applications:
         app.match_score = calculate_match_score(candidate_profile, app.job)
-        app.interview = interview_map.get(app.job_id)
-        app.offer = offer_map.get(app.job_id)
 
     return render(request, "my_applications.html", {"applications": applications})
 
@@ -314,27 +334,6 @@ def job_applicants(request, pk):
         .select_related("candidate", "candidate__user", "job")
         .order_by("-match_score", "-applied_at")
     )
-
-    from skills.models import Certificate, CandidateSkill
-    
-    for app in applicants:
-        # Check if candidate has expert status for ANY skill required by this job
-        job_skill_ids = job.skill_requirements.values_list('skill_id', flat=True)
-        
-        # A candidate is an expert if they have a passed assessment AND a verified certificate for the same skill
-        expert_skills = CandidateSkill.objects.filter(
-            candidate=app.candidate,
-            skill_id__in=job_skill_ids,
-            passed=True
-        ).values_list('skill_id', flat=True)
-        
-        has_expert_badge = Certificate.objects.filter(
-            candidate=app.candidate,
-            skill_id__in=expert_skills,
-            status='verified'
-        ).exists()
-        
-        app.is_expert = has_expert_badge
 
     total_count = len(applicants)
     qualified_count = len([app for app in applicants if app.match_score >= INTERVIEW_MATCH_THRESHOLD])
@@ -541,32 +540,30 @@ def job_skill_delete(request, pk, skill_req_id):
         messages.success(request, "Required skill removed.")
 
     return redirect("job_skill_manage", pk=job.pk)
+
+
 @login_required
 def send_job_offer(request, application_pk):
     application = get_object_or_404(
-        Application.objects.select_related("candidate", "job", "job__recruiter"),
+        Application.objects.select_related("candidate", "candidate__user", "job", "job__recruiter"),
         pk=application_pk,
     )
     recruiter_profile = _get_recruiter_profile(request.user)
 
     if request.user.role != "recruiter" or recruiter_profile != application.job.recruiter:
-        messages.error(request, "You are not allowed to send an offer for this application.")
+        messages.error(request, "You are not allowed to send a job offer for this application.")
         return redirect("dashboard")
 
-    from .forms import JobOfferForm
-    from .models import JobOffer
-
-    existing_offer = JobOffer.objects.filter(
-        candidate=application.candidate, job=application.job
-    ).first()
+    if JobOffer.objects.filter(candidate=application.candidate, job=application.job).exists():
+        messages.info(request, f"An offer has already been sent to {application.candidate.full_name}.")
+        return redirect("offer_list")
 
     if request.method == "POST":
-        form = JobOfferForm(request.POST, request.FILES, instance=existing_offer)
+        form = JobOfferForm(request.POST, request.FILES)
         if form.is_valid():
             offer = form.save(commit=False)
             offer.candidate = application.candidate
             offer.job = application.job
-            offer.offer_status = "pending"
             offer.save()
 
             application.status = "offered"
@@ -574,97 +571,89 @@ def send_job_offer(request, application_pk):
 
             Notification.objects.create(
                 user=application.candidate.user,
-                title="Job Offer Received",
-                message=f"You have received a job offer for the position of {application.job.title} from {application.job.recruiter.company_name}.",
-                is_read=False,
+                title="New Job Offer",
+                message=(
+                    f"Congratulations! You have received a job offer for {application.job.title} "
+                    f"from {application.job.recruiter.company_name}."
+                ),
             )
 
             messages.success(request, f"Job offer sent to {application.candidate.full_name}.")
-            return redirect("job_applicants", pk=application.job.pk)
+            return redirect("offer_list")
     else:
-        form = JobOfferForm(instance=existing_offer)
+        form = JobOfferForm()
 
     return render(
         request,
-        "send_offer.html",
+        "offer_form.html",
         {
-            "application": application,
             "form": form,
-            "existing_offer": existing_offer,
+            "application": application,
+            "job": application.job,
+            "candidate": application.candidate,
         },
     )
 
 
 @login_required
-def view_offer(request, offer_pk):
-    offer = get_object_or_404(
-        JobOffer.objects.select_related("candidate", "job", "job__recruiter"),
-        pk=offer_pk,
-    )
-    candidate_profile = _get_candidate_profile(request.user)
+def offer_list(request):
+    if request.user.role == "candidate":
+        profile = _get_candidate_profile(request.user)
+        offers = JobOffer.objects.filter(candidate=profile).select_related("job", "job__recruiter").order_by("-created_at")
+        return render(request, "offer_list.html", {"offers": offers, "role": "candidate"})
+    
+    if request.user.role == "recruiter":
+        profile = _get_recruiter_profile(request.user)
+        offers = JobOffer.objects.filter(job__recruiter=profile).select_related("candidate", "job").order_by("-created_at")
+        return render(request, "offer_list.html", {"offers": offers, "role": "recruiter"})
 
-    if request.user.role != "candidate" or candidate_profile != offer.candidate:
-        messages.error(request, "You are not allowed to view this offer.")
-        return redirect("dashboard")
-
-    return render(request, "view_offer.html", {"offer": offer})
+    return redirect("dashboard")
 
 
 @login_required
-def accept_offer(request, offer_pk):
-    offer = get_object_or_404(JobOffer, pk=offer_pk)
-    candidate_profile = _get_candidate_profile(request.user)
+def respond_to_offer(request, offer_pk):
+    if request.method != "POST":
+        return redirect("offer_list")
 
-    if request.user.role != "candidate" or candidate_profile != offer.candidate:
-        messages.error(request, "You are not allowed to accept this offer.")
+    offer = get_object_or_404(JobOffer.objects.select_related("candidate", "job", "job__recruiter"), pk=offer_pk)
+    
+    if request.user.role != "candidate" or offer.candidate.user != request.user:
+        messages.error(request, "You are not authorized to respond to this offer.")
         return redirect("dashboard")
 
-    if request.method == "POST":
+    if offer.offer_status != "pending":
+        messages.error(request, "You have already responded to this offer.")
+        return redirect("offer_list")
+
+    action = request.POST.get("action")
+
+    if action == "accepted":
         offer.offer_status = "accepted"
-        offer.save(update_fields=["offer_status"])
-
-        application = Application.objects.get(candidate=offer.candidate, job=offer.job)
-        application.status = "hired"
-        application.save(update_fields=["status", "updated_at"])
-
+        offer.save()
+        # Update application status to hired
+        Application.objects.filter(candidate=offer.candidate, job=offer.job).update(status="hired")
+        
         Notification.objects.create(
             user=offer.job.recruiter.user,
             title="Offer Accepted",
-            message=f"{offer.candidate.full_name} has accepted the job offer for {offer.job.title}.",
-            is_read=False,
+            message=f"{offer.candidate.full_name} has accepted the offer for {offer.job.title}."
         )
-
-        messages.success(request, "Congratulations! You have accepted the job offer.")
-        return redirect("my_applications")
-
-    return redirect("view_offer", offer_pk=offer_pk)
-
-
-@login_required
-def reject_offer(request, offer_pk):
-    offer = get_object_or_404(JobOffer, pk=offer_pk)
-    candidate_profile = _get_candidate_profile(request.user)
-
-    if request.user.role != "candidate" or candidate_profile != offer.candidate:
-        messages.error(request, "You are not allowed to reject this offer.")
-        return redirect("dashboard")
-
-    if request.method == "POST":
+        messages.success(request, "Offer accepted successfully!")
+    elif action == "rejected":
         offer.offer_status = "rejected"
-        offer.save(update_fields=["offer_status"])
-
-        application = Application.objects.get(candidate=offer.candidate, job=offer.job)
-        application.status = "rejected"
-        application.save(update_fields=["status", "updated_at"])
-
+        offer.save()
+        # Update application status to rejected
+        Application.objects.filter(candidate=offer.candidate, job=offer.job).update(status="rejected")
+        
         Notification.objects.create(
             user=offer.job.recruiter.user,
             title="Offer Rejected",
-            message=f"{offer.candidate.full_name} has rejected the job offer for {offer.job.title}.",
-            is_read=False,
+            message=f"{offer.candidate.full_name} has rejected the offer for {offer.job.title}."
         )
+        messages.info(request, "Offer rejected.")
+    else:
+        messages.error(request, "Invalid action.")
 
-        messages.info(request, "You have rejected the job offer.")
-        return redirect("my_applications")
+    return redirect("offer_list")
 
-    return redirect("view_offer", offer_pk=offer_pk)
+

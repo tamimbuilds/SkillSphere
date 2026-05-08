@@ -2,75 +2,227 @@
 
 {% block title %}Match Analysis for {{ job.title }} | SkillSphere{% endblock %}
 
+{% block extra_head %}
+<style>
+    .analysis-card {
+        padding: 1.5rem 2rem;
+        display: flex;
+        align-items: center;
+        gap: 2.5rem;
+        transition: all var(--transition-slow);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .analysis-card:hover {
+        transform: translateX(12px);
+        border-color: var(--accent-2);
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .rank-indicator {
+        font-family: var(--font-display);
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: var(--text-subtle);
+        width: 50px;
+        text-align: center;
+        transition: color var(--transition);
+        font-style: italic;
+    }
+    
+    .analysis-card:hover .rank-indicator {
+        color: var(--accent-2);
+    }
+
+    .score-container {
+        position: relative;
+        width: 84px;
+        height: 84px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .score-ring {
+        position: absolute;
+        inset: 0;
+        border-radius: 24px;
+        border: 2px solid var(--border);
+        transition: all var(--transition);
+    }
+
+    .score-value-box {
+        width: 100%;
+        height: 100%;
+        border-radius: 24px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transition: all var(--transition);
+        background: var(--surface);
+    }
+
+    .score-high .score-value-box { color: var(--success); background: rgba(26, 122, 74, 0.05); }
+    .score-mid .score-value-box { color: var(--warning); background: rgba(184, 134, 11, 0.05); }
+    .score-low .score-value-box { color: var(--danger); background: rgba(192, 57, 43, 0.05); }
+
+    .analysis-card:hover .score-ring {
+        transform: scale(1.05);
+        border-color: currentColor;
+        opacity: 0.5;
+    }
+
+    .metric-group {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-top: 0.5rem;
+    }
+
+    .metric-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.35rem 0.75rem;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        transition: all var(--transition);
+    }
+
+    .analysis-card:hover .metric-pill {
+        border-color: var(--accent-2);
+        color: var(--text);
+    }
+
+    @media (max-width: 768px) {
+        .analysis-card {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1.5rem;
+            padding: 2rem;
+        }
+        .rank-indicator {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            width: auto;
+            font-size: 1.25rem;
+        }
+        .score-container {
+            width: 70px;
+            height: 70px;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="animate-fade-in">
-    <!-- Header -->
-    <div style="margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: flex-end;">
-        <div>
+<div class="animate-fade-in" style="max-width: 1000px; margin: 0 auto;">
+    <!-- Breadcrumb / Back Link -->
+    <div style="margin-bottom: 3rem;">
+        {% if request.user.role == 'recruiter' %}
+        <a href="{% url 'job_applicants' job.pk %}" class="btn-ghost" style="padding-left: 0; margin-bottom: 1.5rem; font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.1em; font-weight: 700;">
+            <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> BACK TO APPLICANTS
+        </a>
+        {% else %}
+        <a href="{% url 'my_applications' %}" class="btn-ghost" style="padding-left: 0; margin-bottom: 1.5rem; font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.1em; font-weight: 700;">
+            <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> BACK TO MY APPLICATIONS
+        </a>
+        {% endif %}
+        
+        <span class="overline">Intelligent Talent Matching</span>
+        <h1 style="font-size: clamp(2.5rem, 5vw, 3.5rem); margin-bottom: 0.5rem;">
+            Match <span class="text-gold">Analysis</span>
+        </h1>
+        <p class="text-muted" style="font-size: 1.1rem; max-width: 600px;">
             {% if request.user.role == 'recruiter' %}
-            <a href="{% url 'job_applicants' job.pk %}" style="display: flex; align-items: center; gap: 0.5rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); text-decoration: none; margin-bottom: 1rem;">
-                <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> Back to Applicants List
-            </a>
+                Comparative AI-driven talent analytics for the <strong class="text-accent">{{ job.title }}</strong> position.
             {% else %}
-            <a href="{% url 'my_applications' %}" style="display: flex; align-items: center; gap: 0.5rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); text-decoration: none; margin-bottom: 1rem;">
-                <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> Back to My Applications
-            </a>
+                Your personalized skill compatibility report for <strong class="text-accent">{{ job.title }}</strong>.
             {% endif %}
-            <h1 style="font-family: var(--font-display); font-size: 2.4rem; font-weight: 700; letter-spacing: -0.02em;">
-                {% if request.user.role == 'recruiter' %}Match Analysis{% else %}My Match Score{% endif %}
-            </h1>
-            <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.4rem;">
-                {% if request.user.role == 'recruiter' %}
-                    Comparative match scoring for <strong>{{ job.title }}</strong>
-                {% else %}
-                    How your skills and assessments match with <strong>{{ job.title }}</strong>
-                {% endif %}
-            </p>
-        </div>
+        </p>
     </div>
 
-    <!-- Scores List -->
-    <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
+    <!-- Analysis Grid -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
         {% for app in applicants %}
-        <div class="card glass" style="padding: 1.5rem; display: flex; align-items: center; gap: 2rem; border-radius: 16px;">
-            <!-- Rank -->
+        <div class="glass analysis-card">
+            <!-- Rank (Recruiter only) -->
             {% if request.user.role == 'recruiter' %}
-            <div style="font-family: var(--font-mono); font-size: 1.25rem; font-weight: 700; color: var(--text-muted); width: 30px;">
+            <div class="rank-indicator">
                 #{{ forloop.counter }}
             </div>
             {% endif %}
 
-            <!-- Match Score Badge -->
-            <div style="flex-shrink: 0; text-align: center; width: 80px; padding: 1rem; border-radius: 14px; background: {% if app.match_score >= 8 %}rgba(34,197,94,0.1){% elif app.match_score >= 5 %}rgba(245,158,11,0.1){% else %}rgba(239,68,68,0.1){% endif %}; border: 1px solid {% if app.match_score >= 8 %}rgba(34,197,94,0.2){% elif app.match_score >= 5 %}rgba(245,158,11,0.2){% else %}rgba(239,68,68,0.2){% endif %};">
-                <div style="font-family: var(--font-mono); font-size: 0.65rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.2rem;">Match</div>
-                <div style="font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; color: {% if app.match_score >= 8 %}var(--success){% elif app.match_score >= 5 %}var(--accent){% else %}var(--danger){% endif %};">
-                    {{ app.match_score|floatformat:1 }} / 10
+            <!-- Score Visualization -->
+            <div class="score-container {% if app.match_score >= 8 %}score-high{% elif app.match_score >= 5 %}score-mid{% else %}score-low{% endif %}">
+                <div class="score-ring"></div>
+                <div class="score-value-box">
+                    <span style="font-family: var(--font-mono); font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.7;">Match</span>
+                    <span style="font-family: var(--font-display); font-size: 1.8rem; font-weight: 800; line-height: 1;">{{ app.match_score|floatformat:1 }}</span>
                 </div>
             </div>
 
-            <!-- Candidate Info -->
+            <!-- Talent Detail -->
             <div style="flex-grow: 1;">
-                <h3 style="font-size: 1.15rem; font-weight: 600; margin-bottom: 0.4rem;">{{ app.candidate.full_name }}</h3>
-                <div style="display: flex; gap: 1.25rem; flex-wrap: wrap;">
-                    <span style="display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);">
-                        <i data-lucide="graduation-cap" style="width:13px;height:13px;"></i> {{ app.candidate.university }}
-                    </span>
-                    <span style="display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);">
-                        <i data-lucide="award" style="width:13px;height:13px;"></i> CGPA: {{ app.candidate.cgpa }}
-                    </span>
+                <h3 style="font-size: 1.5rem; font-weight: 700; color: var(--text); margin-bottom: 0.5rem;">
+                    {{ app.candidate.full_name }}
+                </h3>
+                <div class="metric-group">
+                    <div class="metric-pill">
+                        <i data-lucide="graduation-cap" style="width:14px;height:14px;"></i>
+                        {{ app.candidate.university }}
+                    </div>
+                    <div class="metric-pill">
+                        <i data-lucide="award" style="width:14px;height:14px;"></i>
+                        CGPA: {{ app.candidate.cgpa }}
+                    </div>
+                    {% if app.applied_at %}
+                    <div class="metric-pill">
+                        <i data-lucide="calendar" style="width:14px;height:14px;"></i>
+                        Applied: {{ app.applied_at|date:"M d, Y" }}
+                    </div>
+                    {% endif %}
                 </div>
             </div>
 
-            <!-- Actions -->
+            <!-- Action Area -->
             <div style="flex-shrink: 0;">
-                <a href="{% url 'candidate_detail' app.candidate.pk %}" class="btn btn-outline btn-sm" style="font-size: 0.75rem; border-radius: 8px;">View Profile</a>
+                <a href="{% url 'candidate_detail' app.candidate.pk %}" class="btn btn-navy" style="border-radius: var(--radius-md); padding: 0.8rem 1.8rem;">
+                    View Profile
+                </a>
             </div>
         </div>
         {% empty %}
-        <div class="card glass" style="padding: 4rem; text-align: center; border-radius: 20px;">
-            <p style="color: var(--text-muted);">No applicants to analyze yet.</p>
+        <div class="glass" style="padding: 6rem 2rem; text-align: center; border-style: dashed; border-width: 2px;">
+            <div style="width: 84px; height: 84px; background: var(--surface-2); border-radius: 24px; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem;">
+                <i data-lucide="bar-chart-2" style="width:40px;height:40px;color:var(--text-subtle);"></i>
+            </div>
+            <h2 style="font-size: 1.8rem; margin-bottom: 0.5rem;">No analysis available</h2>
+            <p class="text-muted">Waiting for candidate applications to generate matching reports.</p>
         </div>
         {% endfor %}
     </div>
 </div>
 {% endblock %}
+
+{% block extra_js %}
+<script>
+    // Specific interactions for analysis cards
+    document.querySelectorAll('.analysis-card').forEach(card => {
+        card.addEventListener('mouseenter', () => {
+            const icon = card.querySelector('[data-lucide="arrow-left"]');
+            if (icon) icon.style.transform = 'translateX(-4px)';
+        });
+    });
+</script>
+{% endblock %}
+

@@ -2,151 +2,279 @@
 
 {% block title %}My Applications | SkillSphere{% endblock %}
 
+{% block extra_head %}
+<style>
+    .applications-container {
+        max-width: 1000px;
+        margin: 2rem auto 5rem;
+    }
+
+    .app-card {
+        padding: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 2.5rem;
+        border-radius: var(--radius-2xl);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        transition: all var(--transition-slow);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .app-card:hover {
+        transform: translateX(10px);
+        border-color: var(--accent-2);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .app-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 4px;
+        background: var(--accent);
+        opacity: 0;
+        transition: var(--transition);
+    }
+
+    .app-card:hover::before {
+        opacity: 1;
+    }
+
+    .status-pill {
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-full);
+        font-family: var(--font-mono);
+        font-size: 0.65rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--transition);
+    }
+
+    .status-applied { background: rgba(37, 99, 235, 0.08); color: #2563eb; border: 1px solid rgba(37, 99, 235, 0.2); }
+    .status-shortlisted { background: rgba(217, 119, 6, 0.08); color: #d97706; border: 1px solid rgba(217, 119, 6, 0.2); }
+    .status-interviewing { background: rgba(124, 58, 237, 0.08); color: #7c3aed; border: 1px solid rgba(124, 58, 237, 0.2); }
+    .status-offered { background: rgba(22, 163, 74, 0.08); color: #16a34a; border: 1px solid rgba(22, 163, 74, 0.2); }
+    .status-hired { background: var(--success); color: white; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2); }
+    .status-rejected { background: rgba(220, 38, 38, 0.08); color: #dc2626; border: 1px solid rgba(220, 38, 38, 0.2); }
+
+    .score-badge {
+        width: 72px;
+        height: 72px;
+        border-radius: var(--radius-xl);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        flex-shrink: 0;
+        transition: var(--transition);
+    }
+
+    .app-card:hover .score-badge {
+        background: var(--surface);
+        border-color: var(--accent);
+    }
+
+    .score-label {
+        font-family: var(--font-mono);
+        font-size: 0.55rem;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: -2px;
+    }
+
+    .score-value {
+        font-family: var(--font-display);
+        font-size: 1.5rem;
+        font-weight: 800;
+    }
+
+    .app-info {
+        flex-grow: 1;
+    }
+
+    .app-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.01em;
+    }
+
+    .app-meta {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    .meta-item i {
+        color: var(--accent-2);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 4rem;
+    }
+
+    .stat-card {
+        background: var(--glass);
+        padding: 1.5rem 2rem;
+        border-radius: var(--radius-xl);
+        border: 1px solid var(--glass-border);
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .stat-label {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    .stat-value {
+        font-family: var(--font-display);
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--text-main);
+    }
+
+    @media (max-width: 768px) {
+        .app-card {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1.5rem;
+        }
+        .app-actions {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="animate-fade-in">
-    <div style="margin-bottom: 2.5rem;">
-        <h1 style="font-family: var(--font-display); font-size: 2.4rem; font-weight: 700; letter-spacing: -0.02em;">My Applications</h1>
-        <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.4rem;">Track the status of your job applications and match scores.</p>
-    </div>
+<div class="applications-container animate-fade-in">
+    <!-- Header -->
+    <header class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 2rem;">
+        <div>
+            <span class="overline">Professional Journey</span>
+            <h1 style="font-size: 4rem; color: var(--text-main); line-height: 1.1;">
+                My <span class="text-gradient italic">Applications</span>
+            </h1>
+            <p style="max-width: 500px; margin-top: 1rem;">
+                Track your career progression and monitor your alignment with global opportunities in real-time.
+            </p>
+        </div>
+        
+        <div class="stats-grid" style="margin-bottom: 0;">
+            <div class="stat-card">
+                <span class="stat-value">{{ applications|length }}</span>
+                <span class="stat-label">Active Engagements</span>
+            </div>
+        </div>
+    </header>
 
     {% if applications %}
-    <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem;">
+    <div style="display: grid; gap: 2rem;">
         {% for app in applications %}
-        <div class="card glass animate-fade-in" style="padding: 1.75rem; border-radius: 20px; border: 1px solid var(--border); transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative; overflow: hidden;">
-            <!-- Status Ribbon or Glow (Optional) -->
-            {% if app.status == 'hired' or app.status == 'offered' %}
-            <div style="position: absolute; top: 0; right: 0; width: 4px; height: 100%; background: var(--success); opacity: 0.8;"></div>
-            {% endif %}
+        <div class="app-card">
+            <!-- Score -->
+            <div class="score-badge">
+                <span class="score-label">Match</span>
+                <span class="score-value" style="color: {% if app.match_score >= 8 %}var(--success){% elif app.match_score >= 5 %}var(--accent){% else %}var(--danger){% endif %};">
+                    {{ app.match_score|floatformat:0 }}<small style="font-size: 0.6em; opacity: 0.5;">/10</small>
+                </span>
+            </div>
 
-            <div style="display: flex; align-items: flex-start; gap: 1.5rem; flex-wrap: wrap;">
-                <!-- Match Score Indicator -->
-                <div style="flex-shrink: 0; text-align: center; width: 80px; padding: 1rem 0.5rem; border-radius: 16px; background: rgba(255,255,255,0.02); border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                    <div style="font-family: var(--font-mono); font-size: 0.6rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.4rem; letter-spacing: 0.1em;">Match</div>
-                    <div style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 800; line-height: 1; color: {% if app.match_score >= 8 %}var(--success){% elif app.match_score >= 5 %}var(--accent){% else %}var(--danger){% endif %};">
-                        {{ app.match_score|floatformat:1 }}
-                    </div>
-                    <div style="font-size: 0.65rem; color: var(--text-subtle); margin-top: 0.2rem;">/ 10</div>
+            <!-- Info -->
+            <div class="app-info">
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
+                    <h3 class="app-title" style="margin: 0; font-size: 1.75rem;">{{ app.job.title }}</h3>
+                    <span class="status-pill status-{{ app.status }}">
+                        <span style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></span>
+                        {{ app.get_status_display }}
+                    </span>
                 </div>
-
-                <!-- Main Job Content -->
-                <div style="flex-grow: 1; min-width: 250px;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
-                        <div>
-                            <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text); margin: 0; letter-spacing: -0.01em;">{{ app.job.title }}</h3>
-                            <div style="font-size: 0.9rem; color: var(--accent); font-weight: 500; margin-top: 0.1rem;">{{ app.job.recruiter.company_name }}</div>
-                        </div>
-                        <span style="padding: 0.4rem 0.8rem; border-radius: 12px; font-family: var(--font-mono); font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; 
-                            {% if app.status == 'applied' %}background: rgba(59,130,246,0.1); color: #3b82f6; border: 1px solid rgba(59,130,246,0.2);
-                            {% elif app.status == 'shortlisted' %}background: rgba(245,158,11,0.1); color: #f59e0b; border: 1px solid rgba(245,158,11,0.2);
-                            {% elif app.status == 'rejected' %}background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2);
-                            {% elif app.status == 'offered' %}background: rgba(139,92,246,0.1); color: #8b5cf6; border: 1px solid rgba(139,92,246,0.2);
-                            {% elif app.status == 'hired' %}background: rgba(34,197,94,0.1); color: #22c55e; border: 1px solid rgba(34,197,94,0.2);
-                            {% else %}background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--border);{% endif %}">
-                            {{ app.status }}
-                        </span>
-                    </div>
-
-                    <div style="display: flex; gap: 1.25rem; flex-wrap: wrap; margin-bottom: 1rem;">
-                        <span style="display:inline-flex;align-items:center;gap:0.4rem;font-size:0.8rem;color:var(--text-muted);">
-                            <i data-lucide="map-pin" style="width:14px;height:14px;opacity:0.7;"></i> {{ app.job.location }}
-                        </span>
-                        <span style="display:inline-flex;align-items:center;gap:0.4rem;font-size:0.8rem;color:var(--text-muted);">
-                            <i data-lucide="banknote" style="width:14px;height:14px;opacity:0.7;"></i> {{ app.job.salary_range }}
-                        </span>
-                        <span style="display:inline-flex;align-items:center;gap:0.4rem;font-size:0.8rem;color:var(--text-muted);">
-                            <i data-lucide="calendar" style="width:14px;height:14px;opacity:0.7;"></i> Applied {{ app.applied_at|date:"M d, Y" }}
-                        </span>
-                    </div>
-
-                    <div style="display: flex; gap: 0.75rem;">
-                        <a href="{% url 'job_detail' app.job.pk %}" class="btn btn-outline btn-sm" style="font-size: 0.75rem; border-radius: 10px; padding: 0.5rem 1rem;">
-                            View Details
-                        </a>
-                        <a href="{% url 'job_analysis' app.job.pk %}" target="_blank" class="btn btn-outline btn-sm" style="font-size: 0.75rem; border-radius: 10px; padding: 0.5rem 1rem; color: var(--accent); border-color: rgba(165,243,252,0.3);">
-                            <i data-lucide="bar-chart-2" style="width:14px;height:14px;"></i> Match Analysis
-                        </a>
-                    </div>
+                
+                <div class="app-meta">
+                    <span class="meta-item">
+                        <i data-lucide="building-2" style="width:16px;height:16px;"></i> 
+                        {{ app.job.recruiter.company_name }}
+                    </span>
+                    <span class="meta-item">
+                        <i data-lucide="map-pin" style="width:16px;height:16px;"></i> 
+                        {{ app.job.location }}
+                    </span>
+                    <span class="meta-item">
+                        <i data-lucide="calendar" style="width:16px;height:16px;"></i> 
+                        Applied {{ app.applied_at|date:"M d, Y" }}
+                    </span>
                 </div>
             </div>
 
-            <!-- Conditional Section: Interview -->
-            {% if app.interview %}
-            <div style="margin-top: 1.5rem; padding: 1.25rem; border-radius: 16px; background: rgba(165,243,252,0.05); border: 1px solid rgba(165,243,252,0.1); position: relative;">
-                <div style="position: absolute; top: 1rem; right: 1.25rem;">
-                    <span style="background: var(--accent); color: #000; font-size: 0.6rem; font-weight: 800; padding: 0.2rem 0.5rem; border-radius: 4px; text-transform: uppercase;">Upcoming</span>
-                </div>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; align-items: center;">
-                    <div style="display: flex; align-items: center; gap: 1rem;">
-                        <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(165,243,252,0.15); color: var(--accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                            <i data-lucide="video" style="width:18px;height:18px;"></i>
-                        </div>
-                        <div>
-                            <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-subtle); text-transform: uppercase; letter-spacing: 0.05em;">Interview Date</div>
-                            <div style="font-size: 0.95rem; font-weight: 600; color: var(--text);">{{ app.interview.scheduled_date|date:"l, M d" }}</div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted);">at {{ app.interview.scheduled_time }}</div>
-                        </div>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 1rem;">
-                        <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(165,243,252,0.15); color: var(--accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                            {% if app.interview.meeting_link %}<i data-lucide="link" style="width:18px;height:18px;"></i>{% else %}<i data-lucide="map-pin" style="width:18px;height:18px;"></i>{% endif %}
-                        </div>
-                        <div style="flex-grow: 1; min-width: 0;">
-                            <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-subtle); text-transform: uppercase; letter-spacing: 0.05em;">Meeting Details</div>
-                            <div style="font-size: 0.95rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                {% if app.interview.meeting_link %}
-                                <a href="{{ app.interview.meeting_link }}" target="_blank" style="color: var(--accent); text-decoration: none; display: flex; align-items: center; gap: 0.25rem;">
-                                    Join Link <i data-lucide="external-link" style="width:12px;height:12px;"></i>
-                                </a>
-                                {% else %}
-                                {{ app.interview.location|default:"TBA" }}
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                    <div style="text-align: right;">
-                        <a href="{% url 'interview_detail' app.interview.pk %}" class="btn btn-primary btn-sm" style="font-size: 0.75rem; padding: 0.6rem 1.5rem; border-radius: 10px;">
-                            View Invitation
-                        </a>
-                    </div>
-                </div>
+            <!-- Actions -->
+            <div class="app-actions" style="display: flex; gap: 0.75rem;">
+                <a href="{% url 'job_detail' app.job.pk %}" class="btn btn-outline" style="border-radius: var(--radius-md); padding: 0.8rem 1.6rem; font-weight: 700;">
+                    Review Role
+                </a>
+                <a href="{% url 'job_analysis' app.job.pk %}" class="btn btn-navy" style="border-radius: var(--radius-md); padding: 0.8rem 1.6rem; font-weight: 700;">
+                    <i data-lucide="bar-chart-3" style="width:18px;height:18px;"></i>
+                    AI Insights
+                </a>
             </div>
-            {% endif %}
-
-            <!-- Conditional Section: Job Offer -->
-            {% if app.offer %}
-            <div style="margin-top: 1rem; padding: 1.25rem; border-radius: 16px; background: rgba(34,197,94,0.05); border: 1px solid rgba(34,197,94,0.1); display: flex; justify-content: space-between; align-items: center;">
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(34,197,94,0.15); color: #22c55e; display: flex; align-items: center; justify-content: center;">
-                        <i data-lucide="award" style="width:20px;height:20px;"></i>
-                    </div>
-                    <div>
-                        <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-subtle); text-transform: uppercase; letter-spacing: 0.05em;">Job Offer Received</div>
-                        <div style="font-size: 0.95rem; font-weight: 700; color: var(--text);">Congratulations! You have an offer.</div>
-                        <div style="font-size: 0.8rem; color: var(--text-muted);">Offered Salary: ${{ app.offer.offered_salary|floatformat:0 }} / year</div>
-                    </div>
-                </div>
-                <div style="display: flex; gap: 0.5rem;">
-                    <a href="{{ app.offer.offer_letter.url }}" target="_blank" class="btn btn-outline btn-sm" style="font-size: 0.7rem; border-radius: 8px;">
-                        <i data-lucide="file-down" style="width:14px;height:14px;"></i> Letter
-                    </a>
-                    <a href="{% url 'view_offer' app.offer.pk %}" class="btn btn-primary btn-sm" style="font-size: 0.7rem; border-radius: 8px; background: #22c55e; border-color: #22c55e; color: #fff;">Review Offer</a>
-                </div>
-            </div>
-            {% endif %}
         </div>
         {% endfor %}
     </div>
     {% else %}
-    <div class="card glass" style="padding: 5rem 2rem; text-align: center; border-radius: 24px; border: 1px dashed var(--border);">
-        <div style="width: 80px; height: 80px; border-radius: 50%; background: rgba(255,255,255,0.03); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
-            <i data-lucide="briefcase" style="width:32px;height:32px;color: var(--text-muted); opacity: 0.5;"></i>
+    <div class="empty-state" style="padding: 10rem 2rem; text-align: center; border-radius: var(--radius-2xl); background: var(--surface); border: 2px dashed var(--border); position: relative; overflow: hidden;">
+        <div style="width: 120px; height: 120px; background: var(--surface-2); border-radius: 40px; display: flex; align-items: center; justify-content: center; margin: 0 auto 3rem; border: 1px solid var(--border);">
+            <i data-lucide="compass" style="width:56px;height:56px;color:var(--text-muted); opacity: 0.3;"></i>
         </div>
-        <h3 style="color:var(--text); font-size: 1.5rem; font-weight: 700; font-family: var(--font-display); margin-bottom: 0.5rem;">No applications found</h3>
-        <p style="color: var(--text-muted); font-size: 1rem; max-width: 400px; margin: 0 auto 2rem;">You haven't applied to any jobs yet. Your career journey starts with a single click!</p>
-        <a href="{% url 'job_list' %}" class="btn btn-primary btn-lg" style="border-radius: 14px; padding: 0.8rem 2.5rem; font-weight: 600;">
-            Find Your Dream Job
+        <h2 style="font-family: var(--font-display); font-size: 2.5rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.02em; margin-bottom: 1rem;">No active applications</h2>
+        <p class="text-muted" style="font-size: 1.2rem; margin: 1rem auto 3.5rem; max-width: 500px; line-height: 1.7;">
+            Your next breakthrough is waiting. Explore our curated list of roles that match your unique skill set and career aspirations.
+        </p>
+        <a href="{% url 'job_list' %}" class="btn btn-primary" style="padding: 1.25rem 4rem; border-radius: var(--radius-xl); font-weight: 800; font-size: 1.1rem;">
+            Explore Career Catalog
         </a>
     </div>
     {% endif %}
 </div>
-{% endblock %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    });
+</script>
+{% endblock %}
