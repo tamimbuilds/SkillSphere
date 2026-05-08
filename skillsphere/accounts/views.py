@@ -161,6 +161,14 @@ def candidate_detail(request, pk):
 
 @login_required
 def notifications(request):
-    items = request.user.notifications.select_related('interview', 'interview__job', 'interview__job__recruiter').all()
+    items = request.user.notifications.select_related(
+        'interview',
+        'interview__job',
+        'interview__job__recruiter',
+        'job_offer',
+        'job_offer__candidate',
+        'job_offer__job',
+        'job_offer__job__recruiter',
+    ).all()
     items.filter(is_read=False).update(is_read=True)
     return render(request, 'notifications.html', {'notifications': items})

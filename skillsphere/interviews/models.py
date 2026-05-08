@@ -35,7 +35,7 @@ class Interview(models.Model):
     interview_type = models.CharField(max_length=20, choices=TYPE, default='hr')
     round_number = models.IntegerField(default=1)
     scheduled_date = models.DateField()
-    scheduled_time = models.CharField(max_length=10)
+    scheduled_time = models.TimeField()
     meeting_link = models.URLField(blank=True)
     location = models.CharField(max_length=200, blank=True)
     welcome_message = models.TextField(blank=True)
