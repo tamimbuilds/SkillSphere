@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}View Job Offer | SkillSphere{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in" style="max-width: 900px; margin: 0 auto;">
+    <!-- Header -->
+    <div style="margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1.5rem;">
+        <div>
+            <a href="{% url 'my_applications' %}" style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; margin-bottom: 1rem; transition: color 0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-muted)'">
+                <i data-lucide="arrow-left" style="width:16px;height:16px;"></i> Back to Applications
+            </a>
+            <h1 style="font-family: var(--font-display); font-size: 2.8rem; font-weight: 800; letter-spacing: -0.03em; margin: 0;">Job Offer</h1>
+            <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0.5rem;">Congratulations! You've received an offer from <span style="color: var(--accent); font-weight: 600;">{{ offer.job.recruiter.company_name }}</span>.</p>
+        </div>
+        
+        <div style="padding: 0.5rem 1.25rem; border-radius: 12px; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+            {% if offer.offer_status == 'pending' %}background: rgba(139,92,246,0.1); color: #8b5cf6; border: 1px solid rgba(139,92,246,0.2);
+            {% elif offer.offer_status == 'accepted' %}background: rgba(34,197,94,0.1); color: #22c55e; border: 1px solid rgba(34,197,94,0.2);
+            {% elif offer.offer_status == 'rejected' %}background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2);
+            {% endif %}">
+            Status: {{ offer.offer_status|title }}
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 3fr 2fr; gap: 2rem;">
+        <!-- Main Offer Details -->
+        <div class="card glass" style="padding: 2.5rem; border-radius: 24px; border: 1px solid var(--border); overflow: hidden; position: relative;">
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 6px; background: linear-gradient(90deg, var(--accent), var(--secondary)); opacity: 0.6;"></div>
+            
+            <div style="margin-bottom: 2.5rem;">
+                <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--text);">Offer Summary</h2>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div>
+                        <div style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-subtle); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">Job Title</div>
+                        <div style="font-size: 1.1rem; font-weight: 600; color: var(--text);">{{ offer.job.title }}</div>
+                    </div>
+                    <div>
+                        <div style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-subtle); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">Company</div>
+                        <div style="font-size: 1.1rem; font-weight: 600; color: var(--text);">{{ offer.job.recruiter.company_name }}</div>
+                    </div>
+                    <div>
+                        <div style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-subtle); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">Annual Salary</div>
+                        <div style="font-size: 1.4rem; font-weight: 800; color: var(--success);">$ {{ offer.offered_salary|floatformat:0 }}</div>
+                    </div>
+                    <div>
+                        <div style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-subtle); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">Joining Date</div>
+                        <div style="font-size: 1.1rem; font-weight: 600; color: var(--text);">{{ offer.joining_date|date:"F d, Y" }}</div>
+                    </div>
+                </div>
+            </div>
+
+            {% if offer.offer_letter %}
+            <div style="margin-bottom: 2.5rem; padding: 1.5rem; border-radius: 16px; background: rgba(255,255,255,0.02); border: 1px solid var(--border);">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="width: 50px; height: 50px; border-radius: 12px; background: rgba(239,68,68,0.1); color: #ef4444; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i data-lucide="file-text" style="width:24px;height:24px;"></i>
+                    </div>
+                    <div style="flex-grow: 1;">
+                        <div style="font-size: 1rem; font-weight: 600; color: var(--text);">Offer Letter.pdf</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">Please review the full terms and conditions.</div>
+                    </div>
+                    <a href="{{ offer.offer_letter.url }}" target="_blank" class="btn btn-outline btn-sm" style="border-radius: 10px; display: flex; align-items: center; gap: 0.5rem;">
+                        <i data-lucide="download" style="width:14px;height:14px;"></i> Download
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if offer.offer_status == 'pending' %}
+            <div style="display: flex; gap: 1.5rem; margin-top: 1rem;">
+                <form action="{% url 'accept_offer' offer.pk %}" method="post" style="flex: 1;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary" style="width: 100%; border-radius: 14px; padding: 1rem; font-weight: 700; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 0.75rem; box-shadow: 0 10px 20px rgba(165,243,252,0.1);">
+                        <i data-lucide="check-circle" style="width:20px;height:20px;"></i> Accept Offer
+                    </button>
+                </form>
+                <form action="{% url 'reject_offer' offer.pk %}" method="post" style="flex: 1;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline" style="width: 100%; border-radius: 14px; padding: 1rem; font-weight: 600; font-size: 1rem; color: var(--danger); border-color: rgba(239,68,68,0.3); display: flex; align-items: center; justify-content: center; gap: 0.75rem;" onclick="return confirm('Are you sure you want to reject this offer?')">
+                        <i data-lucide="x-circle" style="width:20px;height:20px;"></i> Decline
+                    </button>
+                </form>
+            </div>
+            {% elif offer.offer_status == 'accepted' %}
+            <div style="text-align: center; padding: 1rem; border-radius: 14px; background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2); color: #22c55e; font-weight: 600;">
+                <i data-lucide="party-popper" style="width:20px;height:20px;margin-right:0.5rem;vertical-align:middle;"></i> You have accepted this offer!
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 1rem; border-radius: 14px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #ef4444; font-weight: 600;">
+                You have declined this offer.
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar Info -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <!-- Recruiter Profile -->
+            <div class="card glass" style="padding: 1.5rem; border-radius: 20px; border: 1px solid var(--border);">
+                <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-subtle); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem;">Employer</div>
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                    <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; font-weight: 800; color: var(--accent); font-size: 1.2rem; border: 2px solid var(--accent);">
+                        {{ offer.job.recruiter.company_name|slice:":1" }}
+                    </div>
+                    <div>
+                        <div style="font-weight: 700; color: var(--text);">{{ offer.job.recruiter.company_name }}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">{{ offer.job.location }}</div>
+                    </div>
+                </div>
+                <div style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 1rem;">
+                    {{ offer.job.recruiter.bio|truncatewords:20 }}
+                </div>
+                <a href="{% url 'job_detail' offer.job.pk %}" style="font-size: 0.8rem; color: var(--accent); text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 0.4rem;">
+                    View Company Profile <i data-lucide="chevron-right" style="width:14px;height:14px;"></i>
+                </a>
+            </div>
+
+            <!-- Next Steps -->
+            <div style="padding: 1.5rem; border-radius: 20px; background: rgba(165,243,252,0.03); border: 1px solid rgba(165,243,252,0.1);">
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="list-checks" style="width:18px;height:18px;color:var(--accent);"></i> Next Steps
+                </h4>
+                <ul style="padding: 0; margin: 0; list-style: none; font-size: 0.85rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 0.75rem;">
+                    <li style="display: flex; gap: 0.75rem;">
+                        <span style="color: var(--accent); font-weight: 800;">1.</span>
+                        Review the offer details and the attached PDF letter carefully.
+                    </li>
+                    <li style="display: flex; gap: 0.75rem;">
+                        <span style="color: var(--accent); font-weight: 800;">2.</span>
+                        If everything looks good, click "Accept Offer" to finalize your hiring.
+                    </li>
+                    <li style="display: flex; gap: 0.75rem;">
+                        <span style="color: var(--accent); font-weight: 800;">3.</span>
+                        Once accepted, the recruiter will be notified and will reach out with onboarding details.
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize Lucide icons
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+</script>
+{% endblock %}

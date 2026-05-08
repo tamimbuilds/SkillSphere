@@ -80,6 +80,9 @@ def profile_view(request):
             s.latest_score = score_qs.first()
             s.attempt_count = score_qs.count()
             s.has_assessment = s.latest_score is not None
+            from skills.models import Certificate
+            s.external_certificates = Certificate.objects.filter(candidate_skill=s)
+            s.is_expert_verified = s.latest_score and s.latest_score.passed and s.external_certificates.filter(verification_status='verified').exists()
         total_jobs = Application.objects.filter(candidate=profile).count()
         total_interviews = Interview.objects.filter(candidate=profile).count()
     elif user.role == 'recruiter':
@@ -126,8 +129,7 @@ def candidate_detail(request, pk):
     
     profile = get_object_or_404(CandidateProfile, pk=pk)
     
-    # Fetch skills and scores
-    from skills.models import CandidateSkill, Score
+    from skills.models import CandidateSkill, Score, Certificate
     from jobs.models import Application
     
     skills = CandidateSkill.objects.filter(candidate=profile).select_related('skill')
@@ -136,6 +138,8 @@ def candidate_detail(request, pk):
         s.latest_score = score_qs.first()
         s.attempt_count = score_qs.count()
         s.has_assessment = s.latest_score is not None
+        s.external_certificates = Certificate.objects.filter(candidate_skill=s)
+        s.is_expert_verified = s.latest_score and s.latest_score.passed and s.external_certificates.filter(verification_status='verified').exists()
 
     applications = Application.objects.filter(candidate=profile).select_related('job', 'job__recruiter')
     

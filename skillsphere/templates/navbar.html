@@ -7,14 +7,15 @@
         {% if user.is_authenticated %}
             {% if user.role == 'candidate' %}
                 <li><a href="{% url 'my_skills' %}">Skills</a></li>
-                <li><a href="{% url 'interview_list' %}">Interviews</a></li>
-                <li><a href="{% url 'offer_list' %}">Offers</a></li>
+                <li><a href="{% url 'interview_list' %}">Invitations</a></li>
                 <li><a href="{% url 'notifications' %}">Notifications</a></li>
             {% elif user.role == 'recruiter' %}
+                <li><a href="{% url 'interview_list' %}">Interviews</a></li>
                 <li><a href="{% url 'interviewer_list' %}">Interviewers</a></li>
-                <li><a href="{% url 'offer_list' %}">Offers</a></li>
             {% endif %}
-
+            {% if user.is_staff or user.is_superuser %}
+                <li><a href="{% url 'admin_certificate_dashboard' %}" style="color: var(--warning);">Cert Admin</a></li>
+            {% endif %}
             <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
             <li><a href="{% url 'profile' %}">Profile</a></li>
             <li>

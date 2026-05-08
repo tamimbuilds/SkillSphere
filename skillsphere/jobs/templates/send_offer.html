@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Send Job Offer | SkillSphere{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in" style="max-width: 800px; margin: 0 auto;">
+    <div style="margin-bottom: 2.5rem;">
+        <a href="{% url 'job_applicants' application.job.pk %}" style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; margin-bottom: 1rem; transition: color 0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-muted)'">
+            <i data-lucide="arrow-left" style="width:16px;height:16px;"></i> Back to Applicants
+        </a>
+        <h1 style="font-family: var(--font-display); font-size: 2.4rem; font-weight: 700; letter-spacing: -0.02em;">Send Job Offer</h1>
+        <p style="color: var(--text-muted); font-size: 1rem; margin-top: 0.4rem;">Extend an offer to <span style="color: var(--accent); font-weight: 600;">{{ application.candidate.full_name }}</span> for the <span style="color: var(--text); font-weight: 600;">{{ application.job.title }}</span> position.</p>
+    </div>
+
+    <div class="card glass" style="padding: 2.5rem; border-radius: 24px; border: 1px solid var(--border);">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                <div class="form-group">
+                    <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-subtle); margin-bottom: 0.75rem;">Offered Salary (Annual)</label>
+                    <div style="position: relative;">
+                        <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-weight: 600;">$</span>
+                        <input type="number" name="offered_salary" value="{{ form.offered_salary.value|default:'' }}" step="0.01" class="form-control" style="padding-left: 2rem; border-radius: 12px; height: 52px; background: rgba(255,255,255,0.03); border-color: var(--border); color: var(--text);" placeholder="e.g. 85000">
+                    </div>
+                    {% if form.offered_salary.errors %}<p style="color: var(--danger); font-size: 0.8rem; margin-top: 0.5rem;">{{ form.offered_salary.errors.0 }}</p>{% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-subtle); margin-bottom: 0.75rem;">Anticipated Joining Date</label>
+                    <input type="date" name="joining_date" value="{{ form.joining_date.value|date:'Y-m-d'|default:'' }}" class="form-control" style="border-radius: 12px; height: 52px; background: rgba(255,255,255,0.03); border-color: var(--border); color: var(--text);">
+                    {% if form.joining_date.errors %}<p style="color: var(--danger); font-size: 0.8rem; margin-top: 0.5rem;">{{ form.joining_date.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 2.5rem;">
+                <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-subtle); margin-bottom: 0.75rem;">Offer Letter (PDF)</label>
+                <div style="border: 2px dashed var(--border); padding: 2rem; border-radius: 16px; text-align: center; background: rgba(255,255,255,0.01); transition: all 0.3s ease;" onmouseover="this.style.borderColor='var(--accent)'; this.style.background='rgba(165,243,252,0.02)'" onmouseout="this.style.borderColor='var(--border)'; this.style.background='rgba(255,255,255,0.01)'">
+                    <i data-lucide="upload-cloud" style="width:32px;height:32px;color:var(--text-muted);margin-bottom:1rem;opacity:0.5;"></i>
+                    <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">Upload a detailed offer letter in PDF format.</p>
+                    <input type="file" name="offer_letter" class="form-control" style="background: transparent; border: none; color: var(--text); padding: 0;">
+                </div>
+                {% if form.offer_letter.errors %}<p style="color: var(--danger); font-size: 0.8rem; margin-top: 0.5rem;">{{ form.offer_letter.errors.0 }}</p>{% endif %}
+                {% if existing_offer.offer_letter %}
+                <p style="font-size: 0.8rem; color: var(--success); margin-top: 0.75rem; display: flex; align-items: center; gap: 0.4rem;">
+                    <i data-lucide="check-circle" style="width:14px;height:14px;"></i> Current file: <a href="{{ existing_offer.offer_letter.url }}" target="_blank" style="color: var(--accent); text-decoration: underline;">{{ existing_offer.offer_letter.name }}</a>
+                </p>
+                {% endif %}
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: flex-end; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+                <a href="{% url 'job_applicants' application.job.pk %}" class="btn btn-outline" style="border-radius: 12px; padding: 0.75rem 2rem;">Cancel</a>
+                <button type="submit" class="btn btn-primary" style="border-radius: 12px; padding: 0.75rem 2.5rem; font-weight: 600;">
+                    {% if existing_offer %}Update Offer{% else %}Send Offer{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tips Section -->
+    <div style="margin-top: 2rem; padding: 1.5rem; border-radius: 16px; background: rgba(59,130,246,0.05); border: 1px solid rgba(59,130,246,0.1); display: flex; gap: 1rem; align-items: flex-start;">
+        <i data-lucide="info" style="width:20px;height:20px;color:#3b82f6;flex-shrink:0;margin-top:2px;"></i>
+        <div>
+            <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--text); margin-bottom: 0.25rem;">Hiring Tip</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">Ensure the offer letter contains all necessary details including benefits, work hours, and company policies. Candidates are 40% more likely to accept offers that are clear and detailed.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

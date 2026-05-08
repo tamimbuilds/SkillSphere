@@ -1,45 +1,157 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Certificate</title>
-    <style>
-        body { font-family: Arial; background:#eef1f5; }
+{% extends "base.html" %}
+{% load static %}
 
-        .box {
-            width:450px;
-            margin:40px auto;
-            background:white;
-            padding:20px;
-            border-radius:8px;
-        }
+{% block title %}Upload Certificate | {{ skill.skill.skill_name }}{% endblock %}
 
-        input, select {
-            width:100%;
-            padding:8px;
-            margin:6px 0;
-        }
+{% block content %}
+<div style="max-width: 600px; margin: 2rem auto;">
+    
+    <!-- Header -->
+    <div style="margin-bottom: 2.5rem; text-align: center;">
+        <span style="font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted);">External Validation</span>
+        <h1 style="font-family: var(--font-mono); font-size: 1.8rem; font-weight: 700; margin-top: 0.5rem;">Upload Certificate</h1>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 0.5rem; font-family: var(--font-sans);">
+            Provide an external certificate to verify your proficiency in 
+            <strong style="color: var(--text);">{{ skill.skill.skill_name }}</strong>.
+        </p>
+    </div>
 
-        button {
-            background:#007bff;
-            color:white;
-            padding:10px;
-            width:100%;
-            border:none;
-            border-radius:5px;
-        }
-    </style>
-</head>
-<body>
+    <!-- Form Card -->
+    <div class="card glass animate-fade-in" style="padding: 2.5rem;">
+        <form method="POST" enctype="multipart/form-data" class="modern-form">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger); color: var(--danger); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem; font-size: 0.82rem; font-family: var(--font-mono);">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
 
-<div class="box">
-    <h2>Upload Certificate</h2>
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <!-- Title -->
+                <div class="form-group">
+                    <label style="font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem; display: block;">
+                        01 — Certificate Title
+                    </label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                        <p style="color: var(--danger); font-size: 0.75rem; margin-top: 0.25rem; font-family: var(--font-mono);">{{ form.title.errors.0 }}</p>
+                    {% endif %}
+                </div>
 
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Upload</button>
-    </form>
+                <!-- Issued By -->
+                <div class="form-group">
+                    <label style="font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem; display: block;">
+                        02 — Issued By (Organization)
+                    </label>
+                    {{ form.issued_by }}
+                    {% if form.issued_by.errors %}
+                        <p style="color: var(--danger); font-size: 0.75rem; margin-top: 0.25rem; font-family: var(--font-mono);">{{ form.issued_by.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Dates -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label style="font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem; display: block;">
+                            03 — Issue Date
+                        </label>
+                        {{ form.issue_date }}
+                        {% if form.issue_date.errors %}
+                            <p style="color: var(--danger); font-size: 0.75rem; margin-top: 0.25rem; font-family: var(--font-mono);">{{ form.issue_date.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label style="font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem; display: block;">
+                            04 — Expiry Date (Optional)
+                        </label>
+                        {{ form.expiry_date }}
+                        {% if form.expiry_date.errors %}
+                            <p style="color: var(--danger); font-size: 0.75rem; margin-top: 0.25rem; font-family: var(--font-mono);">{{ form.expiry_date.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- File Upload -->
+                <div class="form-group">
+                    <label style="font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem; display: block;">
+                        05 — Certificate File (PDF/Image)
+                    </label>
+                    <div class="file-input-wrapper" style="
+                        border: 1px dashed var(--border);
+                        border-radius: var(--radius-sm);
+                        padding: 2rem;
+                        text-align: center;
+                        background: var(--surface-3);
+                        transition: all var(--transition);
+                        position: relative;
+                    ">
+                        <i data-lucide="upload-cloud" style="width: 32px; height: 32px; color: var(--text-muted); margin-bottom: 1rem;"></i>
+                        <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);">
+                            Click to select or drag and drop
+                        </div>
+                        <input type="file" name="certificate_file" required id="id_certificate_file" style="
+                            position: absolute;
+                            inset: 0;
+                            opacity: 0;
+                            cursor: pointer;
+                        ">
+                        <div id="file-name" style="margin-top: 1rem; font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700; color: var(--accent); display: none;"></div>
+                    </div>
+                    {% if form.certificate_file.errors %}
+                        <p style="color: var(--danger); font-size: 0.75rem; margin-top: 0.25rem; font-family: var(--font-mono);">{{ form.certificate_file.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div style="height: 1px; background: var(--border); margin: 2rem 0;"></div>
+
+            <div style="display: flex; gap: 1rem;">
+                <a href="{% url 'my_skills' %}" class="btn btn-outline" style="flex: 1; padding: 0.85rem; text-align: center;">
+                    Cancel
+                </a>
+                <button type="submit" class="btn btn-primary" style="flex: 2; padding: 0.85rem;">
+                    Upload Certificate →
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
-</body>
-</html>
+<script>
+    document.getElementById('id_certificate_file').addEventListener('change', function(e) {
+        const fileName = e.target.files[0]?.name;
+        const display = document.getElementById('file-name');
+        if (fileName) {
+            display.textContent = 'Selected: ' + fileName;
+            display.style.display = 'block';
+        } else {
+            display.style.display = 'none';
+        }
+    });
+</script>
+
+<style>
+    .modern-form .form-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        font-family: var(--font-sans);
+        font-size: 0.9rem;
+        color: var(--text);
+        transition: all var(--transition);
+    }
+    .modern-form .form-input:focus {
+        outline: none;
+        border-color: var(--accent);
+        background: var(--surface-1);
+        box-shadow: 0 0 0 4px rgba(165, 243, 252, 0.1);
+    }
+    .file-input-wrapper:hover {
+        border-color: var(--accent);
+        background: var(--surface-2);
+    }
+</style>
+{% endblock %}

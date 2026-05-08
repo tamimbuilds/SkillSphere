@@ -3,52 +3,6 @@ from pathlib import Path
 from urllib.parse import quote, urlparse
 
 import dj_database_url
-from django.core.exceptions import ImproperlyConfigured
-
-
-# #region agent log (db env debugging)
-def _agent_log(hypothesis_id: str, message: str, data: dict | None = None):
-    """
-    Debug-mode instrumentation.
-    Writes NDJSON to debug-f8d5d9.log and prints a small safe line to stdout.
-    Never logs secrets: only presence/shape metadata.
-    """
-    payload = {
-        "sessionId": "f8d5d9",
-        "runId": "railway-db-env",
-        "hypothesisId": hypothesis_id,
-        "location": "skillsphere/settings.py:agent_log",
-        "message": message,
-        "data": data or {},
-        "timestamp": __import__("time").time_ns() // 1_000_000,
-    }
-    try:
-        with open("debug-f8d5d9.log", "a", encoding="utf-8") as f:
-            f.write(__import__("json").dumps(payload, ensure_ascii=False) + "\n")
-    except Exception:
-        pass
-    try:
-        # Keep stdout minimal; Railway logs will show these lines.
-        print(f"DBG_DBENV {payload['hypothesisId']} {payload['message']} {payload['data']}")
-    except Exception:
-        pass
-
-
-def _safe_env_shape(name: str):
-    """Return metadata about an env var without leaking its value."""
-    exists = name in os.environ
-    val = os.environ.get(name)
-    is_empty = exists and (val is None or str(val) == "")
-    looks_like_railway_ref = isinstance(val, str) and val.strip().startswith("${{") and val.strip().endswith("}}")
-    looks_quoted = isinstance(val, str) and ((val.startswith('"') and val.endswith('"')) or (val.startswith("'") and val.endswith("'")))
-    return {
-        "exists": bool(exists),
-        "empty": bool(is_empty),
-        "len": (len(val) if isinstance(val, str) else None),
-        "railway_ref_syntax": bool(looks_like_railway_ref),
-        "quoted": bool(looks_quoted),
-    }
-# #endregion
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -154,11 +108,11 @@ WSGI_APPLICATION = 'skillsphere.wsgi.application'
 
 
 def _build_postgres_url():
-    pg_name = os.getenv('PGDATABASE') or os.getenv('POSTGRES_DB')
-    pg_user = os.getenv('PGUSER') or os.getenv('POSTGRES_USER')
-    pg_password = os.getenv('PGPASSWORD') or os.getenv('POSTGRES_PASSWORD')
-    pg_host = os.getenv('PGHOST') or os.getenv('POSTGRES_HOST')
-    pg_port = os.getenv('PGPORT') or os.getenv('POSTGRES_PORT') or '5432'
+    pg_name = os.getenv('PGDATABASE')
+    pg_user = os.getenv('PGUSER')
+    pg_password = os.getenv('PGPASSWORD')
+    pg_host = os.getenv('PGHOST')
+    pg_port = os.getenv('PGPORT', '5432')
 
     if all([pg_name, pg_user, pg_password, pg_host]):
         return (
@@ -168,119 +122,14 @@ def _build_postgres_url():
     return None
 
 
-def _first_env(*names):
-    for name in names:
-        value = os.getenv(name)
-        if value:
-            return value
-    return None
-
-
-database_url = _first_env('DATABASE_URL', 'DATABASE_PRIVATE_URL', 'POSTGRES_URL', 'POSTGRESQL_URL') or _build_postgres_url()
-
-
-def _is_collectstatic_command():
-    return any(arg == 'collectstatic' for arg in os.sys.argv)
-
-
-def _is_railway_environment():
-    return any(
-        os.getenv(name)
-        for name in (
-            'RAILWAY_ENVIRONMENT_ID',
-            'RAILWAY_ENVIRONMENT_NAME',
-            'RAILWAY_PROJECT_ID',
-            'RAILWAY_SERVICE_ID',
-            'RAILWAY_DEPLOYMENT_ID',
-        )
-    )
-
-
-allow_sqlite_fallback = DEBUG or _is_collectstatic_command() or not _is_railway_environment()
+database_url = os.getenv('DATABASE_URL') or _build_postgres_url()
 
 DATABASES = {
-    'default': dj_database_url.parse(database_url, conn_max_age=600) if database_url else (
-        {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-        if allow_sqlite_fallback
-        else None
-    )
+    'default': dj_database_url.parse(database_url, conn_max_age=600) if database_url else {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
-
-if DATABASES['default'] is None:
-    database_env_names = (
-        'DATABASE_URL',
-        'DATABASE_PRIVATE_URL',
-        'POSTGRES_URL',
-        'POSTGRESQL_URL',
-        'PGDATABASE',
-        'PGUSER',
-        'PGPASSWORD',
-        'PGHOST',
-        'PGPORT',
-        'POSTGRES_DB',
-        'POSTGRES_USER',
-        'POSTGRES_PASSWORD',
-        'POSTGRES_HOST',
-        'POSTGRES_PORT',
-    )
-    railway_env_names = (
-        'RAILWAY_ENVIRONMENT_ID',
-        'RAILWAY_ENVIRONMENT_NAME',
-        'RAILWAY_PROJECT_ID',
-        'RAILWAY_SERVICE_ID',
-        'RAILWAY_SERVICE_NAME',
-        'RAILWAY_DEPLOYMENT_ID',
-    )
-    non_empty_database_env = ', '.join(name for name in database_env_names if os.getenv(name)) or 'none'
-    empty_database_env = ', '.join(
-        name for name in database_env_names if name in os.environ and not os.getenv(name)
-    ) or 'none'
-    present_railway_env = ', '.join(name for name in railway_env_names if os.getenv(name)) or 'none'
-    print(f'Database env vars present with values: {non_empty_database_env}')
-    print(f'Database env vars defined but empty: {empty_database_env}')
-    print(f'Railway env vars present: {present_railway_env}')
-
-    # #region agent log (hypothesis testing)
-    # Hypotheses:
-    # A: Vars are being set in the wrong Railway service/environment -> keys do not exist in os.environ.
-    # B: Vars exist but are empty -> exists true, empty true.
-    # C: Vars exist but are literally "${{...}}" (not expanded) -> railway_ref_syntax true.
-    # D: User added quotes and Railway kept them -> quoted true.
-    _agent_log(
-        "A",
-        "railway_context",
-        {
-            "railway_env_present": present_railway_env,
-            "railway_service_name_set": bool(os.getenv("RAILWAY_SERVICE_NAME")),
-            "debug_flag": DEBUG,
-        },
-    )
-    _agent_log(
-        "A",
-        "db_key_shapes",
-        {
-            "DATABASE_URL": _safe_env_shape("DATABASE_URL"),
-            "DATABASE_PRIVATE_URL": _safe_env_shape("DATABASE_PRIVATE_URL"),
-            "POSTGRES_URL": _safe_env_shape("POSTGRES_URL"),
-            "POSTGRESQL_URL": _safe_env_shape("POSTGRESQL_URL"),
-            "PGHOST": _safe_env_shape("PGHOST"),
-            "PGPORT": _safe_env_shape("PGPORT"),
-            "PGDATABASE": _safe_env_shape("PGDATABASE"),
-            "PGUSER": _safe_env_shape("PGUSER"),
-            "PGPASSWORD": _safe_env_shape("PGPASSWORD"),
-        },
-    )
-    # #endregion
-
-    raise ImproperlyConfigured(
-        'Database configuration is missing. Set DATABASE_URL on this app service. '
-        'On Railway, add DATABASE_URL=${{ Postgres.DATABASE_URL }} to the Django service '
-        'Variables tab, replacing "Postgres" with the exact name of your PostgreSQL service. '
-        'Alternatively set PGDATABASE, PGUSER, PGPASSWORD, PGHOST, and optionally PGPORT.'
-    )
 
 
 AUTH_PASSWORD_VALIDATORS = [

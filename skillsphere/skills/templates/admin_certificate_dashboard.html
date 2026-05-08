@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Certificate Admin | SkillSphere{% endblock %}
+
+{% block content %}
+<div style="max-width: 1100px; margin: 0 auto;">
+
+    <!-- ── Page Header ───────────────────────── -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2.5rem; flex-wrap: wrap; gap: 1.5rem;">
+        <div>
+            <span style="font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted);">Admin Panel</span>
+            <h1 style="font-family: var(--font-mono); font-size: 2rem; font-weight: 700; letter-spacing: -0.03em; margin-top: 0.4rem;">Certificate Dashboard</h1>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.3rem; font-family: var(--font-sans);">
+                Review and manage external certifications uploaded by candidates.
+            </p>
+        </div>
+
+        <!-- Status Filter Tabs -->
+        <div style="display: flex; gap: 0.5rem;">
+            <a href="?status=pending"
+               style="
+                   font-family: var(--font-mono); font-size: 0.75rem; padding: 0.5rem 1.1rem;
+                   border-radius: var(--radius-sm); text-decoration: none;
+                   border: 1px solid {% if current_status == 'pending' %}var(--warning){% else %}var(--border){% endif %};
+                   background: {% if current_status == 'pending' %}rgba(251,191,36,0.1){% else %}var(--surface-2){% endif %};
+                   color: {% if current_status == 'pending' %}var(--warning){% else %}var(--text-muted){% endif %};
+                   display: inline-flex; align-items: center; gap: 0.4rem;
+                   transition: all var(--transition);
+               ">
+                <i data-lucide="clock" style="width:12px;height:12px;"></i> Pending
+            </a>
+            <a href="?status=verified"
+               style="
+                   font-family: var(--font-mono); font-size: 0.75rem; padding: 0.5rem 1.1rem;
+                   border-radius: var(--radius-sm); text-decoration: none;
+                   border: 1px solid {% if current_status == 'verified' %}var(--success){% else %}var(--border){% endif %};
+                   background: {% if current_status == 'verified' %}rgba(110,231,183,0.08){% else %}var(--surface-2){% endif %};
+                   color: {% if current_status == 'verified' %}var(--success){% else %}var(--text-muted){% endif %};
+                   display: inline-flex; align-items: center; gap: 0.4rem;
+                   transition: all var(--transition);
+               ">
+                <i data-lucide="shield-check" style="width:12px;height:12px;"></i> Verified
+            </a>
+            <a href="?status=rejected"
+               style="
+                   font-family: var(--font-mono); font-size: 0.75rem; padding: 0.5rem 1.1rem;
+                   border-radius: var(--radius-sm); text-decoration: none;
+                   border: 1px solid {% if current_status == 'rejected' %}var(--danger){% else %}var(--border){% endif %};
+                   background: {% if current_status == 'rejected' %}rgba(248,113,113,0.08){% else %}var(--surface-2){% endif %};
+                   color: {% if current_status == 'rejected' %}var(--danger){% else %}var(--text-muted){% endif %};
+                   display: inline-flex; align-items: center; gap: 0.4rem;
+                   transition: all var(--transition);
+               ">
+                <i data-lucide="x-circle" style="width:12px;height:12px;"></i> Rejected
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+        <div style="
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.9rem 1.25rem; border-radius: var(--radius-sm);
+            background: rgba(110,231,183,0.06); border: 1px solid rgba(110,231,183,0.2);
+            color: var(--success); font-family: var(--font-mono); font-size: 0.82rem;
+            margin-bottom: 1.5rem;
+        ">
+            <i data-lucide="check-circle" style="width:14px;height:14px;flex-shrink:0;"></i> {{ message }}
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- ── Certificate Table ─────────────────── -->
+    <div class="card animate-fade-in" style="padding: 0; overflow: hidden;">
+
+        <!-- Section label -->
+        <div style="
+            padding: 1.25rem 1.75rem;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 0.6rem;
+        ">
+            <i data-lucide="file-check" style="width:14px;height:14px;color:var(--accent);"></i>
+            <span style="font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted);">
+                Showing: <strong style="color: var(--text);">{{ current_status }}</strong> certificates
+            </span>
+        </div>
+
+        {% if certificates %}
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 0.8rem;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border); color: var(--text-muted);">
+                        <th style="padding: 1rem 1.5rem; text-align: left; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.65rem;">Candidate</th>
+                        <th style="padding: 1rem 1.5rem; text-align: left; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.65rem;">Skill</th>
+                        <th style="padding: 1rem 1.5rem; text-align: left; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.65rem;">Certificate</th>
+                        <th style="padding: 1rem 1.5rem; text-align: left; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.65rem;">Issued By</th>
+                        <th style="padding: 1rem 1.5rem; text-align: center; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.65rem;">Document</th>
+                        <th style="padding: 1rem 1.5rem; text-align: right; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.65rem;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cert in certificates %}
+                    <tr style="border-bottom: 1px solid var(--surface-3); transition: background var(--transition);"
+                        onmouseover="this.style.background='var(--surface-3)'"
+                        onmouseout="this.style.background='transparent'">
+
+                        <!-- Candidate -->
+                        <td style="padding: 1.25rem 1.5rem;">
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <div style="
+                                    width: 36px; height: 36px; border-radius: var(--radius-sm);
+                                    background: var(--surface-3); border: 1px solid var(--border);
+                                    display: flex; align-items: center; justify-content: center;
+                                    font-family: var(--font-mono); font-size: 0.88rem; font-weight: 700; color: var(--accent);
+                                    flex-shrink: 0;
+                                ">{{ cert.candidate_skill.candidate.full_name|slice:":1"|upper }}</div>
+                                <div>
+                                    <div style="font-weight: 700; color: var(--text);">{{ cert.candidate_skill.candidate.full_name }}</div>
+                                    <div style="font-size: 0.68rem; color: var(--text-muted);">ID #{{ cert.candidate_skill.candidate.id }}</div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Skill -->
+                        <td style="padding: 1.25rem 1.5rem;">
+                            <span class="badge badge-primary" style="font-size: 0.65rem;">
+                                {{ cert.candidate_skill.skill.skill_name }}
+                            </span>
+                        </td>
+
+                        <!-- Certificate details -->
+                        <td style="padding: 1.25rem 1.5rem;">
+                            <div style="font-weight: 700; color: var(--text);">{{ cert.title }}</div>
+                            <div style="font-size: 0.68rem; color: var(--text-muted); margin-top: 0.2rem;">
+                                Issued: {{ cert.issue_date }}
+                                {% if cert.expiry_date %} · Expires: {{ cert.expiry_date }}{% endif %}
+                            </div>
+                        </td>
+
+                        <!-- Issued by -->
+                        <td style="padding: 1.25rem 1.5rem; color: var(--text-subtle);">
+                            {{ cert.issued_by }}
+                        </td>
+
+                        <!-- Document link -->
+                        <td style="padding: 1.25rem 1.5rem; text-align: center;">
+                            <a href="{{ cert.certificate_file.url }}" target="_blank"
+                               style="
+                                   display: inline-flex; align-items: center; gap: 0.4rem;
+                                   font-family: var(--font-mono); font-size: 0.72rem; color: var(--accent);
+                                   text-decoration: none; padding: 0.4rem 0.75rem;
+                                   border: 1px solid rgba(165,243,252,0.2); border-radius: var(--radius-sm);
+                                   transition: all var(--transition);
+                               "
+                               onmouseover="this.style.background='rgba(165,243,252,0.08)'"
+                               onmouseout="this.style.background='transparent'">
+                                <i data-lucide="external-link" style="width:12px;height:12px;"></i> View File
+                            </a>
+                        </td>
+
+                        <!-- Actions -->
+                        <td style="padding: 1.25rem 1.5rem; text-align: right;">
+                            {% if cert.verification_status == 'pending' %}
+                                <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                                    <a href="{% url 'verify_certificate' cert.pk %}"
+                                       style="
+                                           display: inline-flex; align-items: center; gap: 0.35rem;
+                                           font-family: var(--font-mono); font-size: 0.72rem;
+                                           color: var(--success); text-decoration: none;
+                                           padding: 0.4rem 0.85rem;
+                                           border: 1px solid rgba(110,231,183,0.25); border-radius: var(--radius-sm);
+                                           transition: all var(--transition);
+                                       "
+                                       onmouseover="this.style.background='rgba(110,231,183,0.08)'"
+                                       onmouseout="this.style.background='transparent'"
+                                       onclick="return confirm('Verify this certificate?')">
+                                        <i data-lucide="check" style="width:12px;height:12px;"></i> Verify
+                                    </a>
+                                    <a href="{% url 'reject_certificate' cert.pk %}"
+                                       style="
+                                           display: inline-flex; align-items: center; gap: 0.35rem;
+                                           font-family: var(--font-mono); font-size: 0.72rem;
+                                           color: var(--danger); text-decoration: none;
+                                           padding: 0.4rem 0.85rem;
+                                           border: 1px solid rgba(248,113,113,0.25); border-radius: var(--radius-sm);
+                                           transition: all var(--transition);
+                                       "
+                                       onmouseover="this.style.background='rgba(248,113,113,0.08)'"
+                                       onmouseout="this.style.background='transparent'"
+                                       onclick="return confirm('Reject this certificate?')">
+                                        <i data-lucide="x" style="width:12px;height:12px;"></i> Reject
+                                    </a>
+                                </div>
+                            {% elif cert.verification_status == 'verified' %}
+                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-family: var(--font-mono); font-size: 0.7rem; color: var(--success);">
+                                    <i data-lucide="shield-check" style="width:12px;height:12px;"></i> Verified
+                                </span>
+                            {% else %}
+                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-family: var(--font-mono); font-size: 0.7rem; color: var(--danger);">
+                                    <i data-lucide="x-circle" style="width:12px;height:12px;"></i> Rejected
+                                </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% else %}
+        <!-- Empty State -->
+        <div style="text-align: center; padding: 5rem 2rem;">
+            <div style="
+                width: 56px; height: 56px; background: var(--surface-3); border: 1px solid var(--border);
+                border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;
+                margin: 0 auto 1.5rem; color: var(--text-subtle);
+            ">
+                <i data-lucide="file-x" style="width:24px;height:24px;"></i>
+            </div>
+            <h3 style="font-family: var(--font-mono); font-size: 0.95rem; font-weight: 700; margin-bottom: 0.5rem;">No certificates found</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem; font-family: var(--font-sans);">
+                No certificates with status <strong>{{ current_status }}</strong>. Check the other tabs.
+            </p>
+        </div>
+        {% endif %}
+
+    </div><!-- /card -->
+
+</div>
+{% endblock %}

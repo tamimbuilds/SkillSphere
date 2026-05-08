@@ -63,6 +63,7 @@ class Notification(models.Model):
     title = models.CharField(max_length=200)
     message = models.TextField()
     interview = models.ForeignKey('interviews.Interview', on_delete=models.SET_NULL, null=True, blank=True, related_name='notifications')
+    job_offer = models.ForeignKey('jobs.JobOffer', on_delete=models.SET_NULL, null=True, blank=True, related_name='notifications')
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
