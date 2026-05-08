@@ -33,16 +33,18 @@ class CandidateSkillForm(forms.ModelForm):
 class CertificateForm(forms.ModelForm):
     class Meta:
         model = Certificate
-        fields = [
-            'candidate_skill',
-            'title',
-            'certificate_file',
-            'issued_by',
-            'issue_date',
-            'expiry_date',
-            'verification_status',
-            'verified_by_admin'
-        ]
+        fields = '__all__'
+
+class CandidateCertificateForm(forms.ModelForm):
+    class Meta:
+        model = Certificate
+        fields = ['title', 'certificate_file', 'issued_by', 'issue_date', 'expiry_date']
+        widgets = {
+            'issue_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-input'}),
+            'expiry_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-input'}),
+            'title': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'e.g. AWS Certified Solutions Architect'}),
+            'issued_by': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'e.g. Amazon Web Services'}),
+        }
 
 class JobSkillRequirementForm(forms.ModelForm):
     class Meta:

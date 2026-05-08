@@ -94,11 +94,52 @@
                     <div style="margin-top:0.35rem;font-family:var(--font-mono);font-size:0.72rem;color:var(--text-muted);">
                         Attempt {{ s.latest_score.attempt_number }}/3 • Set {{ s.latest_score.question_set_number }}
                     </div>
+                    {% if s.latest_score.passed %}
+                        <div style="margin-top: 1rem;">
+                            <a href="{% url 'view_certificate' s.pk %}" class="btn btn-outline" style="width: 100%; font-size: 0.72rem; padding: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 0.4rem; color: var(--success); border-color: rgba(110,231,183,0.3);">
+                                <i data-lucide="award" style="width:14px;height:14px;"></i> View Exam Certificate
+                            </a>
+                        </div>
+                    {% endif %}
                 {% else %}
                     <span style="display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);font-size:0.75rem;color:var(--warning);">
                         <i data-lucide="alert-circle" style="width:12px;height:12px;"></i> No Assessment Taken
                     </span>
                 {% endif %}
+            </div>
+
+            <!-- External Certificates -->
+            <div style="margin-bottom: 1.5rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                    <span style="font-family:var(--font-mono); font-size:0.68rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted);">External Certificates</span>
+                    <a href="{% url 'add_certificate' s.pk %}" style="color:var(--accent); text-decoration:none; font-family:var(--font-mono); font-size:0.65rem; display:flex; align-items:center; gap:0.25rem;">
+                        <i data-lucide="plus" style="width:10px;height:10px;"></i> Add
+                    </a>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                    {% for cert in s.external_certificates %}
+                    <div style="
+                        background:var(--surface-2); border:1px solid var(--border);
+                        border-radius:var(--radius-sm); padding:0.6rem 0.75rem;
+                        display:flex; justify-content:space-between; align-items:center;
+                    ">
+                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                            <i data-lucide="file-check" style="width:14px;height:14px; color:var(--text-muted);"></i>
+                            <span style="font-family:var(--font-mono); font-size:0.75rem;">{{ cert.title|truncatechars:20 }}</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                            <span class="badge {% if cert.verification_status == 'verified' %}badge-success{% elif cert.verification_status == 'rejected' %}badge-danger{% else %}badge-primary{% endif %}" style="font-size:0.55rem; padding:0.1rem 0.35rem;">
+                                {{ cert.verification_status }}
+                            </span>
+                            <a href="{{ cert.certificate_file.url }}" target="_blank" style="color:var(--text-muted);"><i data-lucide="external-link" style="width:12px;height:12px;"></i></a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div style="font-family:var(--font-mono); font-size:0.68rem; color:var(--text-muted); text-align:center; padding:0.5rem; border:1px dashed var(--border); border-radius:var(--radius-sm);">
+                        None uploaded
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
 
             <!-- Actions -->

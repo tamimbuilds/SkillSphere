@@ -27,8 +27,8 @@
 
     /* Typography */
     --text:           #0f0f14;       /* near-black ink */
-    --text-muted:     rgba(15, 15, 20, 0.50);
-    --text-subtle:    rgba(15, 15, 20, 0.30);
+    --text-muted:     rgba(15, 15, 20, 0.65);
+    --text-subtle:    rgba(15, 15, 20, 0.45);
 
     /* Glass (light frosted) */
     --glass:          rgba(255, 255, 255, 0.72);

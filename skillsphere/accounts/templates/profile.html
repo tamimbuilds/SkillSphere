@@ -125,6 +125,19 @@
                         <div style="display:none;">{{ field }}</div>
                         {% if field.errors %}<div style="color:var(--danger);font-size:0.78rem;margin-top:0.4rem;font-family:var(--font-mono);">↳ {{ field.errors }}</div>{% endif %}
                     </div>
+                    {% elif field.name == 'resume_file' %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                            {{ field }}
+                            {% if field.value %}
+                                <a href="{{ field.value.url }}" target="_blank" class="btn btn-outline" style="font-size:0.72rem; padding:0.4rem 0.8rem; display:inline-flex; align-items:center; gap:0.4rem; width:fit-content;">
+                                    <i data-lucide="file-text" style="width:14px;height:14px;"></i> View Current Resume
+                                </a>
+                            {% endif %}
+                        </div>
+                        {% if field.errors %}<div style="color:var(--danger);font-size:0.78rem;margin-top:0.4rem;font-family:var(--font-mono);">↳ {{ field.errors }}</div>{% endif %}
+                    </div>
                     {% else %}
                     <div class="form-group">
                         <label for="{{ field.id_for_label }}">{{ field.label }}</label>
@@ -155,21 +168,36 @@
                         display:flex;flex-direction:column;gap:0.75rem;
                         transition:border-color var(--transition);
                     " onmouseover="this.style.borderColor='var(--border-hover)'" onmouseout="this.style.borderColor='var(--border)'">
-                        <div style="display:flex;justify-content:space-between;align-items:center;">
-                            <span style="font-family:var(--font-mono);font-size:0.88rem;font-weight:700;">{{ s.skill.skill_name }}</span>
-                            <span class="badge badge-primary" style="font-size:0.62rem;">{{ s.proficiency_level }}</span>
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                            <div>
+                                <div style="font-family:var(--font-mono);font-size:0.88rem;font-weight:700;display:flex;align-items:center;gap:0.4rem;">
+                                    {{ s.skill.skill_name }}
+                                    {% if s.is_expert_verified %}
+                                        <i data-lucide="award" style="width:12px;height:12px;color:#FFD700;" title="Expert Verified"></i>
+                                    {% endif %}
+                                </div>
+                                <span class="badge badge-primary" style="font-size:0.62rem;margin-top:0.25rem;">{{ s.proficiency_level }}</span>
+                            </div>
+                            {% if s.is_expert_verified %}
+                                <div style="background:linear-gradient(135deg, #FFD700, #FFA500);color:white;padding:1px 6px;border-radius:4px;font-size:0.55rem;font-weight:800;">EXPERT</div>
+                            {% endif %}
                         </div>
                         <div>
                             {% if s.has_assessment %}
-                                <span style="display:inline-flex;align-items:center;gap:0.35rem;font-family:var(--font-mono);font-size:0.72rem;color:var(--success);">
-                                    <i data-lucide="check" style="width:11px;height:11px;"></i> {{ s.latest_score.score }}%
-                                </span>
+                                <div style="display:flex;justify-content:space-between;align-items:center;">
+                                    <span style="display:inline-flex;align-items:center;gap:0.35rem;font-family:var(--font-mono);font-size:0.72rem;color:var(--success);">
+                                        <i data-lucide="check" style="width:11px;height:11px;"></i> {{ s.latest_score.score }}%
+                                    </span>
+                                    {% if s.external_certificates %}
+                                        <span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--text-muted);" title="External Certificates">
+                                            <i data-lucide="file-check" style="width:10px;height:10px;"></i> 
+                                            {{ s.verified_certificates_count }}/{{ s.external_certificates.count }} Verified
+                                        </span>
+                                    {% endif %}
+                                </div>
                                 <div style="margin-top:0.35rem;font-family:var(--font-mono);font-size:0.68rem;color:var(--text-muted);">
                                     {{ s.latest_score.correct_answers }}/{{ s.latest_score.total_questions }}
                                     {% if s.latest_score.passed %}• Passed{% else %}• Failed{% endif %}
-                                </div>
-                                <div style="font-family:var(--font-mono);font-size:0.68rem;color:var(--text-muted);">
-                                    Attempts: {{ s.attempt_count }}/3
                                 </div>
                             {% else %}
                                 <span style="display:inline-flex;align-items:center;gap:0.35rem;font-family:var(--font-mono);font-size:0.72rem;color:var(--warning);">

@@ -17,5 +17,11 @@ urlpatterns = [
     # Job Skill Requirement management
     path('<int:pk>/skills/', views.job_skill_manage, name='job_skill_manage'),
     path('<int:pk>/skills/<int:skill_req_id>/delete/', views.job_skill_delete, name='job_skill_delete'),
+
+    # Job Offer management
+    path('applications/<int:application_pk>/send-offer/', views.send_job_offer, name='send_job_offer'),
+    path('offers/<int:offer_pk>/', views.view_offer, name='view_offer'),
+    path('offers/<int:offer_pk>/accept/', views.accept_offer, name='accept_offer'),
+    path('offers/<int:offer_pk>/reject/', views.reject_offer, name='reject_offer'),
 ]
 

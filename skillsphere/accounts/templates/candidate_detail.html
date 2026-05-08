@@ -1,108 +1,210 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}{{ profile.full_name }} | SkillSphere{% endblock %}
+{% block title %}{{ profile.full_name }} | Candidate Profile{% endblock %}
 
 {% block content %}
-<div class="animate-fade-in">
-    <!-- Header Section -->
+<div style="max-width: 1200px; margin: 0 auto;">
+    
+    <!-- ── Navigation ── -->
     <div style="margin-bottom: 2rem;">
-        <a href="javascript:history.back()" style="display: flex; align-items: center; gap: 0.5rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); text-decoration: none; margin-bottom: 1.5rem;">
-            <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> Back to Applicants
+        <a href="javascript:history.back()" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); text-decoration: none; transition: color var(--transition);" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-muted)'">
+            <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> Back to list
         </a>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 320px 1fr; gap: 2rem; align-items: start;">
         
-        <div class="card glass" style="padding: 2rem; border-radius: 20px; display: flex; align-items: center; gap: 2rem;">
-            <div style="width: 100px; height: 100px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; color: white; font-size: 2.5rem; font-family: var(--font-display); font-weight: 700;">
-                {{ profile.full_name|slice:":1" }}
+        <!-- ── Left Column: Sidebar ── -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            
+            <!-- Identity Card -->
+            <div class="card glass" style="padding: 2rem; text-align: center;">
+                <div style="
+                    width: 120px; height: 120px; border-radius: var(--radius-lg); 
+                    background: var(--surface-3); border: 2px solid var(--border-hover);
+                    display: flex; align-items: center; justify-content: center;
+                    margin: 0 auto 1.5rem;
+                    font-family: var(--font-mono); font-size: 3rem; font-weight: 700; color: var(--text-subtle);
+                ">
+                    {{ profile.full_name|slice:":1"|upper }}
+                </div>
+                <h1 style="font-family: var(--font-mono); font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem;">{{ profile.full_name }}</h1>
+                <p style="color: var(--text-muted); font-size: 0.82rem; font-family: var(--font-mono); margin-bottom: 1.5rem;">
+                    {{ profile.get_specialized_sector_display }}
+                </p>
+                
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <a href="mailto:{{ profile.user.email }}" class="btn btn-primary" style="width: 100%; font-size: 0.82rem;">
+                        <i data-lucide="mail" style="width:14px;height:14px;"></i> Contact Candidate
+                    </a>
+                    {% if profile.resume_file %}
+                        <a href="{{ profile.resume_file.url }}" target="_blank" class="btn btn-outline" style="width: 100%; font-size: 0.82rem; border-color: var(--accent); color: var(--accent);">
+                            <i data-lucide="file-text" style="width:14px;height:14px;"></i> View Resume
+                        </a>
+                    {% endif %}
+                </div>
             </div>
-            <div>
-                <h1 style="font-family: var(--font-display); font-size: 2.2rem; font-weight: 700; margin-bottom: 0.5rem;">{{ profile.full_name }}</h1>
-                <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
-                    <span style="display:inline-flex;align-items:center;gap:0.5rem;color:var(--text-muted);font-size:0.9rem;">
-                        <i data-lucide="graduation-cap" style="width:16px;height:16px;"></i> {{ profile.university }}
-                    </span>
-                    <span style="display:inline-flex;align-items:center;gap:0.5rem;color:var(--text-muted);font-size:0.9rem;">
-                        <i data-lucide="award" style="width:16px;height:16px;"></i> CGPA: {{ profile.cgpa }}
-                    </span>
-                    <span style="display:inline-flex;align-items:center;gap:0.5rem;color:var(--text-muted);font-size:0.9rem;">
-                        <i data-lucide="mail" style="width:16px;height:16px;"></i> {{ profile.user.email }}
-                    </span>
+
+            <!-- Education & Info -->
+            <div class="card" style="padding: 1.5rem;">
+                <h3 style="font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 1.25rem;">Candidate Information</h3>
+                
+                <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                    <div style="display: flex; gap: 0.75rem;">
+                        <i data-lucide="graduation-cap" style="width:16px;height:16px;color:var(--accent);margin-top:0.1rem;"></i>
+                        <div>
+                            <div style="font-size:0.85rem;font-weight:700;">{{ profile.university }}</div>
+                            <div style="font-size:0.75rem;color:var(--text-muted);">{{ profile.department }}</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 0.75rem;">
+                        <i data-lucide="award" style="width:16px;height:16px;color:var(--accent);margin-top:0.1rem;"></i>
+                        <div>
+                            <div style="font-size:0.85rem;font-weight:700;">CGPA: {{ profile.cgpa }}</div>
+                            <div style="font-size:0.75rem;color:var(--text-muted);">Class of {{ profile.graduation_year }}</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 0.75rem;">
+                        <i data-lucide="link" style="width:16px;height:16px;color:var(--accent);margin-top:0.1rem;"></i>
+                        <div style="display: flex; gap: 0.75rem;">
+                            {% if profile.linkedin_url %}<a href="{{ profile.linkedin_url }}" target="_blank" style="color:var(--text-muted);"><i data-lucide="linkedin" style="width:16px;height:16px;"></i></a>{% endif %}
+                            {% if profile.github_url %}<a href="{{ profile.github_url }}" target="_blank" style="color:var(--text-muted);"><i data-lucide="github" style="width:16px;height:16px;"></i></a>{% endif %}
+                            {% if profile.portfolio_url %}<a href="{{ profile.portfolio_url }}" target="_blank" style="color:var(--text-muted);"><i data-lucide="globe" style="width:16px;height:16px;"></i></a>{% endif %}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
-        <!-- Left Column: Skills and Experience -->
-        <div>
-            <section style="margin-bottom: 2.5rem;">
-                <h2 style="font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.75rem;">
-                    <i data-lucide="Zap" style="color: var(--accent); width: 24px; height: 24px;"></i> Skills & Assessments
-                </h2>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    {% for skill in skills %}
-                    <div class="card glass" style="padding: 1.25rem; border-radius: 16px;">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
-                            <h4 style="font-weight: 600; font-size: 1.1rem;">{{ skill.skill.name }}</h4>
-                            <span style="font-family: var(--font-mono); font-size: 0.7rem; padding: 0.2rem 0.5rem; background: rgba(255,255,255,0.05); border-radius: 4px; color: var(--text-muted);">
-                                {{ skill.experience_level|capfirst }}
-                            </span>
-                        </div>
-                        
-                        {% if skill.has_assessment %}
-                        <div style="background: rgba(34,197,94,0.05); border: 1px solid rgba(34,197,94,0.1); border-radius: 12px; padding: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <div style="font-size: 0.65rem; color: var(--success); text-transform: uppercase; font-family: var(--font-mono);">Verified Score</div>
-                                <div style="font-size: 1.1rem; font-weight: 700; color: var(--success);">{{ skill.latest_score.score|floatformat:1 }}%</div>
+        <!-- ── Right Column: Main Content ── -->
+        <div style="display: flex; flex-direction: column; gap: 2rem;">
+            
+            <!-- About -->
+            <section class="animate-fade-in delay-1">
+                <h2 style="font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); margin-bottom: 1rem; padding-left: 0.25rem;">Professional Summary</h2>
+                <div class="card glass" style="padding: 2rem; line-height: 1.7; font-size: 0.95rem; color: var(--text-subtle);">
+                    {{ profile.bio|default:"No professional summary provided."|linebreaks }}
+                </div>
+            </section>
+
+            <!-- Skills & Assessments -->
+            <section class="animate-fade-in delay-2">
+                <h2 style="font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); margin-bottom: 1rem; padding-left: 0.25rem;">Verified Skills & Assessments</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 1.5rem;">
+                    {% for s in skills %}
+                    <div class="card" style="padding: 0; overflow: hidden;">
+                        <div style="padding: 1.5rem; border-bottom: 1px solid var(--border);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                <div>
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <h3 style="font-family: var(--font-mono); font-size: 1rem; font-weight: 700; margin-bottom: 0.25rem;">{{ s.skill.skill_name }}</h3>
+                                        
+                                        <!-- Expert Verification Badge -->
+                                        {% if s.is_expert_verified %}
+                                            <div style="background: linear-gradient(135deg, #FFD700, #FFA500); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.6rem; font-weight: 800; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 4px rgba(255,165,0,0.3);" title="Expert Verified: Assessment Passed + External Certificate Verified">
+                                                <i data-lucide="award" style="width:10px;height:10px;"></i> EXPERT
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <span class="badge badge-primary" style="font-size: 0.6rem;">{{ s.get_proficiency_level_display }}</span>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-muted);">Experience</div>
+                                    <div style="font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700;">{{ s.get_years_of_experience_display }}</div>
+                                </div>
                             </div>
-                            <div style="text-align: right;">
-                                <div style="font-size: 0.65rem; color: var(--text-muted); font-family: var(--font-mono);">{{ skill.attempt_count }} Attempts</div>
-                                <div style="font-size: 0.7rem; color: var(--text-muted);">{{ skill.latest_score.completed_at|date:"M Y" }}</div>
+
+                            <!-- Assessment Block -->
+                            {% if s.has_assessment %}
+                            <div style="
+                                background: {% if s.latest_score.passed %}rgba(110,231,183,0.06){% else %}rgba(248,113,113,0.06){% endif %};
+                                border: 1px solid {% if s.latest_score.passed %}rgba(110,231,183,0.2){% else %}rgba(248,113,113,0.2){% endif %};
+                                border-radius: var(--radius-sm); padding: 1rem;
+                                display: flex; justify-content: space-between; align-items: center;
+                            ">
+                                <div>
+                                    <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.25rem;">SkillSphere Verification</div>
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <i data-lucide="{% if s.latest_score.passed %}check-circle{% else %}x-circle{% endif %}" style="width:14px;height:14px; color: {% if s.latest_score.passed %}var(--success){% else %}var(--danger){% endif %};"></i>
+                                        <span style="font-family: var(--font-mono); font-size: 1.1rem; font-weight: 700; color: {% if s.latest_score.passed %}var(--success){% else %}var(--danger){% endif %};">
+                                            {{ s.latest_score.score }}%
+                                        </span>
+                                    </div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-muted);">{{ s.latest_score.completed_at|date:"M d, Y" }}</div>
+                                    <div style="font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-muted);">Attempt {{ s.latest_score.attempt_number }}/3</div>
+                                </div>
                             </div>
+                            {% else %}
+                            <div style="padding: 1rem; border: 1px dashed var(--border); border-radius: var(--radius-sm); text-align: center; font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);">
+                                No SkillSphere assessment taken
+                            </div>
+                            {% endif %}
                         </div>
-                        {% else %}
-                        <div style="padding: 0.75rem; border: 1px dashed var(--border); border-radius: 12px; text-align: center;">
-                            <span style="font-size: 0.8rem; color: var(--text-muted); font-style: italic;">No assessment taken</span>
+
+                        <!-- External Certs in this skill -->
+                        {% if s.external_certificates %}
+                        <div style="padding: 1rem 1.5rem; background: var(--surface-3);">
+                            <div style="font-family: var(--font-mono); font-size: 0.65rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.75rem;">External Certifications</div>
+                            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                {% for cert in s.external_certificates %}
+                                <div style="display: flex; justify-content: space-between; align-items: center; font-family: var(--font-sans);">
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <i data-lucide="award" style="width:14px;height:14px; color: var(--accent);"></i>
+                                        <span style="font-size: 0.82rem; font-weight: 500;">{{ cert.title }}</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        {% if cert.verification_status == 'verified' %}
+                                            <i data-lucide="shield-check" style="width:14px;height:14px; color: var(--success);" title="Verified by Admin"></i>
+                                        {% endif %}
+                                        <a href="{{ cert.certificate_file.url }}" target="_blank" style="color: var(--text-muted);"><i data-lucide="external-link" style="width:12px;height:12px;"></i></a>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
                         </div>
                         {% endif %}
                     </div>
-                    {% empty %}
-                    <p style="color: var(--text-muted);">No skills listed.</p>
                     {% endfor %}
                 </div>
             </section>
 
-            <section>
-                <h2 style="font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.75rem;">
-                    <i data-lucide="Briefcase" style="color: var(--accent); width: 24px; height: 24px;"></i> About & Summary
-                </h2>
-                <div class="card glass" style="padding: 1.5rem; border-radius: 16px; line-height: 1.6; color: var(--text-subtle);">
-                    {{ profile.bio|default:"No bio provided."|linebreaks }}
+            <!-- Application History -->
+            {% if applications %}
+            <section class="animate-fade-in delay-3">
+                <h2 style="font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); margin-bottom: 1rem; padding-left: 0.25rem;">Candidate Activity</h2>
+                <div class="card" style="padding: 0;">
+                    <table style="width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 0.8rem;">
+                        <thead>
+                            <tr style="text-align: left; border-bottom: 1px solid var(--border); color: var(--text-muted);">
+                                <th style="padding: 1.25rem 1.5rem;">Applied Position</th>
+                                <th style="padding: 1.25rem 1.5rem;">Date</th>
+                                <th style="padding: 1.25rem 1.5rem;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for app in applications %}
+                            <tr style="border-bottom: 1px solid var(--surface-3); transition: background var(--transition);" onmouseover="this.style.background='var(--surface-3)'" onmouseout="this.style.background='transparent'">
+                                <td style="padding: 1.25rem 1.5rem;">
+                                    <div style="font-weight: 700; color: var(--text);">{{ app.job.title }}</div>
+                                    <div style="font-size: 0.7rem; color: var(--text-muted);">{{ app.job.recruiter.company_name }}</div>
+                                </td>
+                                <td style="padding: 1.25rem 1.5rem; color: var(--text-muted);">{{ app.applied_at|date:"M d, Y" }}</td>
+                                <td style="padding: 1.25rem 1.5rem;">
+                                    <span class="badge {% if app.status == 'accepted' %}badge-success{% elif app.status == 'rejected' %}badge-danger{% else %}badge-primary{% endif %}" style="font-size: 0.6rem;">
+                                        {{ app.get_status_display }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </section>
-        </div>
+            {% endif %}
 
-        <!-- Right Column: Stats & Actions -->
-        <div>
-            <div class="card glass" style="padding: 1.5rem; border-radius: 20px; position: sticky; top: 2rem;">
-                <h3 style="font-weight: 600; margin-bottom: 1.25rem;">Candidate Stats</h3>
-                
-                <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 12px;">
-                        <span style="color: var(--text-muted); font-size: 0.9rem;">Total Applications</span>
-                        <span style="font-weight: 700; font-family: var(--font-mono);">{{ applications.count }}</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 12px;">
-                        <span style="color: var(--text-muted); font-size: 0.9rem;">Graduation Year</span>
-                        <span style="font-weight: 700; font-family: var(--font-mono);">{{ profile.graduation_year }}</span>
-                    </div>
-                </div>
-
-                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                    <a href="mailto:{{ profile.user.email }}" class="btn btn-outline" style="width: 100%; justify-content: center; border-radius: 12px;">
-                        <i data-lucide="mail" style="width:16px;height:16px;"></i> Send Email
-                    </a>
-                </div>
-            </div>
         </div>
     </div>
 </div>

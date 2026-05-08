@@ -15,7 +15,15 @@
         </div>
         
         <!-- Summary Stats -->
-        <div style="display: flex; gap: 1.5rem;">
+        <div style="display: flex; gap: 1.5rem; align-items: center;">
+            <!-- Filter Toggle -->
+            <div style="margin-right: 1rem;">
+                <button id="filterExpertBtn" class="btn btn-outline btn-sm" style="font-size: 0.7rem; display: flex; align-items: center; gap: 0.4rem; border-radius: 10px; border-color: var(--warning); color: var(--warning);">
+                    <i data-lucide="award" style="width:14px;height:14px;"></i>
+                    Show Expert Only
+                </button>
+            </div>
+
             <div class="card glass" style="padding: 0.75rem 1.25rem; border-radius: 12px; text-align: center;">
                 <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Avg. Match</div>
                 <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent);">
@@ -36,10 +44,18 @@
     <!-- Applicants List -->
     <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
         {% for app in applicants %}
-        <div class="card glass" style="padding: 1.5rem; display: flex; align-items: center; gap: 2rem; transition: transform 0.2s ease; border-radius: 16px;">
+        <div class="card glass applicant-card {% if app.is_expert %}is-expert{% endif %}" style="padding: 1.5rem; display: flex; align-items: center; gap: 2rem; transition: transform 0.2s ease; border-radius: 16px;">
             <!-- Candidate Info -->
             <div style="flex-grow: 1;">
-                <h3 style="font-size: 1.15rem; font-weight: 600; margin-bottom: 0.4rem;">{{ app.candidate.full_name }}</h3>
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.4rem;">
+                    <h3 style="font-size: 1.15rem; font-weight: 600; margin: 0;">{{ app.candidate.full_name }}</h3>
+                    {% if app.is_expert %}
+                    <span style="display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.2rem 0.5rem; background: linear-gradient(135deg, #facc15 0%, #eab308 100%); color: #422006; font-size: 0.65rem; font-weight: 800; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 2px 4px rgba(234, 179, 8, 0.3);">
+                        <i data-lucide="award" style="width:10px;height:10px;"></i>
+                        Expert Verified
+                    </span>
+                    {% endif %}
+                </div>
                 <div style="display: flex; gap: 1.25rem; flex-wrap: wrap;">
                     <span style="display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);">
                         <i data-lucide="graduation-cap" style="width:13px;height:13px;"></i> {{ app.candidate.university }}
@@ -83,4 +99,44 @@
         {% endfor %}
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterBtn = document.getElementById('filterExpertBtn');
+        const cards = document.querySelectorAll('.applicant-card');
+        let expertOnly = false;
+
+        filterBtn.addEventListener('click', function() {
+            expertOnly = !expertOnly;
+            
+            if (expertOnly) {
+                filterBtn.classList.remove('btn-outline');
+                filterBtn.classList.add('btn-primary');
+                filterBtn.style.background = 'var(--warning)';
+                filterBtn.style.color = '#422006';
+                filterBtn.innerHTML = '<i data-lucide="check" style="width:14px;height:14px;"></i> Showing Expert Only';
+            } else {
+                filterBtn.classList.add('btn-outline');
+                filterBtn.classList.remove('btn-primary');
+                filterBtn.style.background = 'transparent';
+                filterBtn.style.color = 'var(--warning)';
+                filterBtn.innerHTML = '<i data-lucide="award" style="width:14px;height:14px;"></i> Show Expert Only';
+            }
+            
+            lucide.createIcons();
+
+            cards.forEach(card => {
+                if (expertOnly) {
+                    if (card.classList.contains('is-expert')) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                } else {
+                    card.style.display = 'flex';
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}

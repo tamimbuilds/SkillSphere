@@ -5,12 +5,14 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
 from .models import Skill, Question, CandidateSkill, Certificate, Assessment, Score, JobSkillRequirement
+from accounts.models import Notification
 from .forms import (
-    SkillForm,
     CandidateSkillForm,
     CertificateForm,
+    CandidateCertificateForm,
     JobSkillRequirementForm
 )
+from django.contrib.admin.views.decorators import staff_member_required
 
 ASSESSMENT_TIME_LIMIT_MINUTES = 10
 
@@ -70,6 +72,7 @@ def candidate_skill_list(request):
         s.attempt_count = score_qs.count()
         s.has_assessment = s.latest_score is not None
         s.can_retry = s.attempt_count < 3 and not (s.latest_score and s.latest_score.passed)
+        s.external_certificates = Certificate.objects.filter(candidate_skill=s)
         
     all_skills = Skill.objects.all().order_by('category', 'skill_name')
     
@@ -119,22 +122,73 @@ def certificate_list(request):
     return render(request, 'certificate_list.html', {'certificates': certificates})
 
 
+@login_required
 def add_certificate(request, pk):
-    form = CertificateForm(request.POST or None, request.FILES or None)
-    if form.is_valid():
+    from accounts.models import CandidateProfile
+    profile = get_object_or_404(CandidateProfile, user=request.user)
+    skill = get_object_or_404(CandidateSkill, pk=pk, candidate=profile)
+    
+    form = CandidateCertificateForm(request.POST or None, request.FILES or None)
+    if request.method == 'POST' and form.is_valid():
         cert = form.save(commit=False)
-        cert.candidate_skill_id = pk
+        cert.candidate_skill = skill
         cert.save()
-        return redirect('certificate_list')
-    return render(request, 'certificate_form.html', {'form': form})
+        messages.success(request, f'Certificate for "{skill.skill.skill_name}" uploaded successfully and is pending verification.')
+        return redirect('my_skills')
+        
+    return render(request, 'certificate_form.html', {
+        'form': form,
+        'skill': skill
+    })
 
 
+@staff_member_required
+def admin_certificate_dashboard(request):
+    status_filter = request.GET.get('status', 'pending')
+    certificates = Certificate.objects.filter(verification_status=status_filter).select_related(
+        'candidate_skill__candidate', 'candidate_skill__skill'
+    ).order_by('-id')
+    
+    return render(request, 'admin_certificate_dashboard.html', {
+        'certificates': certificates,
+        'current_status': status_filter
+    })
+
+
+@staff_member_required
 def verify_certificate(request, pk):
     certificate = get_object_or_404(Certificate, pk=pk)
     certificate.verification_status = 'verified'
     certificate.verified_by_admin = True
     certificate.save()
-    return redirect('certificate_list')
+    
+    # Create notification for candidate
+    Notification.objects.create(
+        user=certificate.candidate_skill.candidate.user,
+        title="Certificate Verified",
+        message=f"Your external certificate '{certificate.title}' for {certificate.candidate_skill.skill.skill_name} has been verified by an admin."
+    )
+    
+    messages.success(request, f"Certificate '{certificate.title}' has been verified.")
+    return redirect('admin_certificate_dashboard')
+
+
+@staff_member_required
+def reject_certificate(request, pk):
+    certificate = get_object_or_404(Certificate, pk=pk)
+    certificate.verification_status = 'rejected'
+    certificate.verified_by_admin = False
+    certificate.save()
+    
+    # Create notification for candidate
+    Notification.objects.create(
+        user=certificate.candidate_skill.candidate.user,
+        title="Certificate Rejected",
+        message=f"Your external certificate '{certificate.title}' for {certificate.candidate_skill.skill.skill_name} was rejected. Please ensure the file is clear and valid."
+    )
+    
+    messages.warning(request, f"Certificate '{certificate.title}' has been rejected.")
+    return redirect('admin_certificate_dashboard')
 
 
 # ---------------- ASSESSMENT ----------------
@@ -270,6 +324,27 @@ def add_assessment(request, pk):
         'remaining_attempts': 4 - next_attempt,
         'time_limit_minutes': ASSESSMENT_TIME_LIMIT_MINUTES,
         'expires_at_unix_ms': int(expires_at.timestamp() * 1000),
+    })
+
+
+@login_required
+def view_certificate(request, pk):
+    from accounts.models import CandidateProfile
+    profile = get_object_or_404(CandidateProfile, user=request.user)
+    skill = get_object_or_404(CandidateSkill, pk=pk, candidate=profile)
+    
+    score = Score.objects.filter(user=request.user, candidate_skill=skill, passed=True).order_by('-completed_at').first()
+    
+    if not score:
+        messages.error(request, "You haven't passed the assessment for this skill yet.")
+        return redirect('my_skills')
+        
+    return render(request, 'certificate_view.html', {
+        'profile': profile,
+        'skill': skill,
+        'score': score,
+        'date': score.completed_at.strftime('%B %d, %Y'),
+        'cert_id': f"CERT-{skill.pk}-{score.pk}"
     })
 
 

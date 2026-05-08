@@ -26,7 +26,7 @@ class UserUpdateForm(forms.ModelForm):
 class CandidateProfileForm(forms.ModelForm):
     class Meta:
         model = CandidateProfile
-        fields = ['full_name', 'specialized_sector', 'university', 'department', 'cgpa', 'graduation_year', 'bio', 'linkedin_url', 'github_url', 'portfolio_url']
+        fields = ['full_name', 'specialized_sector', 'university', 'department', 'cgpa', 'graduation_year', 'bio', 'resume_file', 'linkedin_url', 'github_url', 'portfolio_url']
 
 
 class RecruiterProfileForm(forms.ModelForm):
