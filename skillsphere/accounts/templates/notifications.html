@@ -12,8 +12,17 @@
   <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
     {% for n in notifications %}
     <div class="card glass" style="padding: 1.35rem 1.5rem; border-radius: 16px; display: flex; align-items: flex-start; gap: 1rem;">
-      <div style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: rgba(165,243,252,0.08); color: var(--accent); flex-shrink: 0;">
+      <div style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; 
+        {% if 'Verified' in n.title %}background: rgba(34,197,94,0.1); color: var(--success);
+        {% elif 'Rejected' in n.title %}background: rgba(239,68,68,0.1); color: var(--danger);
+        {% else %}background: rgba(165,243,252,0.08); color: var(--accent);{% endif %} flex-shrink: 0;">
+        {% if 'Verified' in n.title %}
+        <i data-lucide="check-circle" style="width:16px;height:16px;"></i>
+        {% elif 'Rejected' in n.title %}
+        <i data-lucide="x-circle" style="width:16px;height:16px;"></i>
+        {% else %}
         <i data-lucide="bell" style="width:16px;height:16px;"></i>
+        {% endif %}
       </div>
       <div style="flex-grow: 1;">
         <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.35rem;">{{ n.title }}</h3>

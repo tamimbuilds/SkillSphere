@@ -5,12 +5,14 @@
 {% block content %}
 <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3rem; flex-wrap: wrap; gap: 1rem;">
     <div>
-        <span style="font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted);">Pipeline</span>
+        <span style="font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted);">
+            {% if user.role == 'candidate' %}Invitations{% else %}Pipeline{% endif %}
+        </span>
         <h1 style="font-family: var(--font-mono); font-size: 2.2rem; font-weight: 700; letter-spacing: -0.03em; margin-top: 0.4rem;">
-            Interview Pipeline
+            {% if user.role == 'candidate' %}Interview Invitations{% else %}Interview Pipeline{% endif %}
         </h1>
         <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 0.3rem; font-family: var(--font-sans);">
-            Manage and track all scheduled interviews.
+            {% if user.role == 'candidate' %}Review and manage your upcoming interview invitations.{% else %}Manage and track all scheduled interviews.{% endif %}
         </p>
     </div>
     {% if user.role == 'recruiter' %}
