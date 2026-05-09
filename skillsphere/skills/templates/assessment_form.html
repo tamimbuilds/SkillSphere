@@ -2,459 +2,626 @@
 
 {% block title %}Skill Assessment | SkillSphere{% endblock %}
 
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --radius-lg: 20px;
+        --radius-xl: 32px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 
 <style>
-    /* ── No-copy protection ── */
-    .no-copy-area,
-    .q-text {
-        user-select: none;
-        -webkit-user-select: none;
-        -ms-user-select: none;
+    /* ── Premium Tech Design System ── */
+    :root {
+        --primary: #7c3aed;         /* Violet 600 */
+        --primary-light: #a78bfa;   /* Violet 400 */
+        --primary-glow: rgba(124, 58, 237, 0.1);
+        --secondary: #0ea5e9;       /* Sky 500 */
+        --accent: #8b5cf6;          /* Purple 500 */
+        --success: #10b981;         /* Emerald 500 */
+        --background: #fdfdff;
+        --surface: #ffffff;
+        --text: #0f172a;
+        --text-muted: #64748b;
+        --border: rgba(226, 232, 240, 0.6);
+        --danger: #f43f5e;          /* Rose 500 */
+        
+        --glass-bg: rgba(255, 255, 255, 0.7);
+        --glass-border: rgba(255, 255, 255, 0.5);
+        --shadow-premium: 0 25px 50px -12px rgba(0, 0, 0, 0.05);
+        --font-jakarta: 'Plus Jakarta Sans', sans-serif;
     }
 
-    /* ── Page wrapper ── */
+    body {
+        background: radial-gradient(circle at top right, #fdfdff 0%, #f1f5f9 100%);
+        position: relative;
+        overflow-x: hidden;
+        font-family: var(--font-jakarta);
+    }
+
+    /* ── Decorative Background Blobs ── */
+    .bg-blobs {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    .blob {
+        position: absolute;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+        border-radius: 50%;
+        filter: blur(80px);
+        animation: blob-float 25s infinite alternate ease-in-out;
+    }
+
+    .blob-1 { top: -100px; right: -100px; background: radial-gradient(circle, rgba(124, 58, 237, 0.08) 0%, transparent 70%); }
+    .blob-2 { bottom: -200px; left: -200px; background: radial-gradient(circle, rgba(14, 165, 233, 0.08) 0%, transparent 70%); animation-delay: -5s; }
+    .blob-3 { top: 40%; left: 20%; width: 400px; height: 400px; background: radial-gradient(circle, rgba(139, 92, 246, 0.05) 0%, transparent 70%); animation-delay: -10s; }
+
+    @keyframes blob-float {
+        0% { transform: translate(0, 0) scale(1); }
+        33% { transform: translate(40px, -60px) scale(1.15); }
+        66% { transform: translate(-30px, 30px) scale(0.9); }
+        100% { transform: translate(0, 0) scale(1); }
+    }
+
     .assessment-page {
-        max-width: 720px;
-        margin: 3rem auto;
-        padding: 0 1.25rem 4rem;
-        font-family: var(--font-sans, 'Inter', sans-serif);
+        max-width: 840px;
+        margin: 0 auto;
+        padding: 4rem 1.5rem 12rem;
+        font-family: var(--font-jakarta);
     }
 
-    /* ── Sticky top bar: title + timer ── */
+    /* ── Sticky Topbar (Glassmorphism) ── */
     .assessment-topbar {
         position: sticky;
-        top: 0;
-        z-index: 50;
-        background: var(--bg, #0f0f14);
-        padding: 0.9rem 0 0.75rem;
-        margin-bottom: 1.5rem;
-        border-bottom: 1px solid var(--border, rgba(255,255,255,0.08));
+        top: 20px;
+        z-index: 100;
+        background: var(--glass-bg);
+        backdrop-filter: blur(24px) saturate(180%);
+        -webkit-backdrop-filter: blur(24px) saturate(180%);
+        margin: 0 -1rem 3rem;
+        padding: 1.25rem 2rem;
+        border: 1px solid var(--glass-border);
+        box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.05);
+        border-radius: 24px;
+        animation: slide-down 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    @keyframes slide-down {
+        from { transform: translateY(-100%); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
     }
 
     .assessment-topbar-inner {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 1rem;
-        flex-wrap: wrap;
+        gap: 2rem;
+    }
+
+    .overline {
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: var(--primary);
+        display: block;
+        margin-bottom: 0.5rem;
     }
 
     .assessment-title-group h1 {
-        font-size: 1.25rem;
-        font-weight: 700;
-        margin: 0 0 0.15rem;
-        color: var(--text-bright, #fff);
+        font-size: 1.75rem;
+        font-weight: 900;
+        margin: 0;
+        color: var(--text);
+        letter-spacing: -0.03em;
+        line-height: 1.1;
     }
 
     .assessment-title-group p {
-        font-size: 0.8rem;
-        color: var(--text-muted, #8888a8);
-        margin: 0;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin: 0.5rem 0 0;
+        font-weight: 600;
+        letter-spacing: 0.02em;
     }
 
-    /* ── Countdown timer ── */
+    /* ── Timer ── */
     .timer-chip {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        background: rgba(239, 68, 68, 0.08);
-        border: 1px solid rgba(239, 68, 68, 0.25);
-        border-radius: 999px;
-        padding: 0.45rem 1rem;
-        transition: background 0.3s, border-color 0.3s;
+        gap: 0.75rem;
+        background: white;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        padding: 0.5rem 1rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .timer-chip svg {
-        width: 14px;
-        height: 14px;
-        stroke: #ef4444;
-        flex-shrink: 0;
+    .timer-chip i {
+        width: 18px;
+        height: 18px;
+        stroke: var(--primary);
     }
 
     .timer-chip span {
-        font-family: var(--font-mono, 'Fira Code', monospace);
-        font-size: 0.95rem;
+        font-family: var(--font-mono);
+        font-size: 1.1rem;
         font-weight: 700;
-        color: #ef4444;
-        min-width: 3.5ch;
-        letter-spacing: 0.04em;
+        color: var(--text);
     }
 
     .timer-chip.urgent {
-        background: rgba(239, 68, 68, 0.18);
-        border-color: rgba(239, 68, 68, 0.55);
-        animation: timer-pulse 1s ease-in-out infinite;
+        border-color: var(--danger);
+        background: rgba(239, 68, 68, 0.05);
+        animation: pulse-border 2s infinite;
     }
 
-    @keyframes timer-pulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.04); }
+    @keyframes pulse-border {
+        0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
     }
 
-    /* ── Progress bar ── */
-    .progress-wrap {
-        margin-bottom: 2rem;
+    .timer-chip.urgent span, .timer-chip.urgent i {
+        color: var(--danger);
+        stroke: var(--danger);
     }
 
-    .progress-header {
+    /* ── Progress Section ── */
+    .progress-section {
+        margin-bottom: 4rem;
+        background: var(--surface);
+        padding: 2.5rem;
+        border-radius: 28px;
+        border: 1px solid var(--border);
+        box-shadow: 0 10px 30px -10px rgba(0,0,0,0.03);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .progress-section::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+        opacity: 0.5;
+    }
+
+    .progress-meta {
         display: flex;
         justify-content: space-between;
-        align-items: center;
-        margin-bottom: 0.5rem;
+        align-items: flex-end;
+        margin-bottom: 1.5rem;
     }
 
-    .progress-header span {
-        font-size: 0.78rem;
-        color: var(--text-muted, #8888a8);
-    }
-
-    .progress-header strong {
-        font-size: 0.82rem;
-        color: var(--primary, #6366f1);
-    }
-
-    .progress-track {
-        height: 5px;
-        background: var(--border, rgba(255,255,255,0.08));
-        border-radius: 999px;
-        overflow: hidden;
-    }
-
-    .progress-fill {
-        height: 100%;
-        background: linear-gradient(90deg, var(--primary, #6366f1), #818cf8);
-        border-radius: 999px;
-        transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    /* ── Info banner ── */
-    .info-banner {
-        display: flex;
-        align-items: flex-start;
-        gap: 0.75rem;
-        background: rgba(99, 102, 241, 0.06);
-        border: 1px solid rgba(99, 102, 241, 0.18);
-        border-radius: 14px;
-        padding: 1rem 1.25rem;
-        margin-bottom: 2rem;
-        font-size: 0.85rem;
-        color: var(--text-bright, #d0d0e8);
-        line-height: 1.55;
-    }
-
-    .info-banner svg {
-        width: 16px;
-        height: 16px;
-        stroke: var(--primary, #6366f1);
-        flex-shrink: 0;
-        margin-top: 2px;
-    }
-
-    /* ── Question card (Google Forms style) ── */
-    .q-card {
-        background: var(--surface-2, #1a1a2e);
-        border: 1px solid var(--border, rgba(255,255,255,0.08));
-        border-radius: 16px;
-        overflow: hidden;
-        margin-bottom: 1.25rem;
-        transition: border-color 0.25s, box-shadow 0.25s;
-    }
-
-    .q-card.answered {
-        border-color: rgba(99, 102, 241, 0.35);
-    }
-
-    .q-card-header {
-        padding: 1.25rem 1.5rem 0.9rem;
-        border-bottom: 1px solid var(--border, rgba(255,255,255,0.06));
-    }
-
-    .q-number {
-        font-size: 0.72rem;
-        font-weight: 600;
+    .progress-info h3 {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--text-muted);
         text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: var(--primary, #6366f1);
-        margin-bottom: 0.5rem;
+        letter-spacing: 0.08em;
+        margin: 0 0 0.5rem;
     }
 
-    .q-text {
-        font-size: 1rem;
-        font-weight: 600;
-        color: var(--text-bright, #fff);
-        line-height: 1.6;
+    .progress-info p {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: var(--text);
         margin: 0;
     }
 
-    /* ── Options list ── */
-    .q-options {
-        padding: 0.6rem 0.75rem 0.75rem;
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
+    .progress-pct {
+        font-size: 2.5rem;
+        font-weight: 900;
+        color: var(--primary);
+        line-height: 1;
+        letter-spacing: -0.04em;
     }
 
-    /* Each option row */
-    .q-option {
+    .progress-bar-container {
+        height: 14px;
+        background: #f1f5f9;
+        border-radius: 100px;
+        overflow: hidden;
+        border: 1px solid rgba(0,0,0,0.02);
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary), var(--secondary), var(--primary));
+        background-size: 200% 100%;
+        border-radius: 100px;
+        transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
         position: relative;
+        animation: progress-shimmer 3s linear infinite;
+    }
+
+    .progress-bar-fill.is-complete {
+        background: linear-gradient(90deg, var(--success), var(--primary));
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+    }
+
+    @keyframes progress-shimmer {
+        0% { background-position: 100% 0%; }
+        100% { background-position: -100% 0%; }
+    }
+
+    /* ── Question Card ── */
+    .q-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 36px;
+        margin-bottom: 4rem;
+        padding: 4rem;
+        transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+        opacity: 0;
+        transform: translateY(40px) scale(0.98);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+    }
+
+    .q-card.visible {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    .q-card:hover {
+        border-color: var(--primary-light);
+        box-shadow: 0 40px 80px -12px rgba(124, 58, 237, 0.08);
+    }
+
+    .q-card.answered {
+        border-color: var(--success);
+        background: linear-gradient(to bottom right, #ffffff, #f0fdf4);
+    }
+
+    .q-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 8px;
+        height: 100%;
+        background: var(--primary);
+        border-radius: 36px 0 0 36px;
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+
+    .q-card.answered::before {
+        opacity: 1;
+        background: var(--success);
+    }
+
+    @keyframes bounce-in {
+        0% { transform: scale(0); opacity: 0; }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    .q-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1.25rem;
+        background: var(--primary-glow);
+        color: var(--primary);
+        font-size: 0.8rem;
+        font-weight: 800;
+        border-radius: 12px;
+        margin-bottom: 1.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        border: 1px solid rgba(124, 58, 237, 0.1);
+    }
+
+    .q-text {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--text);
+        line-height: 1.3;
+        letter-spacing: -0.02em;
+        margin-bottom: 2.5rem;
+    }
+
+    /* ── Options List ── */
+    .q-options {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .q-option {
         display: flex;
         align-items: center;
-        gap: 1rem;
-        padding: 0.9rem 1rem;
-        border-radius: 10px;
+        gap: 1.5rem;
+        padding: 1.75rem;
+        border: 2px solid var(--border);
+        border-radius: 20px;
         cursor: pointer;
-        transition: background 0.18s ease;
+        transition: all 0.4s cubic-bezier(0.2, 1, 0.2, 1);
+        position: relative;
+        background: #ffffff;
         overflow: hidden;
     }
 
     .q-option:hover {
-        background: rgba(255, 255, 255, 0.04);
+        border-color: var(--primary-light);
+        background: #fcfaff;
+        transform: translateX(8px);
     }
 
-    /* Ripple on click */
-    .q-option .ripple {
-        position: absolute;
-        border-radius: 50%;
-        background: rgba(99, 102, 241, 0.28);
-        transform: scale(0);
-        animation: ripple-expand 0.5s linear;
-        pointer-events: none;
-    }
-
-    @keyframes ripple-expand {
-        to {
-            transform: scale(4);
-            opacity: 0;
-        }
-    }
-
-    /* Hide native radio */
     .q-option input[type="radio"] {
         position: absolute;
         opacity: 0;
-        width: 0;
-        height: 0;
+    }
+
+    .q-radio-box {
+        width: 26px;
+        height: 26px;
+        border: 2px solid #cbd5e1;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+        background: white;
+    }
+
+    .q-radio-inner {
+        width: 12px;
+        height: 12px;
+        background: var(--primary);
+        border-radius: 50%;
+        transform: scale(0);
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .q-option-letter {
+        font-family: var(--font-jakarta);
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--text-muted);
+        width: 38px;
+        height: 38px;
+        background: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0,0,0,0.03);
+    }
+
+    .q-option-content {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: #334155;
+        line-height: 1.5;
+    }
+
+    /* ── Selected State ── */
+    .q-option.is-selected {
+        background: #f5f3ff;
+        border-color: var(--primary);
+        box-shadow: 0 10px 25px -5px rgba(124, 58, 237, 0.15);
+        transform: scale(1.02) translateX(8px);
+    }
+
+    .q-option.is-selected .q-radio-box {
+        border-color: var(--primary);
+        background: var(--primary);
+    }
+
+    .q-option.is-selected .q-radio-inner {
+        transform: scale(1);
+        background: white;
+    }
+
+    .q-option.is-selected .q-option-letter {
+        background: var(--primary);
+        color: white;
+        box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+    }
+
+    .q-option.is-selected .q-option-content {
+        color: var(--text);
+        font-weight: 700;
+    }
+
+    /* ── Ripple ── */
+    .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: var(--primary);
+        opacity: 0.15;
+        transform: scale(0);
+        animation: ripple-animation 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         pointer-events: none;
     }
 
-    /* Custom radio circle */
-    .q-radio {
-        flex-shrink: 0;
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        border: 2px solid var(--border-hover, rgba(255,255,255,0.25));
-        background: transparent;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
-        position: relative;
+    @keyframes ripple-animation {
+        to { transform: scale(4); opacity: 0; }
     }
 
-    /* Inner dot */
-    .q-radio::after {
-        content: '';
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: #fff;
-        transform: scale(0);
-        transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    /* Option letter badge */
-    .q-letter {
-        flex-shrink: 0;
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        background: var(--surface-3, rgba(255,255,255,0.06));
-        border: 1px solid var(--border, rgba(255,255,255,0.1));
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.75rem;
+    /* ── Floating Status ── */
+    .save-status {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        background: var(--text);
+        color: white;
+        padding: 0.75rem 1.25rem;
+        border-radius: 100px;
+        font-size: 0.8rem;
         font-weight: 700;
-        color: var(--text-muted, #8888a8);
-        transition: background 0.2s, border-color 0.2s, color 0.2s;
-        font-family: var(--font-mono, monospace);
-    }
-
-    /* Option text */
-    .q-option-text {
-        flex: 1;
-        font-size: 0.92rem;
-        color: var(--text, #c8c8e0);
-        line-height: 1.5;
-        transition: color 0.2s, font-weight 0.2s;
-    }
-
-    /* ── SELECTED STATE ── */
-    .q-option.is-selected {
-        background: rgba(99, 102, 241, 0.1);
-    }
-
-    .q-option.is-selected .q-radio {
-        border-color: var(--primary, #6366f1);
-        background: var(--primary, #6366f1);
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
-    }
-
-    .q-option.is-selected .q-radio::after {
-        transform: scale(1);
-    }
-
-    .q-option.is-selected .q-letter {
-        background: var(--primary, #6366f1);
-        border-color: var(--primary, #6366f1);
-        color: #fff;
-    }
-
-    .q-option.is-selected .q-option-text {
-        color: var(--text-bright, #fff);
-        font-weight: 600;
-    }
-
-    /* Answered card accent bar */
-    .q-card.answered {
-        border-left: 3px solid var(--primary, #6366f1);
-    }
-
-    /* ── Bottom action bar ── */
-    .assessment-actions {
-        display: flex;
-        gap: 1rem;
-        margin-top: 2.5rem;
-        flex-wrap: wrap;
-    }
-
-    .btn-submit {
-        flex: 1;
-        min-width: 180px;
-        padding: 0.95rem 2rem;
-        background: var(--primary, #6366f1);
-        color: #fff;
-        border: none;
-        border-radius: 12px;
-        font-size: 1rem;
-        font-weight: 700;
-        cursor: pointer;
-        transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
         display: flex;
         align-items: center;
-        justify-content: center;
-        gap: 0.6rem;
+        gap: 0.5rem;
+        box-shadow: var(--shadow-premium);
+        transform: translateY(100px);
+        transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        z-index: 1000;
     }
 
-    .btn-submit:hover {
-        background: #4f46e5;
-        box-shadow: 0 8px 24px rgba(99, 102, 241, 0.35);
-        transform: translateY(-1px);
-    }
-
-    .btn-submit:active {
+    .save-status.show {
         transform: translateY(0);
     }
 
-    .btn-submit svg {
-        width: 18px;
-        height: 18px;
-        stroke: #fff;
+    /* ── Proctored Banner ── */
+    .proctored-banner {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        background: linear-gradient(to right, #f8fafc, #ffffff);
+        border: 1px solid var(--border);
+        border-left: 5px solid var(--primary);
+        padding: 1.5rem 2rem;
+        border-radius: 12px 24px 24px 12px;
+        margin-bottom: 4rem;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        line-height: 1.6;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.02);
     }
 
-    .btn-cancel {
-        flex: 1;
-        min-width: 140px;
-        padding: 0.95rem 1.5rem;
-        background: transparent;
-        color: var(--text-muted, #8888a8);
-        border: 1px solid var(--border, rgba(255,255,255,0.12));
-        border-radius: 12px;
-        font-size: 0.95rem;
-        font-weight: 600;
+    .proctored-banner i {
+        color: var(--success);
+        flex-shrink: 0;
+    }
+
+    /* ── Actions ── */
+    .assessment-actions {
+        display: flex;
+        gap: 1.5rem;
+        margin-top: 6rem;
+    }
+
+    .btn-submit {
+        flex: 2;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        border: none;
+        border-radius: 20px;
+        font-size: 1.2rem;
+        font-weight: 800;
         cursor: pointer;
-        text-align: center;
+        transition: all 0.4s cubic-bezier(0.2, 1, 0.2, 1);
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 0.5rem;
-        transition: border-color 0.2s, color 0.2s, background 0.2s;
+        gap: 1.25rem;
+        box-shadow: 0 10px 40px -10px rgba(124, 58, 237, 0.4);
+    }
+
+    .btn-submit.ready {
+        animation: pulse-ready 2s infinite;
+    }
+
+    @keyframes pulse-ready {
+        0% { box-shadow: 0 10px 40px -10px rgba(124, 58, 237, 0.4); }
+        50% { box-shadow: 0 10px 60px 0px rgba(124, 58, 237, 0.6); transform: scale(1.02); }
+        100% { box-shadow: 0 10px 40px -10px rgba(124, 58, 237, 0.4); }
+    }
+
+    .btn-submit:hover:not(:disabled) {
+        transform: translateY(-5px);
+        box-shadow: 0 25px 50px -12px rgba(124, 58, 237, 0.5);
+        background: linear-gradient(135deg, var(--primary-light), var(--primary));
+    }
+
+    .btn-submit:active {
+        transform: translateY(-2px);
+    }
+
+    .btn-back {
+        flex: 1;
+        padding: 1.5rem;
+        background: white;
+        color: #64748b;
+        border: 2px solid #e2e8f0;
+        border-radius: 16px;
+        font-size: 1rem;
+        font-weight: 700;
         text-decoration: none;
-    }
-
-    .btn-cancel:hover {
-        border-color: rgba(255,255,255,0.25);
-        color: var(--text-bright, #fff);
-        background: rgba(255,255,255,0.04);
-    }
-
-    .btn-cancel svg {
-        width: 16px;
-        height: 16px;
-        stroke: currentColor;
-    }
-
-    /* Answered counter chip */
-    .answered-chip {
-        display: inline-flex;
+        display: flex;
         align-items: center;
-        gap: 0.4rem;
-        font-size: 0.78rem;
-        color: var(--text-muted);
+        justify-content: center;
+        gap: 0.75rem;
+        transition: all 0.3s ease;
     }
 
-    .answered-chip strong {
-        color: var(--primary, #6366f1);
+    .btn-back:hover {
+        border-color: #cbd5e1;
+        color: var(--text);
+        background: #f1f5f9;
     }
 
-    @media (max-width: 600px) {
-        .assessment-page { padding: 0 0.75rem 3rem; margin: 1.5rem auto; }
-        .q-card-header { padding: 1rem 1.1rem 0.75rem; }
-        .q-options { padding: 0.4rem 0.5rem 0.6rem; }
-        .q-option { padding: 0.8rem 0.75rem; }
+    @media (max-width: 768px) {
+        .assessment-page { padding: 2rem 1rem 8rem; }
+        .assessment-topbar { top: 0; margin: 0 -1rem 3rem; padding: 1rem; border-radius: 0; }
+        .assessment-topbar-inner { flex-direction: column; align-items: flex-start; gap: 1rem; }
+        .q-card { padding: 2rem 1.5rem; }
+        .q-text { font-size: 1.25rem; }
         .assessment-actions { flex-direction: column; }
     }
 </style>
 
+
+<div class="bg-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+</div>
+
 <div class="assessment-page">
 
-    <!-- Sticky top bar -->
+    <!-- Sticky Header -->
     <div class="assessment-topbar no-copy-area">
         <div class="assessment-topbar-inner">
             <div class="assessment-title-group">
-                <h1>{{ skill_name }} Assessment</h1>
-                <p>Attempt {{ attempt_number }} of 3 &nbsp;·&nbsp; Set {{ set_number }} &nbsp;·&nbsp; {{ remaining_attempts }} attempt{% if remaining_attempts != 1 %}s{% endif %} remaining</p>
+                <span class="overline">Official Assessment</span>
+                <h1>{{ skill_name }}</h1>
+                <p>Attempt {{ attempt_number }} of 3 &nbsp;·&nbsp; Set {{ set_number }}</p>
             </div>
             <div class="timer-chip" id="timer-chip">
-                <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                </svg>
+                <i data-lucide="clock"></i>
                 <span id="assessment-timer">10:00</span>
             </div>
         </div>
     </div>
 
-    <!-- Progress bar -->
-    <div class="progress-wrap no-copy-area">
-        <div class="progress-header">
-            <span class="answered-chip">
-                <strong id="answered-count">0</strong> / 10 answered
-            </span>
-            <strong id="progress-pct">0%</strong>
+    <!-- Progress Tracking -->
+    <div class="progress-section no-copy-area">
+        <div class="progress-meta">
+            <div class="progress-info">
+                <h3>Assessment Performance</h3>
+                <p><span id="answered-count">0</span> of {{ questions|length }} completed</p>
+            </div>
+            <div class="progress-pct" id="progress-pct">0%</div>
         </div>
-        <div class="progress-track">
-            <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+        <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="progress-fill" style="width: 0%"></div>
         </div>
     </div>
 
-    <!-- Info banner -->
-    <div class="info-banner no-copy-area">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-        <span>Choose <strong>one answer</strong> per question. All 10 must be answered before you can submit. Score 6 or more to pass.</span>
+    <!-- Instructions -->
+    <div class="proctored-banner no-copy-area">
+        <i data-lucide="shield-check"></i>
+        <span><strong>Proctoring Active:</strong> Please do not exit this window or try to copy content. Focus on providing the most accurate answers for this assessment.</span>
     </div>
 
     <form method="POST" id="assessment-form">
@@ -463,61 +630,62 @@
         <div id="questions-list">
             {% for question in questions %}
             <div class="q-card no-copy-area" id="q-card-{{ forloop.counter }}" data-qnum="{{ forloop.counter }}">
-                <div class="q-card-header">
-                    <div class="q-number">Question {{ forloop.counter }} of {{ questions|length }}</div>
-                    <p class="q-text">{{ question.question_text }}</p>
+                <div class="q-header">
+                    <span class="q-badge">Question {{ forloop.counter }} of {{ questions|length }}</span>
+                    <h2 class="q-text">{{ question.question_text }}</h2>
                 </div>
-                <div class="q-options">
 
+                <div class="q-options">
                     <label class="q-option" data-qpk="{{ question.pk }}" data-val="A">
                         <input type="radio" name="question_{{ question.pk }}" value="A">
-                        <span class="q-radio"></span>
-                        <span class="q-letter">A</span>
-                        <span class="q-option-text q-text">{{ question.option_a }}</span>
+                        <div class="q-radio-box"><div class="q-radio-inner"></div></div>
+                        <div class="q-option-letter">A</div>
+                        <div class="q-option-content">{{ question.option_a }}</div>
                     </label>
 
                     <label class="q-option" data-qpk="{{ question.pk }}" data-val="B">
                         <input type="radio" name="question_{{ question.pk }}" value="B">
-                        <span class="q-radio"></span>
-                        <span class="q-letter">B</span>
-                        <span class="q-option-text q-text">{{ question.option_b }}</span>
+                        <div class="q-radio-box"><div class="q-radio-inner"></div></div>
+                        <div class="q-option-letter">B</div>
+                        <div class="q-option-content">{{ question.option_b }}</div>
                     </label>
 
                     <label class="q-option" data-qpk="{{ question.pk }}" data-val="C">
                         <input type="radio" name="question_{{ question.pk }}" value="C">
-                        <span class="q-radio"></span>
-                        <span class="q-letter">C</span>
-                        <span class="q-option-text q-text">{{ question.option_c }}</span>
+                        <div class="q-radio-box"><div class="q-radio-inner"></div></div>
+                        <div class="q-option-letter">C</div>
+                        <div class="q-option-content">{{ question.option_c }}</div>
                     </label>
 
                     <label class="q-option" data-qpk="{{ question.pk }}" data-val="D">
                         <input type="radio" name="question_{{ question.pk }}" value="D">
-                        <span class="q-radio"></span>
-                        <span class="q-letter">D</span>
-                        <span class="q-option-text q-text">{{ question.option_d }}</span>
+                        <div class="q-radio-box"><div class="q-radio-inner"></div></div>
+                        <div class="q-option-letter">D</div>
+                        <div class="q-option-content">{{ question.option_d }}</div>
                     </label>
-
                 </div>
             </div>
             {% endfor %}
         </div>
 
-        <!-- Action buttons -->
+        <!-- Submission -->
         <div class="assessment-actions">
             <button type="submit" class="btn-submit" id="submit-btn">
-                <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="20 6 9 17 4 12"/>
-                </svg>
-                Submit Assessment
+                <i data-lucide="send"></i>
+                Submit My Assessment
             </button>
-            <a href="{% url 'my_skills' %}" class="btn-cancel">
-                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-                Cancel
+            <a href="{% url 'my_skills' %}" class="btn-back">
+                <i data-lucide="arrow-left"></i>
+                Cancel & Go Back
             </a>
         </div>
     </form>
+
+    <!-- Floating Status Indicator -->
+    <div id="save-status" class="save-status">
+        <i data-lucide="refresh-cw" class="animate-spin" style="width: 14px; height: 14px;"></i>
+        <span>Saving response...</span>
+    </div>
 </div>
 
 <script>
@@ -566,7 +734,7 @@
     });
 
     // ── Progress tracking ──────────────────────────────
-    const TOTAL = 10;
+    const TOTAL = {{ questions|length }};
     const answeredMap = {}; // qpk -> answered boolean
     const fillEl   = document.getElementById('progress-fill');
     const countEl  = document.getElementById('answered-count');
@@ -575,9 +743,21 @@
     function updateProgress() {
         const answered = Object.values(answeredMap).filter(Boolean).length;
         const pct = Math.round((answered / TOTAL) * 100);
-        if (fillEl) fillEl.style.width = pct + '%';
+        if (fillEl) {
+            fillEl.style.width = pct + '%';
+            if (pct === 100) fillEl.classList.add('is-complete');
+        }
         if (countEl) countEl.textContent = answered;
-        if (pctEl) pctEl.textContent = pct + '%';
+        if (pctEl) {
+            pctEl.textContent = pct + '%';
+            if (pct === 100) pctEl.style.color = 'var(--success)';
+        }
+        
+        // Pulse submit button when complete
+        const submitBtn = document.getElementById('submit-btn');
+        if (pct === 100 && submitBtn) {
+            submitBtn.classList.add('ready');
+        }
     }
 
     // ── Option selection with ripple ───────────────────
@@ -590,24 +770,47 @@
             // Deselect siblings
             document.querySelectorAll(`.q-option[data-qpk="${qpk}"]`).forEach(o => {
                 o.classList.remove('is-selected');
-                o.querySelector('input[type="radio"]').checked = false;
+                const rb = o.querySelector('input[type="radio"]');
+                if (rb) rb.checked = false;
             });
 
             // Select this one
             this.classList.add('is-selected');
             const radio = this.querySelector('input[type="radio"]');
-            radio.checked = true;
+            if (radio) radio.checked = true;
 
             // Mark card as answered
-            if (card) card.classList.add('answered');
+            if (card) {
+                card.classList.add('answered');
+                
+                // Auto-scroll to next card after a small delay
+                const nextNum = parseInt(card.dataset.qnum) + 1;
+                const nextCard = document.getElementById(`q-card-${nextNum}`);
+                if (nextCard) {
+                    setTimeout(() => {
+                        nextCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 600);
+                }
+            }
+            
             answeredMap[qpk] = true;
             updateProgress();
+
+            // Show "Saving" indicator
+            const status = document.getElementById('save-status');
+            if (status) {
+                status.classList.add('show');
+                status.querySelector('span').textContent = 'Response saved';
+                status.querySelector('i').setAttribute('data-lucide', 'check');
+                lucide.createIcons();
+                setTimeout(() => status.classList.remove('show'), 2000);
+            }
 
             // Ripple effect
             const rect = this.getBoundingClientRect();
             const ripple = document.createElement('span');
             ripple.className = 'ripple';
-            const size = Math.max(this.offsetWidth, this.offsetHeight) * 1.5;
+            const size = Math.max(this.offsetWidth, this.offsetHeight) * 2;
             ripple.style.cssText = `
                 width: ${size}px;
                 height: ${size}px;
@@ -619,7 +822,27 @@
         });
     });
 
-})();
+    // ── Intersection Observer for staggered entrance ──
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.q-card').forEach((card, index) => {
+        // Initial visibility for first card
+        if (index === 0) card.classList.add('visible');
+        observer.observe(card);
+    });
+
 </script>
 
 {% endblock %}
