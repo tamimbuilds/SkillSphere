@@ -66,7 +66,7 @@
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;">
+        <div class="profile-form-grid">
 
             <!-- Account Settings -->
             <div class="card animate-fade-in delay-1" style="padding:2.5rem;">
@@ -239,12 +239,28 @@
         color: var(--accent) !important;
     }
 
+    /* Profile form grid: 2-col → 1-col on tablet */
+    .profile-form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+
     @media (max-width: 900px) {
-        div[style*="grid-template-columns:1fr 1fr"] {
-            grid-template-columns: 1fr !important;
+        .profile-form-grid {
+            grid-template-columns: 1fr;
         }
-        div[style*="grid-column:1/-1"] {
-            grid-column: auto !important;
+        /* full-width cards inside the grid keep their span */
+        .profile-form-grid > .card[style*="grid-column"] {
+            grid-column: auto;
+        }
+    }
+
+    @media (max-width: 768px) {
+        /* Profile page header: stack avatar + name */
+        .card .profile-header-inner {
+            flex-direction: column;
+            align-items: flex-start;
         }
     }
 </style>
