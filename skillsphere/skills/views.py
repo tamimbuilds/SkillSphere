@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
-from .models import Skill, Question, CandidateSkill, Certificate, Assessment, Score, JobSkillRequirement
+from .models import Skill, Question, CandidateSkill, CandidateSkillProgress, Certificate, Assessment, Score, JobSkillRequirement
 from accounts.models import Notification
 from .forms import (
     CandidateSkillForm,
@@ -15,10 +15,62 @@ from .forms import (
 from django.contrib.admin.views.decorators import staff_member_required
 
 ASSESSMENT_TIME_LIMIT_MINUTES = 10
+ASSESSMENT_BLOCK_DAYS = 7
+ASSESSMENT_BLOCK_PENALTY = 0.5
 
 
 def _assessment_timer_session_key(candidate_skill_id, attempt_number):
     return f'assessment_started_{candidate_skill_id}_{attempt_number}'
+
+
+def _get_or_create_skill_progress(profile, skill):
+    progress, created = CandidateSkillProgress.objects.get_or_create(
+        candidate=profile,
+        skill=skill,
+        defaults={'add_count': 1},
+    )
+    if not created and progress.add_count < 1:
+        progress.add_count = 1
+        progress.save(update_fields=['add_count'])
+    return progress
+
+
+def _record_skill_added(profile, skill):
+    progress, _ = CandidateSkillProgress.objects.get_or_create(
+        candidate=profile,
+        skill=skill,
+    )
+    progress.add_count += 1
+    progress.save(update_fields=['add_count'])
+    return progress
+
+
+def _record_assessment_result(profile, candidate_skill, passed):
+    progress = _get_or_create_skill_progress(profile, candidate_skill.skill)
+    progress.total_attempts += 1
+    progress.current_cycle_attempts += 1
+    progress.last_attempt_at = timezone.now()
+
+    update_fields = ['total_attempts', 'current_cycle_attempts', 'last_attempt_at']
+
+    if passed:
+        progress.consecutive_failures = 0
+        progress.current_cycle_attempts = 0
+        update_fields.extend(['consecutive_failures', 'current_cycle_attempts'])
+    else:
+        progress.total_failures += 1
+        progress.consecutive_failures += 1
+        update_fields.extend(['total_failures', 'consecutive_failures'])
+
+        if progress.current_cycle_attempts >= 3:
+            progress.times_blocked += 1
+            progress.penalty_points = round(progress.penalty_points + ASSESSMENT_BLOCK_PENALTY, 2)
+            progress.blocked_until = timezone.now() + timedelta(days=ASSESSMENT_BLOCK_DAYS)
+            progress.current_cycle_attempts = 0
+            update_fields.extend(['times_blocked', 'penalty_points', 'blocked_until', 'current_cycle_attempts'])
+
+    progress.save(update_fields=list(set(update_fields)))
+    return progress
 
 
 # ---------------- SKILL ----------------
@@ -65,19 +117,30 @@ def candidate_skill_list(request):
     )
     sector = profile.specialized_sector
     my_skills = CandidateSkill.objects.filter(candidate=profile).select_related('skill')
+    existing_skill_ids = set(my_skills.values_list('skill_id', flat=True))
     
     for s in my_skills:
+        progress = _get_or_create_skill_progress(profile, s.skill)
         score_qs = Score.objects.filter(user=request.user, candidate_skill=s).order_by('-attempt_number', '-completed_at')
         s.latest_score = score_qs.first()
         s.attempt_count = score_qs.count()
         s.has_assessment = s.latest_score is not None
-        s.can_retry = s.attempt_count < 3 and not (s.latest_score and s.latest_score.passed)
+        s.progress = progress
+        s.blocked = progress.is_blocked
+        s.blocked_until = progress.blocked_until
+        s.penalty_points = progress.penalty_points
+        s.readd_count = max(progress.add_count - 1, 0)
+        s.can_retry = (
+            not s.blocked
+            and s.attempt_count < 3
+            and not (s.latest_score and s.latest_score.passed)
+        )
         s.external_certificates = Certificate.objects.filter(candidate_skill=s)
         
     all_skills = Skill.objects.all().order_by('category', 'skill_name')
     
     # Handle Skill Addition on the same page
-    form = CandidateSkillForm(request.POST or None, sector=sector)
+    form = CandidateSkillForm(request.POST or None, sector=sector, candidate=profile)
     
     if request.method == 'POST' and form.is_valid():
         skill_obj = form.save(commit=False)
@@ -88,9 +151,12 @@ def candidate_skill_list(request):
             messages.error(request, "Please select a specialized sector in your profile before adding skills.")
         elif skill_obj.skill.category != sector:
             messages.error(request, "You can only add skills within your specialized sector.")
+        elif skill_obj.skill_id in existing_skill_ids:
+            messages.error(request, f'You already added "{skill_obj.skill.skill_name}". Remove it first if you want to add it again.')
         else:
             try:
                 skill_obj.save()
+                _record_skill_added(profile, skill_obj.skill)
                 messages.success(request, f'Skill "{skill_obj.skill.skill_name}" added successfully! Note: You haven\'t taken an assessment for this skill yet.')
                 return redirect('my_skills')
             except Exception as e:
@@ -100,6 +166,7 @@ def candidate_skill_list(request):
         'form': form,
         'data': my_skills,
         'all_skills': all_skills,
+        'existing_skill_ids': existing_skill_ids,
         'user_sector': sector
     })
 
@@ -140,6 +207,27 @@ def add_certificate(request, pk):
         'form': form,
         'skill': skill
     })
+
+
+@login_required
+def delete_certificate(request, pk):
+    from accounts.models import CandidateProfile
+    profile = get_object_or_404(CandidateProfile, user=request.user)
+    certificate = get_object_or_404(
+        Certificate.objects.select_related('candidate_skill', 'candidate_skill__skill'),
+        pk=pk,
+        candidate_skill__candidate=profile,
+    )
+
+    if request.method == 'POST':
+        title = certificate.title
+        certificate_file = certificate.certificate_file
+        certificate.delete()
+        if certificate_file:
+            certificate_file.delete(save=False)
+        messages.success(request, f'Certificate "{title}" removed.')
+
+    return redirect('my_skills')
 
 
 @staff_member_required
@@ -209,6 +297,15 @@ def add_assessment(request, pk):
     from accounts.models import CandidateProfile
     profile = get_object_or_404(CandidateProfile, user=request.user)
     skill = get_object_or_404(CandidateSkill, pk=pk, candidate=profile)
+    progress = _get_or_create_skill_progress(profile, skill.skill)
+
+    if progress.is_blocked:
+        messages.error(
+            request,
+            f'{skill.skill.skill_name} is blocked until {progress.blocked_until.strftime("%b %d, %Y %H:%M")} after 3 failed attempts.'
+        )
+        return redirect('my_skills')
+
     previous_scores = list(
         Score.objects.filter(user=request.user, candidate_skill=skill).order_by('attempt_number', 'completed_at')
     )
@@ -301,6 +398,7 @@ def add_assessment(request, pk):
 
             skill.verified = passed
             skill.save(update_fields=['verified'])
+            progress = _record_assessment_result(profile, skill, passed)
             
             # Update match scores for all applications
             from jobs.utils import update_candidate_match_scores
@@ -313,6 +411,11 @@ def add_assessment(request, pk):
                 request,
                 f'Assessment {status_text} for {skill.skill.skill_name}. Attempt {next_attempt}/3, set {next_set_number}, score {correct_answers}/{total_questions} ({percentage}%).'
             )
+            if progress.is_blocked:
+                messages.error(
+                    request,
+                    f'{skill.skill.skill_name} is now blocked for {ASSESSMENT_BLOCK_DAYS} days after 3 failed attempts. Match penalty: -{progress.penalty_points}.'
+                )
             return redirect('my_skills')
 
     return render(request, 'assessment_form.html', {

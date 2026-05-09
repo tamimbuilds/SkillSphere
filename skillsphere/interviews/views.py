@@ -6,16 +6,46 @@ from django.contrib import messages
 
 # Create your views here.
 
+@login_required
 def interviewer_list(request):
-    interviewers = Interviewer.objects.all()
+    if request.user.role != 'recruiter':
+        messages.error(request, "Only recruiters can manage interviewers.")
+        return redirect('dashboard')
+    interviewers = Interviewer.objects.filter(recruiter=request.user.recruiter_profile).order_by('full_name')
     return render(request, 'interviewer_list.html', {'interviewers': interviewers})
 
+@login_required
 def add_interviewer(request):
     form = InterviewerForm(request.POST or None)
+    if request.user.role != 'recruiter':
+        messages.error(request, "Only recruiters can add interviewers.")
+        return redirect('dashboard')
     if form.is_valid():
-        form.save()
+        interviewer = form.save(commit=False)
+        interviewer.recruiter = request.user.recruiter_profile
+        interviewer.save()
+        messages.success(request, f'Interviewer "{interviewer.full_name}" added.')
         return redirect('interviewer_list')
     return render(request, 'interviewer_form.html', {'form': form})
+
+@login_required
+def delete_interviewer(request, pk):
+    if request.user.role != 'recruiter':
+        messages.error(request, "Only recruiters can remove interviewers.")
+        return redirect('dashboard')
+
+    interviewer = get_object_or_404(
+        Interviewer,
+        pk=pk,
+        recruiter=request.user.recruiter_profile,
+    )
+
+    if request.method == 'POST':
+        name = interviewer.full_name
+        interviewer.delete()
+        messages.success(request, f'Interviewer "{name}" removed.')
+
+    return redirect('interviewer_list')
 
 def shortlist_list(request):
     shortlists = Shortlist.objects.all()

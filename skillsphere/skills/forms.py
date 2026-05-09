@@ -20,10 +20,20 @@ class CandidateSkillForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         sector = kwargs.pop('sector', None)
+        self.candidate = kwargs.pop('candidate', None)
         super().__init__(*args, **kwargs)
         if sector:
-            # Assuming Skill category matches CandidateProfile specialized_sector
-            self.fields['skill'].queryset = Skill.objects.filter(category__icontains=sector)
+            self.fields['skill'].queryset = Skill.objects.filter(category=sector).order_by('skill_name')
+
+    def clean_skill(self):
+        skill = self.cleaned_data.get('skill')
+        if self.candidate and skill:
+            exists = CandidateSkill.objects.filter(candidate=self.candidate, skill=skill)
+            if self.instance.pk:
+                exists = exists.exclude(pk=self.instance.pk)
+            if exists.exists():
+                raise forms.ValidationError("You already added this skill. Remove it first if you want to add it again.")
+        return skill
 
     class Meta:
         model = CandidateSkill

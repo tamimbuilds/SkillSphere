@@ -107,10 +107,18 @@ class CandidateSkill(models.Model):
     verified = models.BooleanField(default=False)
     added_date = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['candidate', 'skill'], name='unique_candidate_skill')
+        ]
+
     def clean(self):
         from django.core.exceptions import ValidationError
         try:
             if not self.pk and hasattr(self, 'candidate') and self.candidate: 
+                if self.skill_id and CandidateSkill.objects.filter(candidate=self.candidate, skill_id=self.skill_id).exists():
+                    raise ValidationError("You already added this skill. Remove it first if you want to add it again.")
+
                 count = CandidateSkill.objects.filter(candidate=self.candidate).count()
                 if count >= 3:
                     raise ValidationError("You can only add up to 3 specialized skills to prevent fraud.")

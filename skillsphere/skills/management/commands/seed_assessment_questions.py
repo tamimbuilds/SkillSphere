@@ -9,6 +9,111 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         self.stdout.write('Starting question seeding process...')
 
+        CURATED_QUESTION_SETS = {
+            ('Node.js', 1): [
+                {
+                    'question_text': 'Which runtime is commonly used to execute Node.js applications?',
+                    'options': {
+                        'A': 'Java Virtual Machine only',
+                        'B': 'CPython interpreter',
+                        'C': 'Chrome V8 JavaScript engine',
+                        'D': 'Ruby MRI only',
+                    },
+                    'correct_option': 'C',
+                },
+                {
+                    'question_text': 'Which file usually stores metadata and dependencies for a Node.js project?',
+                    'options': {
+                        'A': 'requirements.txt',
+                        'B': 'package.json',
+                        'C': 'pom.xml',
+                        'D': 'composer.json',
+                    },
+                    'correct_option': 'B',
+                },
+                {
+                    'question_text': 'Which object is commonly used in Express.js route handlers to send a response?',
+                    'options': {
+                        'A': 'res',
+                        'B': 'req',
+                        'C': 'next',
+                        'D': 'module',
+                    },
+                    'correct_option': 'A',
+                },
+                {
+                    'question_text': 'Which HTTP method is most appropriate for creating a new resource in a REST API?',
+                    'options': {
+                        'A': 'POST',
+                        'B': 'GET',
+                        'C': 'HEAD',
+                        'D': 'OPTIONS',
+                    },
+                    'correct_option': 'A',
+                },
+                {
+                    'question_text': 'Which module system keyword is used by CommonJS to import a module?',
+                    'options': {
+                        'A': 'include',
+                        'B': 'using',
+                        'C': 'import-only',
+                        'D': 'require',
+                    },
+                    'correct_option': 'D',
+                },
+                {
+                    'question_text': 'Why is asynchronous programming important in Node.js?',
+                    'options': {
+                        'A': 'It disables the event loop',
+                        'B': 'It makes CSS render faster',
+                        'C': 'It helps handle non-blocking I/O operations',
+                        'D': 'It prevents all database usage',
+                    },
+                    'correct_option': 'C',
+                },
+                {
+                    'question_text': 'Which command is commonly used to install a package in a Node.js project?',
+                    'options': {
+                        'A': 'pip install package',
+                        'B': 'composer require package',
+                        'C': 'npm install package',
+                        'D': 'gem install package',
+                    },
+                    'correct_option': 'C',
+                },
+                {
+                    'question_text': 'What is middleware in an Express.js application?',
+                    'options': {
+                        'A': 'A function that can process requests before the final route handler',
+                        'B': 'A CSS layout technique',
+                        'C': 'A database table type',
+                        'D': 'A browser-only animation API',
+                    },
+                    'correct_option': 'A',
+                },
+                {
+                    'question_text': 'Which practice helps secure user input in a Node.js API?',
+                    'options': {
+                        'A': 'Validate and sanitize input before using it',
+                        'B': 'Store passwords in plain text',
+                        'C': 'Commit API keys to the repository',
+                        'D': 'Disable error handling',
+                    },
+                    'correct_option': 'A',
+                },
+                {
+                    'question_text': 'What does the Node.js event loop help manage?',
+                    'options': {
+                        'A': 'Asynchronous callbacks and non-blocking tasks',
+                        'B': 'Image editing layers',
+                        'C': 'HTML tag names only',
+                        'D': 'Operating system themes',
+                    },
+                    'correct_option': 'A',
+                },
+            ],
+        }
+
         SECTOR_TEMPLATES = {
             'android': [
                 "What is the primary language used alongside {skill} for Android?",
@@ -145,6 +250,9 @@ class Command(BaseCommand):
             "Which tool is most commonly paired with {skill}?"
         ]
 
+        # The first option in each tuple is the intended correct answer.
+        # The options are shuffled per question, so we compute the final
+        # correct letter after shuffling instead of choosing one randomly.
         OPTIONS = [
             ("It improves performance", "It reduces security", "It is only for beginners", "It has no real impact"),
             ("Using specific design patterns", "Ignoring best practices", "Relying purely on documentation", "Guessing the syntax"),
@@ -157,6 +265,14 @@ class Command(BaseCommand):
             ("It integrates seamlessly", "It requires complete rewrites", "It is incompatible", "It works only on Tuesdays"),
             ("By writing comprehensive tests", "By pushing straight to production", "By hoping for the best", "By asking users to find bugs")
         ]
+        option_letters = ['A', 'B', 'C', 'D']
+        correct_texts = {option_set[0] for option_set in OPTIONS}
+
+        def get_correct_option(options):
+            for index, option_text in enumerate(options):
+                if option_text in correct_texts:
+                    return option_letters[index]
+            return None
 
         skills = Skill.objects.all()
         if not skills.exists():
@@ -164,13 +280,68 @@ class Command(BaseCommand):
             return
 
         total_questions_created = 0
+        total_questions_repaired = 0
+        total_curated_questions_updated = 0
 
         with transaction.atomic():
             for skill in skills:
                 sector = skill.category
-                
+
+                for (skill_name, set_number), curated_questions in CURATED_QUESTION_SETS.items():
+                    if skill.skill_name != skill_name:
+                        continue
+
+                    for question_order, curated_question in enumerate(curated_questions, start=1):
+                        question, created = Question.objects.update_or_create(
+                            skill=skill,
+                            set_number=set_number,
+                            question_order=question_order,
+                            defaults={
+                                'sector': sector,
+                                'question_text': curated_question['question_text'],
+                                'option_a': curated_question['options']['A'],
+                                'option_b': curated_question['options']['B'],
+                                'option_c': curated_question['options']['C'],
+                                'option_d': curated_question['options']['D'],
+                                'correct_option': curated_question['correct_option'],
+                                'is_active': True,
+                            },
+                        )
+                        if created:
+                            total_questions_created += 1
+                        else:
+                            total_curated_questions_updated += 1
+
+                    self.stdout.write(
+                        self.style.SUCCESS(
+                            f"Upserted curated set {set_number} for skill '{skill.skill_name}'"
+                        )
+                    )
+
+                questions_to_update = []
+                existing_questions = Question.objects.filter(skill=skill)
+                for existing_question in existing_questions.iterator():
+                    repaired_correct_option = get_correct_option([
+                        existing_question.option_a,
+                        existing_question.option_b,
+                        existing_question.option_c,
+                        existing_question.option_d,
+                    ])
+                    if repaired_correct_option and existing_question.correct_option != repaired_correct_option:
+                        existing_question.correct_option = repaired_correct_option
+                        questions_to_update.append(existing_question)
+
+                if questions_to_update:
+                    Question.objects.bulk_update(questions_to_update, ['correct_option'])
+                    total_questions_repaired += len(questions_to_update)
+                    self.stdout.write(
+                        self.style.SUCCESS(
+                            f"Repaired {len(questions_to_update)} answer keys for skill '{skill.skill_name}'"
+                        )
+                    )
+
                 # Fetch existing questions to avoid creating duplicates
-                existing_questions_count = Question.objects.filter(skill=skill).count()
+                existing_questions_count = existing_questions.count()
                 if existing_questions_count >= 30:
                     self.stdout.write(f"Skill '{skill.skill_name}' already has {existing_questions_count} questions. Skipping.")
                     continue
@@ -198,11 +369,12 @@ class Command(BaseCommand):
                         template = shuffled_templates[question_order - 1]
                         question_text = template.format(skill=skill.skill_name)
                         
-                        # Pick random options
-                        opts = list(random.choice(OPTIONS))
+                        # Pick random options while preserving the correct answer key.
+                        option_set = random.choice(OPTIONS)
+                        correct_option_text = option_set[0]
+                        opts = list(option_set)
                         random.shuffle(opts)
-                        
-                        correct_opt_letter = random.choice(['A', 'B', 'C', 'D'])
+                        correct_opt_letter = option_letters[opts.index(correct_option_text)]
                         
                         question = Question(
                             skill=skill,
@@ -224,4 +396,8 @@ class Command(BaseCommand):
                     total_questions_created += len(questions_to_create)
                     self.stdout.write(self.style.SUCCESS(f"Created {len(questions_to_create)} questions for skill '{skill.skill_name}'"))
 
-        self.stdout.write(self.style.SUCCESS(f"Successfully seeded {total_questions_created} new questions!"))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Successfully seeded {total_questions_created} new questions, repaired {total_questions_repaired} answer keys, and updated {total_curated_questions_updated} curated questions!"
+            )
+        )

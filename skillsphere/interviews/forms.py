@@ -5,7 +5,7 @@ from .models import Interview, Interviewer, Shortlist
 class InterviewerForm(forms.ModelForm):
     class Meta:
         model = Interviewer
-        fields = '__all__'
+        fields = ['full_name', 'email', 'designation', 'department', 'phone']
 
 
 class ShortlistForm(forms.ModelForm):

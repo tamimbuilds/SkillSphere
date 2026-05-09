@@ -30,7 +30,7 @@ class Interview(models.Model):
     STATUS = [('scheduled','Scheduled'),('completed','Completed'),('cancelled','Cancelled')]
 
     candidate = models.ForeignKey(CandidateProfile, on_delete=models.CASCADE)
-    interviewer = models.ForeignKey(Interviewer, on_delete=models.CASCADE, null=True, blank=True)
+    interviewer = models.ForeignKey(Interviewer, on_delete=models.SET_NULL, null=True, blank=True)
     job = models.ForeignKey(JobPost, on_delete=models.CASCADE)
     interview_type = models.CharField(max_length=20, choices=TYPE, default='hr')
     round_number = models.IntegerField(default=1)

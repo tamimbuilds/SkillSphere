@@ -278,15 +278,26 @@
             </div>
 
             {% if request.user.role == 'recruiter' and request.user.recruiter_profile == job.recruiter %}
-            <div style="display: flex; gap: 1rem; align-items: center; margin-top: 1rem;">
+            <div style="display: flex; gap: 1rem; align-items: center; margin-top: 1rem; flex-wrap: wrap;">
                 <a href="{% url 'job_edit' job.pk %}" class="btn btn-outline" style="padding: 1rem 2rem; border-radius: var(--radius-md); font-weight: 700;">
                     <i data-lucide="edit-3" style="width:18px;height:18px;"></i>
                     Modify Role
+                </a>
+                <a href="{% url 'job_skill_manage' job.pk %}" class="btn btn-outline" style="padding: 1rem 2rem; border-radius: var(--radius-md); font-weight: 700;">
+                    <i data-lucide="settings-2" style="width:18px;height:18px;"></i>
+                    Edit Skills
                 </a>
                 <a href="{% url 'job_applicants' job.pk %}" class="btn btn-navy" style="padding: 1rem 2rem; border-radius: var(--radius-md); font-weight: 700;">
                     <i data-lucide="users" style="width:18px;height:18px;"></i>
                     Applications ({{ job.applications.count }})
                 </a>
+                <form method="POST" action="{% url 'job_delete' job.pk %}" style="margin:0;" onsubmit="return confirm('Delete this job post? This will also remove its applications, interviews, offers, and skill requirements.');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger" style="padding: 1rem 2rem; border-radius: var(--radius-md); font-weight: 700;">
+                        <i data-lucide="trash-2" style="width:18px;height:18px;"></i>
+                        Delete
+                    </button>
+                </form>
             </div>
             {% endif %}
         </div>
@@ -454,4 +465,4 @@
     lucide.createIcons();
 </script>
 {% endblock %}
-{% endblock %}
+{% endblock %}

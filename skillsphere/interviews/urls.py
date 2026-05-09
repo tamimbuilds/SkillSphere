@@ -8,6 +8,7 @@ urlpatterns = [
     path('shortlist/add/', views.add_shortlist, name='add_shortlist'),
     path('interviewers/', views.interviewer_list, name='interviewer_list'),
     path('interviewers/add/', views.add_interviewer, name='add_interviewer'),
+    path('interviewers/<int:pk>/delete/', views.delete_interviewer, name='delete_interviewer'),
     path('<int:pk>/feedback/', views.submit_feedback, name='submit_feedback'),
     path('<int:pk>/delete/', views.delete_interview, name='delete_interview'),
     path('<int:pk>/', views.interview_detail, name='interview_detail'),
