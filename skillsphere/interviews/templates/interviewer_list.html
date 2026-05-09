@@ -32,6 +32,7 @@
                     <th style="padding: 1rem 1.5rem; font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700;">Designation</th>
                     <th style="padding: 1rem 1.5rem; font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700;">Department</th>
                     <th style="padding: 1rem 1.5rem; font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700;">Phone</th>
+                    <th style="padding: 1rem 1.5rem; font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700;">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -53,6 +54,15 @@
                     </td>
                     <td style="padding: 1.1rem 1.5rem;">
                         <span style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--text-muted);">{{ interviewer.phone }}</span>
+                    </td>
+                    <td style="padding: 1.1rem 1.5rem;">
+                        <form method="POST" action="{% url 'delete_interviewer' interviewer.pk %}" style="margin:0;" onsubmit="return confirm('Remove this interviewer?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger" style="font-size:0.72rem;padding:0.45rem 0.75rem;">
+                                <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
+                                Remove
+                            </button>
+                        </form>
                     </td>
                 </tr>
                 {% endfor %}

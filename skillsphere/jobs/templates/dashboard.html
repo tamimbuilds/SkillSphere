@@ -489,7 +489,7 @@
                             </h3>
                             <div class="dash-card-subtitle">
                                 <i data-lucide="calendar" style="width:14px;height:14px;"></i>
-                                Posted {{ job.created_at|date:"M d, Y" }}
+                                Posted {{ job.posted_at|date:"M d, Y" }}
                             </div>
                         </div>
                         <span class="status-pill status-open">
@@ -524,6 +524,15 @@
                             <a href="{% url 'job_edit' job.pk %}" class="btn btn-ghost" style="padding: 0.5rem; min-width: auto; border-radius: var(--radius-md);" title="Edit Listing">
                                 <i data-lucide="edit-3" style="width:18px;height:18px;"></i>
                             </a>
+                            <a href="{% url 'job_skill_manage' job.pk %}" class="btn btn-ghost" style="padding: 0.5rem; min-width: auto; border-radius: var(--radius-md);" title="Edit Skills">
+                                <i data-lucide="settings-2" style="width:18px;height:18px;"></i>
+                            </a>
+                            <form method="POST" action="{% url 'job_delete' job.pk %}" style="margin:0;" onsubmit="return confirm('Delete this job post? This will also remove its applications, interviews, offers, and skill requirements.');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-ghost" style="padding: 0.5rem; min-width: auto; border-radius: var(--radius-md); color: var(--danger);" title="Delete Listing">
+                                    <i data-lucide="trash-2" style="width:18px;height:18px;"></i>
+                                </button>
+                            </form>
                             <a href="{% url 'job_applicants' job.pk %}" class="btn btn-navy" style="padding: 0.75rem 1.5rem; font-size: 0.8rem; font-weight: 700; border-radius: var(--radius-md);">
                                 Review Hub <i data-lucide="arrow-right" style="width:14px;height:14px; margin-left: 0.3rem;"></i>
                             </a>

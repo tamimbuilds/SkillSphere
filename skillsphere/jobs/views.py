@@ -300,6 +300,24 @@ def job_edit(request, pk):
 
 
 @login_required
+def job_delete(request, pk):
+    job = get_object_or_404(JobPost.objects.select_related("recruiter"), pk=pk)
+    recruiter_profile = _get_recruiter_profile(request.user)
+
+    if request.user.role != "recruiter" or recruiter_profile != job.recruiter:
+        messages.error(request, "You are not allowed to delete this job post.")
+        return redirect("job_detail", pk=job.pk)
+
+    if request.method == "POST":
+        title = job.title
+        job.delete()
+        messages.success(request, f'Job post "{title}" deleted successfully.')
+        return redirect("dashboard")
+
+    return redirect("job_detail", pk=job.pk)
+
+
+@login_required
 def apply_job(request, pk):
     if request.user.role != "candidate":
         messages.error(request, "Only candidates can apply for jobs.")

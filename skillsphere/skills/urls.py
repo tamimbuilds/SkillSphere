@@ -18,6 +18,7 @@ urlpatterns = [
     # Certificate (Candidate)
     path('certificate/', views.certificate_list, name='certificate_list'),
     path('<int:pk>/certificate/add/', views.add_certificate, name='add_certificate'),
+    path('certificate/<int:pk>/delete/', views.delete_certificate, name='delete_certificate'),
     path('view-certificate/<int:pk>/', views.view_certificate, name='view_certificate'),
 
     # Assessment

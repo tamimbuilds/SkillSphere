@@ -303,6 +303,12 @@
                     <i data-lucide="save" style="width:20px;height:20px;margin-right:0.5rem;"></i> 
                     {% if job %}Update Job Post{% else %}Launch Job Post{% endif %}
                 </button>
+                {% if job %}
+                <a href="{% url 'job_skill_manage' job.pk %}" class="btn btn-outline" style="padding: 1rem 2rem; border-radius: var(--radius-xl); font-weight: 600;">
+                    <i data-lucide="settings-2" style="width:18px;height:18px;"></i>
+                    Manage Skills
+                </a>
+                {% endif %}
                 <a href="{% url 'job_list' %}" class="btn btn-outline" style="padding: 1rem 2rem; border-radius: var(--radius-xl); font-weight: 600;">Cancel</a>
             </div>
         </form>

@@ -144,6 +144,12 @@
                                 {{ cert.verification_status }}
                             </span>
                             <a href="{{ cert.certificate_file.url }}" target="_blank" style="color:var(--text-muted);"><i data-lucide="external-link" style="width:12px;height:12px;"></i></a>
+                            <form method="POST" action="{% url 'delete_certificate' cert.pk %}" style="margin:0;" onsubmit="return confirm('Remove this certificate?');">
+                                {% csrf_token %}
+                                <button type="submit" title="Remove certificate" style="border:0;background:transparent;color:var(--danger);padding:0;display:flex;align-items:center;cursor:pointer;">
+                                    <i data-lucide="trash-2" style="width:12px;height:12px;"></i>
+                                </button>
+                            </form>
                         </div>
                     </div>
                     {% empty %}
@@ -221,9 +227,9 @@
                             margin-top: 0.75rem;
                         ">
                             {% for skill in all_skills %}
-                            <div class="skill-opt {% if skill.category == user_sector %}skill-selectable{% else %}skill-locked{% endif %}"
+                            <div class="skill-opt {% if skill.id in existing_skill_ids %}skill-added{% elif skill.category == user_sector %}skill-selectable{% else %}skill-locked{% endif %}"
                                  data-skill-id="{{ skill.id }}"
-                                 {% if skill.category == user_sector %}onclick="selectSkill('{{ skill.id }}', this)"{% endif %}
+                                 {% if skill.category == user_sector and skill.id not in existing_skill_ids %}onclick="selectSkill('{{ skill.id }}', this)"{% endif %}
                                  style="
                                     padding: 0.9rem 0.75rem;
                                     background: var(--surface-2); border: 1px solid var(--border);
@@ -231,15 +237,17 @@
                                     display: flex; flex-direction: column; align-items: center;
                                     gap: 0.5rem; text-align: center;
                                     transition: all var(--transition);
-                                    cursor: {% if skill.category == user_sector %}pointer{% else %}not-allowed{% endif %};
-                                    opacity: {% if skill.category == user_sector %}1{% else %}0.3{% endif %};
+                                    cursor: {% if skill.category == user_sector and skill.id not in existing_skill_ids %}pointer{% else %}not-allowed{% endif %};
+                                    opacity: {% if skill.category == user_sector and skill.id not in existing_skill_ids %}1{% elif skill.id in existing_skill_ids %}0.65{% else %}0.3{% endif %};
                                     position: relative;
                                  ">
-                                <div style="color: {% if skill.category == user_sector %}var(--accent){% else %}var(--text-muted){% endif %};">
-                                    <i data-lucide="{% if skill.category == user_sector %}plus-circle{% else %}lock{% endif %}" style="width:16px;height:16px;"></i>
+                                <div style="color: {% if skill.id in existing_skill_ids %}var(--success){% elif skill.category == user_sector %}var(--accent){% else %}var(--text-muted){% endif %};">
+                                    <i data-lucide="{% if skill.id in existing_skill_ids %}check-circle{% elif skill.category == user_sector %}plus-circle{% else %}lock{% endif %}" style="width:16px;height:16px;"></i>
                                 </div>
                                 <span style="font-family:var(--font-mono);font-size:0.78rem;font-weight:700;color:var(--text);">{{ skill.skill_name }}</span>
-                                <span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">{{ skill.get_category_display }}</span>
+                                <span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">
+                                    {% if skill.id in existing_skill_ids %}Already added{% else %}{{ skill.get_category_display }}{% endif %}
+                                </span>
                             </div>
                             {% endfor %}
                         </div>
@@ -281,6 +289,15 @@
     }
     .skill-opt.skill-selected i { color: var(--accent) !important; }
 
+    .skill-opt.skill-added {
+        background: rgba(110,231,183,0.08) !important;
+        border-color: rgba(110,231,183,0.24) !important;
+    }
+
+    .skill-opt.skill-added span:last-child {
+        color: var(--success) !important;
+    }
+
     /* Scrollbar for skill grid */
     div[style*="overflow-y: auto"]::-webkit-scrollbar { width: 4px; }
     div[style*="overflow-y: auto"]::-webkit-scrollbar-track { background: var(--surface-3); }
@@ -289,6 +306,7 @@
 
 <script>
     function selectSkill(skillId, element) {
+        if (element.classList.contains('skill-added') || element.classList.contains('skill-locked')) return;
         document.querySelectorAll('.skill-opt').forEach(c => c.classList.remove('skill-selected'));
         element.classList.add('skill-selected');
         const select = document.querySelector('select[name="skill"]');
