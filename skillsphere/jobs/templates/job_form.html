@@ -324,6 +324,7 @@
         const btnAdd = document.getElementById('btn-add-skill');
         const masterCategorySelect = document.getElementById('master-category-select');
         const maxSkillsWarning = document.getElementById('max-skills-warning');
+        const form = document.querySelector('form');
 
         function populateCategories() {
             masterCategorySelect.innerHTML = '<option value="">Select Category</option>';
@@ -336,6 +337,7 @@
         }
 
         function populateSkillSelect(skillSelect, category) {
+            const selectedValue = skillSelect.value;
             skillSelect.innerHTML = '<option value="">Select Skill</option>';
             if (category && skillsData[category]) {
                 skillsData[category].forEach(skill => {
@@ -344,10 +346,28 @@
                     opt.textContent = skill.name;
                     skillSelect.appendChild(opt);
                 });
+                skillSelect.value = selectedValue;
                 skillSelect.disabled = false;
             } else {
                 skillSelect.disabled = true;
             }
+            updateSkillOptions();
+        }
+
+        function getSelectedSkillIds() {
+            return Array.from(container.querySelectorAll('.skill-name-select'))
+                .map(select => select.value)
+                .filter(Boolean);
+        }
+
+        function updateSkillOptions() {
+            const selectedIds = getSelectedSkillIds();
+            container.querySelectorAll('.skill-name-select').forEach(select => {
+                select.querySelectorAll('option').forEach(option => {
+                    if (!option.value) return;
+                    option.disabled = selectedIds.includes(option.value) && option.value !== select.value;
+                });
+            });
         }
 
         masterCategorySelect.addEventListener('change', function(e) {
@@ -364,6 +384,7 @@
                 btnAdd.style.display = 'inline-flex';
                 
                 const firstSkillSelect = container.querySelector('.skill-name-select');
+                firstSkillSelect.value = '';
                 populateSkillSelect(firstSkillSelect, category);
                 container.querySelector('select[name="req_level"]').selectedIndex = 0;
             } else {
@@ -371,6 +392,7 @@
                 btnAdd.style.display = 'none';
             }
             updateAddButton();
+            updateSkillOptions();
         });
 
         function handleRemoveSkill(e) {
@@ -387,6 +409,7 @@
                 row.querySelector('select[name="req_level"]').selectedIndex = 0;
             }
             updateAddButton();
+            updateSkillOptions();
         }
 
         function addSkillRow() {
@@ -405,6 +428,7 @@
                 lucide.createIcons({ root: newRow });
             }
             updateAddButton();
+            updateSkillOptions();
         }
 
         function updateAddButton() {
@@ -421,8 +445,20 @@
         populateCategories();
 
         container.addEventListener('click', handleRemoveSkill);
+        container.addEventListener('change', function(e) {
+            if (e.target.classList.contains('skill-name-select')) {
+                updateSkillOptions();
+            }
+        });
         if (btnAdd) {
             btnAdd.addEventListener('click', addSkillRow);
+        }
+        if (form) {
+            form.addEventListener('submit', function() {
+                container.querySelectorAll('.skill-name-select option:disabled').forEach(option => {
+                    option.disabled = false;
+                });
+            });
         }
         {% endif %}
     });

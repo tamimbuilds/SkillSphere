@@ -3,6 +3,7 @@ from datetime import datetime
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -20,11 +21,17 @@ INTERVIEW_MATCH_THRESHOLD = 8.0
 
 
 def _get_recruiter_profile(user):
-    return getattr(user, "recruiter_profile", None)
+    try:
+        return getattr(user, "recruiter_profile", None)
+    except ObjectDoesNotExist:
+        return None
 
 
 def _get_candidate_profile(user):
-    return getattr(user, "candidate_profile", None)
+    try:
+        return getattr(user, "candidate_profile", None)
+    except ObjectDoesNotExist:
+        return None
 
 
 def _build_skills_json():
@@ -53,9 +60,13 @@ def _save_skill_requirements(request, job):
             skill_ids = [skill_id]
             levels = [level or "beginner"]
 
+    saved_skill_ids = set()
     for index, skill_id in enumerate(skill_ids):
         if not skill_id:
             continue
+        if skill_id in saved_skill_ids:
+            continue
+        saved_skill_ids.add(skill_id)
         JobSkillRequirement.objects.update_or_create(
             job=job,
             skill_id=skill_id,
@@ -77,7 +88,15 @@ def job_list(request):
     location_filter = request.GET.get('location', '')
     level_filter = request.GET.get('level', '')
 
-    jobs_queryset = JobPost.objects.filter(status="open").select_related("recruiter")
+    recruiter_profile = (
+        _get_recruiter_profile(request.user)
+        if request.user.is_authenticated and request.user.role == "recruiter"
+        else None
+    )
+    if recruiter_profile:
+        jobs_queryset = JobPost.objects.filter(recruiter=recruiter_profile).select_related("recruiter")
+    else:
+        jobs_queryset = JobPost.objects.filter(status="open").select_related("recruiter")
 
     if query:
         jobs_queryset = jobs_queryset.filter(
@@ -102,7 +121,7 @@ def job_list(request):
     jobs = list(jobs_queryset)
     
     # Get unique locations for the filter
-    locations = JobPost.objects.filter(status="open").values_list('location', flat=True).distinct()
+    locations = jobs_queryset.values_list('location', flat=True).distinct()
     
     candidate_profile = None
 
