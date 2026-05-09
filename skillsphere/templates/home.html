@@ -5,10 +5,23 @@
 
 {% block extra_head %}
 <style>
+    /* ── Override global main padding for homepage ── */
+    main {
+        padding-top: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        padding-bottom: 0 !important;
+    }
+    main > .container {
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
     /* ── Hero Section ────────────────────────────────────────── */
     .hero {
         position: relative;
-        padding: 10rem 0 6rem;
+        padding: 7rem 5% 5rem;
         overflow: hidden;
         background: var(--background);
     }
@@ -31,10 +44,12 @@
     .hero-container {
         display: grid;
         grid-template-columns: 1.1fr 0.9fr;
-        gap: 4rem;
+        gap: 3.5rem;
         align-items: center;
         position: relative;
         z-index: 2;
+        max-width: 1200px;
+        margin: 0 auto;
     }
 
     .hero-content {
@@ -87,7 +102,7 @@
 
     .visual-card {
         background: var(--surface);
-        padding: 1rem;
+        padding: 0.75rem;
         border-radius: var(--radius-xl);
         border: 1px solid var(--border);
         box-shadow: var(--shadow-xl);
@@ -97,36 +112,47 @@
 
     .visual-card img {
         width: 100%;
+        aspect-ratio: 4 / 3;
+        object-fit: cover;
         border-radius: var(--radius-lg);
         display: block;
     }
 
+    /* Stats badge — sits inside the card at the bottom */
     .floating-stats {
         position: absolute;
-        bottom: -2rem;
-        left: -2rem;
-        background: var(--surface);
-        padding: 1.5rem;
-        border-radius: var(--radius-lg);
+        bottom: 1.25rem;
+        left: 1.25rem;
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        padding: 0.9rem 1.25rem;
+        border-radius: var(--radius-md);
         border: 1px solid var(--border);
         box-shadow: var(--shadow-lg);
         display: flex;
-        gap: 2rem;
+        gap: 1rem;
         z-index: 3;
+        align-items: center;
     }
 
     /* ── Trusted By ─────────────────────────────────────────── */
     .trusted-section {
-        padding: 4rem 0;
+        padding: 3.5rem 5%;
         border-bottom: 1px solid var(--border);
         text-align: center;
+        max-width: 100%;
+    }
+    .trusted-section .container {
+        max-width: 1200px;
+        margin: 0 auto;
     }
 
     .brand-grid {
         display: flex;
         justify-content: center;
         align-items: center;
-        gap: 5rem;
+        gap: 4rem;
         opacity: 0.4;
         filter: grayscale(1);
         flex-wrap: wrap;
@@ -134,14 +160,18 @@
 
     .brand-item {
         font-family: var(--font-display);
-        font-size: 1.4rem;
+        font-size: 1.3rem;
         font-weight: 800;
         letter-spacing: -0.02em;
     }
 
     /* ── Features ───────────────────────────────────────────── */
     .features-section {
-        padding: 10rem 0;
+        padding: 7rem 5%;
+    }
+    .features-section .container {
+        max-width: 1200px;
+        margin: 0 auto;
     }
 
     .feature-card-premium {
@@ -180,9 +210,9 @@
     /* ── Trending Skills ────────────────────────────────────── */
     .skills-section {
         background: var(--surface-2);
-        padding: 8rem 0;
+        padding: 5rem 5%;
         border-radius: var(--radius-xl);
-        margin: 4rem 0;
+        margin: 3rem 5%;
     }
 
     .skill-bar-container {
@@ -291,9 +321,10 @@
     .skills-inner-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 6rem;
-        padding: 0 4rem;
+        gap: 5rem;
         align-items: center;
+        max-width: 1200px;
+        margin: 0 auto;
     }
 
     /* ── Responsive ─────────────────────────────────────────── */
@@ -302,24 +333,29 @@
         .hero-content { margin: 0 auto; }
         .hero p { margin: 0 auto 3rem; }
         .hero-visual { display: none; }
-        .brand-grid { gap: 3rem; }
-        .skills-inner-grid { grid-template-columns: 1fr; gap: 3rem; padding: 0 2rem; }
+        .brand-grid { gap: 2.5rem; }
+        .skills-inner-grid { grid-template-columns: 1fr; gap: 3rem; padding: 0; }
     }
 
     @media (max-width: 768px) {
-        .hero { padding: 8rem 0 4rem; }
+        .hero { padding: 5.5rem 4% 3.5rem; }
         .hero h1 { font-size: 2.4rem !important; }
+        .hero-content { text-align: left; }
         .visual-card { max-width: 500px; margin: 0 auto; }
-        .feature-grid { grid-template-columns: 1fr; }
-        .skills-inner-grid { padding: 0 1rem; gap: 2rem; }
-        .skills-section { padding: 4rem 0; margin: 2rem 0; }
-        .features-section { padding: 5rem 0; }
+        .features-section { padding: 4rem 4%; }
+        .skills-section { padding: 3.5rem 4%; margin: 2rem 4%; }
         .talent-grid { grid-template-columns: 1fr; }
+        .skills-inner-grid { padding: 0; gap: 2rem; }
+        .trusted-section { padding: 2.5rem 4%; }
+        .brand-grid { gap: 2rem; }
     }
 
     @media (max-width: 480px) {
-        .hero { padding: 6rem 0 3rem; }
-        .hero h1 { font-size: 2rem !important; }
+        .hero { padding: 5rem 4% 3rem; }
+        .hero h1 { font-size: 1.9rem !important; }
+        .hero p { font-size: 0.95rem; }
+        .features-section { padding: 3rem 4%; }
+        .skills-section { padding: 3rem 4%; margin: 1.5rem 4%; }
     }
 </style>
 {% endblock %}
@@ -429,7 +465,7 @@
 
 <!-- Trending Skills Section -->
 {% if featured_skills %}
-<section class="container">
+<section>
     <div class="skills-section animate-fade-in">
         <div class="skills-inner-grid">
             <div>
@@ -458,7 +494,7 @@
 
 <!-- Talent Showcase -->
 {% if featured_candidates %}
-<section style="padding: 8rem 0;">
+<section style="padding: 5rem 5%;">
     <div class="container">
         <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 5rem;" class="animate-fade-in">
             <div>
@@ -513,8 +549,8 @@
 {% endif %}
 
 <!-- CTA Section -->
-<section class="container" style="padding-bottom: 8rem;">
-    <div style="background: var(--accent); border-radius: var(--radius-xl); padding: 8rem 4rem; text-align: center; color: white; position: relative; overflow: hidden;">
+<section style="padding: 4rem 5% 6rem;">
+    <div style="background: var(--accent); border-radius: var(--radius-xl); padding: 6rem 4rem; text-align: center; color: white; position: relative; overflow: hidden; max-width: 1200px; margin: 0 auto;">
         <!-- Background Decoration -->
         <div style="position: absolute; top: -50%; left: -10%; width: 50%; height: 200%; background: radial-gradient(circle, rgba(201,169,110,0.1) 0%, transparent 70%); transform: rotate(15deg);"></div>
         <div style="position: absolute; bottom: -50%; right: -10%; width: 50%; height: 200%; background: radial-gradient(circle, rgba(201,169,110,0.1) 0%, transparent 70%); transform: rotate(-15deg);"></div>
