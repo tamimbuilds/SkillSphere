@@ -1,9 +1,11 @@
+import logging
 from datetime import datetime, timedelta
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
+from django.conf import settings
 from .models import Skill, Question, CandidateSkill, CandidateSkillProgress, Certificate, Assessment, Score, JobSkillRequirement
 from accounts.models import Notification
 from .forms import (
@@ -17,6 +19,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 ASSESSMENT_TIME_LIMIT_MINUTES = 10
 ASSESSMENT_BLOCK_DAYS = 7
 ASSESSMENT_BLOCK_PENALTY = 0.5
+logger = logging.getLogger(__name__)
 
 
 def _assessment_timer_session_key(candidate_skill_id, attempt_number):
@@ -358,6 +361,21 @@ def add_assessment(request, pk):
     next_set_number = next_attempt
     timer_session_key = _assessment_timer_session_key(skill.pk, next_attempt)
     questions, using_sector_fallback = _get_assessment_questions(skill.skill, next_set_number)
+    logger.info(
+        'Assessment question load: candidate_skill_id=%s skill_id=%s skill_name=%s category=%s set=%s count=%s fallback=%s',
+        skill.pk,
+        skill.skill_id,
+        skill.skill.skill_name,
+        skill.skill.category,
+        next_set_number,
+        len(questions),
+        using_sector_fallback,
+    )
+    if settings.DEBUG:
+        messages.info(
+            request,
+            f'Debug: loaded {len(questions)} questions for {skill.skill.skill_name}, set {next_set_number}.'
+        )
 
     if len(questions) < 10:
         messages.error(
