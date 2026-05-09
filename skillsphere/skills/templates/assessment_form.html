@@ -3,226 +3,623 @@
 {% block title %}Skill Assessment | SkillSphere{% endblock %}
 
 {% block content %}
-<div class="assessment-container" style="max-width: 800px; margin: 4rem auto; padding: 2rem;">
-    <div class="assessment-card glass animate-fade-in" style="padding: 3rem; border-radius: 24px;">
-        <div class="header" style="text-align: center; margin-bottom: 3rem;">
-            <div class="icon-box" style="font-size: 3.5rem; color: var(--primary); margin-bottom: 1rem;">
-                <i data-lucide="award"></i>
-            </div>
-            <h1 style="font-size: 2rem; margin-bottom: 0.5rem;">Skill Assessment</h1>
-            <p style="color: var(--text-muted);">Verify your proficiency in <strong>{{ skill_name }}</strong></p>
-        </div>
-
-        <div class="info-alert glass timer-box no-copy-area" style="background: rgba(239, 68, 68, 0.07); padding: 1rem 1.5rem; border-radius: 12px; margin-bottom: 1rem; border: 1px solid rgba(239, 68, 68, 0.2); display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap;">
-            <span style="font-size:0.9rem;color:var(--text-bright);">Time Limit: {{ time_limit_minutes }} minutes</span>
-            <strong id="assessment-timer" style="font-family:var(--font-mono);font-size:1rem;color:var(--danger);">10:00</strong>
-        </div>
-
-        <form method="POST" class="assessment-form" id="assessment-form">
-            {% csrf_token %}
-            
-            <div class="info-alert glass no-copy-area" style="background: rgba(99, 102, 241, 0.05); padding: 1.5rem; border-radius: 12px; margin-bottom: 2.5rem; border: 1px solid rgba(99, 102, 241, 0.2);">
-                <p style="margin: 0; font-size: 0.9rem; color: var(--text-bright);">
-                    <i data-lucide="info" style="margin-right: 0.5rem; color: var(--primary);"></i>
-                    Attempt {{ attempt_number }} of 3. You are taking set {{ set_number }} for {{ skill_name }}. This test contains 10 multiple-choice questions, and you have {{ remaining_attempts }} attempt{% if remaining_attempts != 1 %}s{% endif %} available including this one.
-                </p>
-            </div>
-
-            <div style="display:flex;flex-direction:column;gap:1.25rem;">
-                {% for question in questions %}
-                <div class="no-copy-area" style="padding:1.5rem;border:1px solid var(--border);border-radius:16px;background:var(--surface-2);">
-                    <div class="question-text" style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.75rem;">
-                        Question {{ forloop.counter }}
-                    </div>
-                    <p class="question-text" style="font-size:1rem;font-weight:600;margin-bottom:1rem;">{{ question.question_text }}</p>
-                    <div style="display:grid;gap:0.75rem;">
-                        <label class="answer-option">
-                            <input type="radio" name="question_{{ question.pk }}" value="A" required>
-                            <span class="question-text">A. {{ question.option_a }}</span>
-                        </label>
-                        <label class="answer-option">
-                            <input type="radio" name="question_{{ question.pk }}" value="B" required>
-                            <span class="question-text">B. {{ question.option_b }}</span>
-                        </label>
-                        <label class="answer-option">
-                            <input type="radio" name="question_{{ question.pk }}" value="C" required>
-                            <span class="question-text">C. {{ question.option_c }}</span>
-                        </label>
-                        <label class="answer-option">
-                            <input type="radio" name="question_{{ question.pk }}" value="D" required>
-                            <span class="question-text">D. {{ question.option_d }}</span>
-                        </label>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-
-            <div class="actions" style="margin-top: 3.5rem; display: flex; gap: 1.5rem;">
-                <button type="submit" class="btn btn-primary btn-large" style="flex: 1;">Submit Assessment</button>
-                <a href="{% url 'my_skills' %}" class="btn btn-outline" style="flex: 1; text-align: center; display: flex; align-items: center; justify-content: center;">Cancel</a>
-            </div>
-        </form>
-    </div>
-</div>
 
 <style>
+    /* ── No-copy protection ── */
     .no-copy-area,
-    .question-text {
+    .q-text {
         user-select: none;
         -webkit-user-select: none;
         -ms-user-select: none;
     }
 
-    .answer-option {
-        position:relative;
-        display:flex;
-        align-items:flex-start;
-        gap:0.85rem;
-        padding:1rem 1.1rem;
-        border:1px solid var(--border);
-        border-radius:12px;
-        background:var(--surface-3);
-        cursor:pointer;
-        transition:all var(--transition);
+    /* ── Page wrapper ── */
+    .assessment-page {
+        max-width: 720px;
+        margin: 3rem auto;
+        padding: 0 1.25rem 4rem;
+        font-family: var(--font-sans, 'Inter', sans-serif);
     }
 
-    .answer-option:hover {
-        border-color:var(--border-hover);
-        background:var(--surface);
+    /* ── Sticky top bar: title + timer ── */
+    .assessment-topbar {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background: var(--bg, #0f0f14);
+        padding: 0.9rem 0 0.75rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border, rgba(255,255,255,0.08));
+    }
+
+    .assessment-topbar-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .assessment-title-group h1 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0 0 0.15rem;
+        color: var(--text-bright, #fff);
+    }
+
+    .assessment-title-group p {
+        font-size: 0.8rem;
+        color: var(--text-muted, #8888a8);
+        margin: 0;
+    }
+
+    /* ── Countdown timer ── */
+    .timer-chip {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(239, 68, 68, 0.08);
+        border: 1px solid rgba(239, 68, 68, 0.25);
+        border-radius: 999px;
+        padding: 0.45rem 1rem;
+        transition: background 0.3s, border-color 0.3s;
+    }
+
+    .timer-chip svg {
+        width: 14px;
+        height: 14px;
+        stroke: #ef4444;
+        flex-shrink: 0;
+    }
+
+    .timer-chip span {
+        font-family: var(--font-mono, 'Fira Code', monospace);
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #ef4444;
+        min-width: 3.5ch;
+        letter-spacing: 0.04em;
+    }
+
+    .timer-chip.urgent {
+        background: rgba(239, 68, 68, 0.18);
+        border-color: rgba(239, 68, 68, 0.55);
+        animation: timer-pulse 1s ease-in-out infinite;
+    }
+
+    @keyframes timer-pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.04); }
+    }
+
+    /* ── Progress bar ── */
+    .progress-wrap {
+        margin-bottom: 2rem;
+    }
+
+    .progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .progress-header span {
+        font-size: 0.78rem;
+        color: var(--text-muted, #8888a8);
+    }
+
+    .progress-header strong {
+        font-size: 0.82rem;
+        color: var(--primary, #6366f1);
+    }
+
+    .progress-track {
+        height: 5px;
+        background: var(--border, rgba(255,255,255,0.08));
+        border-radius: 999px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary, #6366f1), #818cf8);
+        border-radius: 999px;
+        transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* ── Info banner ── */
+    .info-banner {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        background: rgba(99, 102, 241, 0.06);
+        border: 1px solid rgba(99, 102, 241, 0.18);
+        border-radius: 14px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 2rem;
+        font-size: 0.85rem;
+        color: var(--text-bright, #d0d0e8);
+        line-height: 1.55;
+    }
+
+    .info-banner svg {
+        width: 16px;
+        height: 16px;
+        stroke: var(--primary, #6366f1);
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    /* ── Question card (Google Forms style) ── */
+    .q-card {
+        background: var(--surface-2, #1a1a2e);
+        border: 1px solid var(--border, rgba(255,255,255,0.08));
+        border-radius: 16px;
+        overflow: hidden;
+        margin-bottom: 1.25rem;
+        transition: border-color 0.25s, box-shadow 0.25s;
+    }
+
+    .q-card.answered {
+        border-color: rgba(99, 102, 241, 0.35);
+    }
+
+    .q-card-header {
+        padding: 1.25rem 1.5rem 0.9rem;
+        border-bottom: 1px solid var(--border, rgba(255,255,255,0.06));
+    }
+
+    .q-number {
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--primary, #6366f1);
+        margin-bottom: 0.5rem;
+    }
+
+    .q-text {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-bright, #fff);
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    /* ── Options list ── */
+    .q-options {
+        padding: 0.6rem 0.75rem 0.75rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    /* Each option row */
+    .q-option {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.9rem 1rem;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background 0.18s ease;
+        overflow: hidden;
+    }
+
+    .q-option:hover {
+        background: rgba(255, 255, 255, 0.04);
+    }
+
+    /* Ripple on click */
+    .q-option .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(99, 102, 241, 0.28);
+        transform: scale(0);
+        animation: ripple-expand 0.5s linear;
+        pointer-events: none;
+    }
+
+    @keyframes ripple-expand {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+
+    /* Hide native radio */
+    .q-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+        pointer-events: none;
+    }
+
+    /* Custom radio circle */
+    .q-radio {
+        flex-shrink: 0;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid var(--border-hover, rgba(255,255,255,0.25));
+        background: transparent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+        position: relative;
+    }
+
+    /* Inner dot */
+    .q-radio::after {
+        content: '';
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #fff;
+        transform: scale(0);
+        transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* Option letter badge */
+    .q-letter {
+        flex-shrink: 0;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--surface-3, rgba(255,255,255,0.06));
+        border: 1px solid var(--border, rgba(255,255,255,0.1));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-muted, #8888a8);
+        transition: background 0.2s, border-color 0.2s, color 0.2s;
+        font-family: var(--font-mono, monospace);
+    }
+
+    /* Option text */
+    .q-option-text {
+        flex: 1;
+        font-size: 0.92rem;
+        color: var(--text, #c8c8e0);
+        line-height: 1.5;
+        transition: color 0.2s, font-weight 0.2s;
+    }
+
+    /* ── SELECTED STATE ── */
+    .q-option.is-selected {
+        background: rgba(99, 102, 241, 0.1);
+    }
+
+    .q-option.is-selected .q-radio {
+        border-color: var(--primary, #6366f1);
+        background: var(--primary, #6366f1);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+    }
+
+    .q-option.is-selected .q-radio::after {
+        transform: scale(1);
+    }
+
+    .q-option.is-selected .q-letter {
+        background: var(--primary, #6366f1);
+        border-color: var(--primary, #6366f1);
+        color: #fff;
+    }
+
+    .q-option.is-selected .q-option-text {
+        color: var(--text-bright, #fff);
+        font-weight: 600;
+    }
+
+    /* Answered card accent bar */
+    .q-card.answered {
+        border-left: 3px solid var(--primary, #6366f1);
+    }
+
+    /* ── Bottom action bar ── */
+    .assessment-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2.5rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-submit {
+        flex: 1;
+        min-width: 180px;
+        padding: 0.95rem 2rem;
+        background: var(--primary, #6366f1);
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.6rem;
+    }
+
+    .btn-submit:hover {
+        background: #4f46e5;
+        box-shadow: 0 8px 24px rgba(99, 102, 241, 0.35);
         transform: translateY(-1px);
     }
 
-    .answer-option.selected,
-    .answer-option:has(input:checked) {
-        border-color: var(--primary);
-        background: rgba(99, 102, 241, 0.16);
-        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.24), 0 12px 26px rgba(99, 102, 241, 0.12);
+    .btn-submit:active {
+        transform: translateY(0);
     }
 
-    .answer-option.selected::after,
-    .answer-option:has(input:checked)::after {
-        content: "";
-        flex: 0 0 auto;
-        margin-left:auto;
-        width:0.9rem;
-        height:0.9rem;
-        margin-top:0.14rem;
-        border:3px solid rgba(255, 255, 255, 0.85);
-        border-radius:50%;
-        background:var(--primary);
-        box-shadow:0 0 0 3px rgba(99, 102, 241, 0.35);
+    .btn-submit svg {
+        width: 18px;
+        height: 18px;
+        stroke: #fff;
     }
 
-    .answer-option.selected .question-text,
-    .answer-option:has(input:checked) .question-text {
-        font-weight: 700;
-        color: var(--text-bright);
+    .btn-cancel {
+        flex: 1;
+        min-width: 140px;
+        padding: 0.95rem 1.5rem;
+        background: transparent;
+        color: var(--text-muted, #8888a8);
+        border: 1px solid var(--border, rgba(255,255,255,0.12));
+        border-radius: 12px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: border-color 0.2s, color 0.2s, background 0.2s;
+        text-decoration: none;
     }
 
-    .answer-option input {
-        flex:0 0 auto;
-        width:1.1rem;
-        height:1.1rem;
-        margin-top:0.12rem;
-        accent-color: var(--primary);
-        transform: scale(1.25);
+    .btn-cancel:hover {
+        border-color: rgba(255,255,255,0.25);
+        color: var(--text-bright, #fff);
+        background: rgba(255,255,255,0.04);
     }
 
-    .answer-option input:focus-visible {
-        outline:2px solid var(--primary);
-        outline-offset:3px;
+    .btn-cancel svg {
+        width: 16px;
+        height: 16px;
+        stroke: currentColor;
     }
 
-    @media (max-width: 640px) {
-        .answer-option {
-            padding:0.95rem;
-        }
+    /* Answered counter chip */
+    .answered-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.78rem;
+        color: var(--text-muted);
+    }
 
-        .answer-option.selected::after,
-        .answer-option:has(input:checked)::after {
-            width:0.75rem;
-            height:0.75rem;
-        }
+    .answered-chip strong {
+        color: var(--primary, #6366f1);
+    }
+
+    @media (max-width: 600px) {
+        .assessment-page { padding: 0 0.75rem 3rem; margin: 1.5rem auto; }
+        .q-card-header { padding: 1rem 1.1rem 0.75rem; }
+        .q-options { padding: 0.4rem 0.5rem 0.6rem; }
+        .q-option { padding: 0.8rem 0.75rem; }
+        .assessment-actions { flex-direction: column; }
     }
 </style>
 
+<div class="assessment-page">
+
+    <!-- Sticky top bar -->
+    <div class="assessment-topbar no-copy-area">
+        <div class="assessment-topbar-inner">
+            <div class="assessment-title-group">
+                <h1>{{ skill_name }} Assessment</h1>
+                <p>Attempt {{ attempt_number }} of 3 &nbsp;·&nbsp; Set {{ set_number }} &nbsp;·&nbsp; {{ remaining_attempts }} attempt{% if remaining_attempts != 1 %}s{% endif %} remaining</p>
+            </div>
+            <div class="timer-chip" id="timer-chip">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span id="assessment-timer">10:00</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="progress-wrap no-copy-area">
+        <div class="progress-header">
+            <span class="answered-chip">
+                <strong id="answered-count">0</strong> / 10 answered
+            </span>
+            <strong id="progress-pct">0%</strong>
+        </div>
+        <div class="progress-track">
+            <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+        </div>
+    </div>
+
+    <!-- Info banner -->
+    <div class="info-banner no-copy-area">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span>Choose <strong>one answer</strong> per question. All 10 must be answered before you can submit. Score 6 or more to pass.</span>
+    </div>
+
+    <form method="POST" id="assessment-form">
+        {% csrf_token %}
+
+        <div id="questions-list">
+            {% for question in questions %}
+            <div class="q-card no-copy-area" id="q-card-{{ forloop.counter }}" data-qnum="{{ forloop.counter }}">
+                <div class="q-card-header">
+                    <div class="q-number">Question {{ forloop.counter }} of {{ questions|length }}</div>
+                    <p class="q-text">{{ question.question_text }}</p>
+                </div>
+                <div class="q-options">
+
+                    <label class="q-option" data-qpk="{{ question.pk }}" data-val="A">
+                        <input type="radio" name="question_{{ question.pk }}" value="A">
+                        <span class="q-radio"></span>
+                        <span class="q-letter">A</span>
+                        <span class="q-option-text q-text">{{ question.option_a }}</span>
+                    </label>
+
+                    <label class="q-option" data-qpk="{{ question.pk }}" data-val="B">
+                        <input type="radio" name="question_{{ question.pk }}" value="B">
+                        <span class="q-radio"></span>
+                        <span class="q-letter">B</span>
+                        <span class="q-option-text q-text">{{ question.option_b }}</span>
+                    </label>
+
+                    <label class="q-option" data-qpk="{{ question.pk }}" data-val="C">
+                        <input type="radio" name="question_{{ question.pk }}" value="C">
+                        <span class="q-radio"></span>
+                        <span class="q-letter">C</span>
+                        <span class="q-option-text q-text">{{ question.option_c }}</span>
+                    </label>
+
+                    <label class="q-option" data-qpk="{{ question.pk }}" data-val="D">
+                        <input type="radio" name="question_{{ question.pk }}" value="D">
+                        <span class="q-radio"></span>
+                        <span class="q-letter">D</span>
+                        <span class="q-option-text q-text">{{ question.option_d }}</span>
+                    </label>
+
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Action buttons -->
+        <div class="assessment-actions">
+            <button type="submit" class="btn-submit" id="submit-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                Submit Assessment
+            </button>
+            <a href="{% url 'my_skills' %}" class="btn-cancel">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
 <script>
-    (function () {
-        const expiresAt = {{ expires_at_unix_ms }};
-        const timerEl = document.getElementById('assessment-timer');
-        const formEl = document.getElementById('assessment-form');
-        let intervalId = null;
+(function () {
+    // ── Timer ──────────────────────────────────────────
+    const expiresAt = {{ expires_at_unix_ms }};
+    const timerEl   = document.getElementById('assessment-timer');
+    const chipEl    = document.getElementById('timer-chip');
+    const formEl    = document.getElementById('assessment-form');
+    let intervalId  = null;
 
-        function formatTime(msRemaining) {
-            const totalSeconds = Math.max(0, Math.floor(msRemaining / 1000));
-            const minutes = Math.floor(totalSeconds / 60);
-            const seconds = totalSeconds % 60;
-            return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    function formatTime(ms) {
+        const s = Math.max(0, Math.floor(ms / 1000));
+        const m = Math.floor(s / 60);
+        const sec = s % 60;
+        return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+    }
+
+    function tick() {
+        const remaining = expiresAt - Date.now();
+        if (timerEl) timerEl.textContent = formatTime(remaining);
+        if (remaining <= 120000) chipEl && chipEl.classList.add('urgent');
+        if (remaining <= 0) {
+            clearInterval(intervalId);
+            if (formEl) formEl.submit();
         }
+    }
+    tick();
+    intervalId = setInterval(tick, 1000);
 
-        function tick() {
-            const remaining = expiresAt - Date.now();
-            if (timerEl) {
-                timerEl.textContent = formatTime(remaining);
-            }
-
-            if (remaining <= 0) {
-                clearInterval(intervalId);
-                if (formEl) {
-                    formEl.submit();
-                }
+    // ── Anti-copy ──────────────────────────────────────
+    const blockSel = '.q-text, .no-copy-area';
+    ['copy','cut','contextmenu','selectstart'].forEach(evtName => {
+        document.addEventListener(evtName, e => {
+            if (e.target.closest(blockSel)) e.preventDefault();
+        });
+    });
+    document.addEventListener('keydown', e => {
+        const k = e.key.toLowerCase();
+        if ((e.ctrlKey || e.metaKey) && ['a','c','x'].includes(k)) {
+            if ((document.activeElement && document.activeElement.closest(blockSel))
+                || (document.getSelection() && document.getSelection().toString())) {
+                e.preventDefault();
             }
         }
+    });
 
-        const blockedSelector = '.question-text, .no-copy-area';
-        document.addEventListener('copy', function (event) {
-            if (event.target.closest(blockedSelector)) {
-                event.preventDefault();
-            }
-        });
-        document.addEventListener('cut', function (event) {
-            if (event.target.closest(blockedSelector)) {
-                event.preventDefault();
-            }
-        });
-        document.addEventListener('contextmenu', function (event) {
-            if (event.target.closest(blockedSelector)) {
-                event.preventDefault();
-            }
-        });
-        document.addEventListener('selectstart', function (event) {
-            if (event.target.closest(blockedSelector)) {
-                event.preventDefault();
-            }
-        });
-        document.addEventListener('keydown', function (event) {
-            const key = event.key.toLowerCase();
-            if ((event.ctrlKey || event.metaKey) && ['a', 'c', 'x'].includes(key)) {
-                if (document.activeElement && document.activeElement.closest(blockedSelector)) {
-                    event.preventDefault();
-                } else if (document.getSelection() && document.getSelection().toString()) {
-                    event.preventDefault();
-                }
-            }
-        });
+    // ── Progress tracking ──────────────────────────────
+    const TOTAL = 10;
+    const answeredMap = {}; // qpk -> answered boolean
+    const fillEl   = document.getElementById('progress-fill');
+    const countEl  = document.getElementById('answered-count');
+    const pctEl    = document.getElementById('progress-pct');
 
-        // Add explicit .selected class to answer-options
-        const radios = document.querySelectorAll('input[type="radio"]');
-        radios.forEach(radio => {
-            radio.addEventListener('change', function() {
-                const name = this.name;
-                // Remove selected class from all options in the same group
-                document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
-                    r.closest('.answer-option').classList.remove('selected');
-                });
-                if(this.checked) {
-                    this.closest('.answer-option').classList.add('selected');
-                }
+    function updateProgress() {
+        const answered = Object.values(answeredMap).filter(Boolean).length;
+        const pct = Math.round((answered / TOTAL) * 100);
+        if (fillEl) fillEl.style.width = pct + '%';
+        if (countEl) countEl.textContent = answered;
+        if (pctEl) pctEl.textContent = pct + '%';
+    }
+
+    // ── Option selection with ripple ───────────────────
+    document.querySelectorAll('.q-option').forEach(option => {
+        option.addEventListener('click', function (e) {
+            const qpk  = this.dataset.qpk;
+            const val  = this.dataset.val;
+            const card = this.closest('.q-card');
+
+            // Deselect siblings
+            document.querySelectorAll(`.q-option[data-qpk="${qpk}"]`).forEach(o => {
+                o.classList.remove('is-selected');
+                o.querySelector('input[type="radio"]').checked = false;
             });
-        });
 
-        tick();
-        intervalId = setInterval(tick, 1000);
-    })();
+            // Select this one
+            this.classList.add('is-selected');
+            const radio = this.querySelector('input[type="radio"]');
+            radio.checked = true;
+
+            // Mark card as answered
+            if (card) card.classList.add('answered');
+            answeredMap[qpk] = true;
+            updateProgress();
+
+            // Ripple effect
+            const rect = this.getBoundingClientRect();
+            const ripple = document.createElement('span');
+            ripple.className = 'ripple';
+            const size = Math.max(this.offsetWidth, this.offsetHeight) * 1.5;
+            ripple.style.cssText = `
+                width: ${size}px;
+                height: ${size}px;
+                left: ${e.clientX - rect.left - size / 2}px;
+                top: ${e.clientY - rect.top - size / 2}px;
+            `;
+            this.appendChild(ripple);
+            ripple.addEventListener('animationend', () => ripple.remove());
+        });
+    });
+
+})();
 </script>
+
 {% endblock %}

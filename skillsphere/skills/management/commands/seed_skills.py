@@ -33,10 +33,6 @@ class Command(BaseCommand):
             {'skill_name': 'Kotlin', 'category': 'android', 'description': 'A modern programming language that makes developers happier.'},
             {'skill_name': 'Android Jetpack', 'category': 'android', 'description': 'A suite of libraries to help developers follow best practices.'},
             
-            # iOS
-            {'skill_name': 'Swift', 'category': 'ios', 'description': 'The powerful programming language that is also easy to learn.'},
-            {'skill_name': 'SwiftUI', 'category': 'ios', 'description': 'Build better apps. Less code.'},
-            
             # DevOps
             {'skill_name': 'Docker', 'category': 'devops', 'description': 'Accelerate how you build, share, and run modern applications.'},
             {'skill_name': 'Kubernetes', 'category': 'devops', 'description': 'Production-Grade Container Orchestration.'},
@@ -50,10 +46,6 @@ class Command(BaseCommand):
             # UI/UX
             {'skill_name': 'Figma', 'category': 'ui_ux', 'description': 'The collaborative interface design tool.'},
             {'skill_name': 'Adobe XD', 'category': 'ui_ux', 'description': 'Fast and powerful UI/UX design and prototyping tool.'},
-            
-            # Web App (General)
-            {'skill_name': 'Laravel', 'category': 'web_app', 'description': 'The PHP Framework for Web Artisans.'},
-            {'skill_name': 'Ruby on Rails', 'category': 'web_app', 'description': 'Web development that doesn\'t hurt.'},
         ]
 
         self.stdout.write('Starting skill seeding...')

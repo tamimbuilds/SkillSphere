@@ -19,7 +19,7 @@ class JobPost(models.Model):
 
     @property
     def qualified_applicants_count(self):
-        return self.application_set.filter(match_score__gte=8.0).count()
+        return self.applications.filter(match_score__gte=8.0).count()
 
 class HiringInvitation(models.Model):
     STATUS = [('pending','Pending'),('accepted','Accepted'),('rejected','Rejected')]
