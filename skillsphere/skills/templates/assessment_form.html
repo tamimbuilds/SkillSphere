@@ -273,11 +273,6 @@
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
     }
 
-    .assessment-page.is-enhanced .q-card {
-        opacity: 0;
-        transform: translateY(28px);
-    }
-
     .q-card.visible {
         opacity: 1;
         transform: translateY(0);
@@ -696,9 +691,6 @@
 
 <script>
 (function () {
-    const pageEl = document.querySelector('.assessment-page');
-    if (pageEl) pageEl.classList.add('is-enhanced');
-
     // ── Timer ──────────────────────────────────────────
     const expiresAt = {{ expires_at_unix_ms }};
     const timerEl   = document.getElementById('assessment-timer');
@@ -831,26 +823,6 @@
     });
 
     // ── Intersection Observer for staggered entrance ──
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-                observer.unobserve(entry.target);
-            }
-        });
-    }, observerOptions);
-
-    document.querySelectorAll('.q-card').forEach((card, index) => {
-        // Initial visibility for first card
-        if (index === 0) card.classList.add('visible');
-        observer.observe(card);
-    });
-
 })();
 </script>
 
