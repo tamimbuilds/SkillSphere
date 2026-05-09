@@ -263,19 +263,24 @@
     .q-card {
         background: var(--surface);
         border: 1px solid var(--border);
-        border-radius: 36px;
-        margin-bottom: 4rem;
-        padding: 4rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        padding: 3rem;
         transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         position: relative;
-        opacity: 0;
-        transform: translateY(40px) scale(0.98);
+        opacity: 1;
+        transform: none;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+    }
+
+    .assessment-page.is-enhanced .q-card {
+        opacity: 0;
+        transform: translateY(28px);
     }
 
     .q-card.visible {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: translateY(0);
     }
 
     .q-card:hover {
@@ -296,7 +301,7 @@
         width: 8px;
         height: 100%;
         background: var(--primary);
-        border-radius: 36px 0 0 36px;
+        border-radius: 20px 0 0 20px;
         opacity: 0;
         transition: opacity 0.4s ease;
     }
@@ -344,11 +349,11 @@
 
     .q-option {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         gap: 1.5rem;
         padding: 1.75rem;
         border: 2px solid var(--border);
-        border-radius: 20px;
+        border-radius: 12px;
         cursor: pointer;
         transition: all 0.4s cubic-bezier(0.2, 1, 0.2, 1);
         position: relative;
@@ -410,6 +415,7 @@
         font-weight: 600;
         color: #334155;
         line-height: 1.5;
+        overflow-wrap: anywhere;
     }
 
     /* ── Selected State ── */
@@ -690,6 +696,9 @@
 
 <script>
 (function () {
+    const pageEl = document.querySelector('.assessment-page');
+    if (pageEl) pageEl.classList.add('is-enhanced');
+
     // ── Timer ──────────────────────────────────────────
     const expiresAt = {{ expires_at_unix_ms }};
     const timerEl   = document.getElementById('assessment-timer');
@@ -742,7 +751,7 @@
 
     function updateProgress() {
         const answered = Object.values(answeredMap).filter(Boolean).length;
-        const pct = Math.round((answered / TOTAL) * 100);
+        const pct = TOTAL ? Math.round((answered / TOTAL) * 100) : 0;
         if (fillEl) {
             fillEl.style.width = pct + '%';
             if (pct === 100) fillEl.classList.add('is-complete');
@@ -764,7 +773,6 @@
     document.querySelectorAll('.q-option').forEach(option => {
         option.addEventListener('click', function (e) {
             const qpk  = this.dataset.qpk;
-            const val  = this.dataset.val;
             const card = this.closest('.q-card');
 
             // Deselect siblings
@@ -802,7 +810,7 @@
                 status.classList.add('show');
                 status.querySelector('span').textContent = 'Response saved';
                 status.querySelector('i').setAttribute('data-lucide', 'check');
-                lucide.createIcons();
+                if (window.lucide) lucide.createIcons();
                 setTimeout(() => status.classList.remove('show'), 2000);
             }
 
@@ -843,6 +851,7 @@
         observer.observe(card);
     });
 
+})();
 </script>
 
 {% endblock %}
