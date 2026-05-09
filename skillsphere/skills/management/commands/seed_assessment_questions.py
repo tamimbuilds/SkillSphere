@@ -347,7 +347,6 @@ class Command(BaseCommand):
                             'option_c': s_opt_c,
                             'option_d': s_opt_d,
                             'correct_option': new_correct_option,
-                            'explanation': f"The correct answer is {new_correct_option}: {correct_text}",
                             'is_active': True,
                         }
                     )

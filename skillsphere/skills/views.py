@@ -23,6 +23,40 @@ def _assessment_timer_session_key(candidate_skill_id, attempt_number):
     return f'assessment_started_{candidate_skill_id}_{attempt_number}'
 
 
+def _get_assessment_questions(skill, set_number):
+    exact_questions = list(
+        Question.objects.filter(
+            skill=skill,
+            set_number=set_number,
+            is_active=True,
+        ).order_by('question_order', 'id')
+    )
+    if len(exact_questions) >= 10:
+        return exact_questions[:10], False
+
+    sector_questions = (
+        Question.objects.filter(
+            sector=skill.category,
+            set_number=set_number,
+            is_active=True,
+        )
+        .select_related('skill')
+        .order_by('question_order', 'id')
+    )
+    questions = []
+    seen_question_text = set()
+    for question in sector_questions:
+        normalized_text = question.question_text.strip().lower()
+        if normalized_text in seen_question_text:
+            continue
+        seen_question_text.add(normalized_text)
+        questions.append(question)
+        if len(questions) == 10:
+            break
+
+    return questions, True
+
+
 def _get_or_create_skill_progress(profile, skill):
     progress, created = CandidateSkillProgress.objects.get_or_create(
         candidate=profile,
@@ -323,14 +357,12 @@ def add_assessment(request, pk):
     next_attempt = attempt_count + 1
     next_set_number = next_attempt
     timer_session_key = _assessment_timer_session_key(skill.pk, next_attempt)
-    questions = list(
-        Question.objects.filter(skill=skill.skill, set_number=next_set_number, is_active=True).order_by('question_order', 'id')
-    )
+    questions, using_sector_fallback = _get_assessment_questions(skill.skill, next_set_number)
 
     if len(questions) < 10:
         messages.error(
             request,
-            f"{skill.skill.skill_name} is missing question set {next_set_number}. Please add 10 questions for that set."
+            f"{skill.skill.skill_name} is missing question set {next_set_number}. Please add 10 active questions for the skill or its {skill.skill.get_category_display()} sector."
         )
         return redirect('my_skills')
 
@@ -427,6 +459,7 @@ def add_assessment(request, pk):
         'remaining_attempts': 4 - next_attempt,
         'time_limit_minutes': ASSESSMENT_TIME_LIMIT_MINUTES,
         'expires_at_unix_ms': int(expires_at.timestamp() * 1000),
+        'using_sector_fallback': using_sector_fallback,
     })
 
 
